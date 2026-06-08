@@ -13016,32 +13016,32 @@
     "options": {
       "en": [
         "Move thinking into the system prompt so it is cached once and never re-billed on later turns",
-        "Let the API auto-strip prior-turn thinking across new user turns, and size max_tokens to cover both the thinking budget and the final answer since thinking is billed as output",
+        "Don't manually re-send prior-turn thinking — the API handles it across turns for you — and size max_tokens to cover both the thinking budget and the final answer, since thinking is billed as output",
         "Keep manually re-sending prior thinking, but mark it with cache_control so the re-sent blocks are read cheaply from cache",
         "Treat thinking as free input that doesn't count toward the window, and only budget max_tokens for the visible answer"
       ],
       "fr": [
         "Déplacer la réflexion dans le prompt système pour qu'elle soit mise en cache une fois et jamais refacturée lors des tours ultérieurs",
-        "Laisser l'API supprimer automatiquement la réflexion du tour précédent au fil des nouveaux tours utilisateur, et dimensionner max_tokens pour couvrir à la fois le budget de réflexion et la réponse finale, puisque la réflexion est facturée comme sortie",
+        "Ne pas retransmettre manuellement la réflexion du tour précédent — l'API la gère pour vous d'un tour à l'autre — et dimensionner max_tokens pour couvrir à la fois le budget de réflexion et la réponse finale, puisque la réflexion est facturée comme sortie",
         "Continuer à retransmettre manuellement la réflexion antérieure, mais la marquer avec cache_control pour que les blocs retransmis soient lus à moindre coût depuis le cache",
         "Traiter la réflexion comme une entrée gratuite qui ne compte pas dans la fenêtre, et ne budgéter max_tokens que pour la réponse visible"
       ]
     },
     "correct_index": 1,
     "explanation": {
-      "en": "The API automatically strips previous thinking from later turns' input (so you don't pay for it again and shouldn't resend it), and thinking is a subset of max_tokens billed as output and counted toward the window at generation — so max_tokens must cover both thinking and the answer.",
-      "fr": "L'API supprime automatiquement la réflexion antérieure de l'entrée des tours suivants (vous ne la payez donc pas à nouveau et ne devez pas la retransmettre), et la réflexion est un sous-ensemble de max_tokens facturé comme sortie et compté dans la fenêtre à la génération — donc max_tokens doit couvrir à la fois la réflexion et la réponse."
+      "en": "You shouldn't manually re-send prior thinking — the API handles prior-turn thinking across turns, so resending it only wastes tokens — and thinking is a subset of max_tokens billed as output, counted toward the window at generation, so max_tokens must cover both the thinking and the final answer.",
+      "fr": "Vous ne devez pas retransmettre manuellement la réflexion antérieure — l'API gère la réflexion des tours précédents d'un tour à l'autre, la retransmettre ne fait que gaspiller des jetons — et la réflexion est un sous-ensemble de max_tokens facturé comme sortie, compté dans la fenêtre à la génération, donc max_tokens doit couvrir à la fois la réflexion et la réponse finale."
     },
     "distractor_explanations": {
       "en": [
         "Thinking belongs to the assistant turn that generated it, not the system prompt; relocating it there is not how the mechanism works and doesn't avoid output billing at generation.",
-        "Correct: the API auto-strips prior thinking across user turns, and thinking is billed as output within max_tokens, so the budget must hold both thinking and the final answer.",
+        "Correct: you don't manually re-send prior thinking (the API handles it across turns), and thinking is billed as output within max_tokens, so the budget must hold both the thinking and the final answer.",
         "Manually re-sending old thinking wastes tokens because the API already strips it; thinking blocks also cannot be explicitly marked with cache_control.",
         "Thinking is not free input — it consumes max_tokens, is billed as output, and counts toward the window and rate limits at generation."
       ],
       "fr": [
         "La réflexion appartient au tour assistant qui l'a générée, pas au prompt système ; la relocaliser là n'est pas le fonctionnement du mécanisme et n'évite pas la facturation comme sortie à la génération.",
-        "Correct : l'API supprime automatiquement la réflexion antérieure au fil des tours utilisateur, et la réflexion est facturée comme sortie dans max_tokens, donc le budget doit contenir à la fois la réflexion et la réponse finale.",
+        "Correct : vous ne retransmettez pas manuellement la réflexion antérieure (l'API la gère d'un tour à l'autre), et la réflexion est facturée comme sortie dans max_tokens, donc le budget doit contenir à la fois la réflexion et la réponse finale.",
         "Retransmettre manuellement l'ancienne réflexion gaspille des jetons car l'API la supprime déjà ; les blocs de réflexion ne peuvent pas non plus être explicitement marqués avec cache_control.",
         "La réflexion n'est pas une entrée gratuite — elle consomme max_tokens, est facturée comme sortie, et compte dans la fenêtre et les limites de débit à la génération."
       ]
