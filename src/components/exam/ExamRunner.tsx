@@ -1,0 +1,211 @@
+import { useState } from 'react'
+import { AlertTriangle, ChevronLeft, ChevronRight, Flag, LayoutGrid, Timer } from 'lucide-react'
+import { BLUEPRINT, DOMAIN_BY_KEY } from '@/data'
+import { Badge } from '@/components/ui/Badge'
+import { Button } from '@/components/ui/Button'
+import { Card } from '@/components/ui/Card'
+import { Modal } from '@/components/ui/Modal'
+import { QuestionGrid } from '@/components/exam/QuestionGrid'
+import { cn } from '@/lib/cn'
+import { formatDuration, useCountdown } from '@/lib/useCountdown'
+import { useLang, useT } from '@/lib/useT'
+import { useExamStore } from '@/store/examStore'
+
+const LETTERS = ['A', 'B', 'C', 'D']
+const WARN_MS = BLUEPRINT.session.soft_warning_remaining_minutes * 60 * 1000
+
+export function ExamRunner() {
+  const t = useT()
+  const lang = useLang()
+  const session = useExamStore((s) => s.session)
+  const answer = useExamStore((s) => s.answer)
+  const toggleFlag = useExamStore((s) => s.toggleFlag)
+  const next = useExamStore((s) => s.next)
+  const prev = useExamStore((s) => s.prev)
+  const submit = useExamStore((s) => s.submit)
+
+  const [gridOpen, setGridOpen] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+
+  const remaining = useCountdown(session?.endsAt ?? 0, session?.status === 'active', () =>
+    submit(true),
+  )
+
+  if (!session) return null
+
+  const i = session.current
+  const q = session.questions[i]
+  const total = session.questions.length
+  const selected = session.answers[i]
+  const isFlagged = session.flagged[i]
+  const answeredCount = session.answers.filter((a) => a !== null).length
+  const unanswered = total - answeredCount
+  const warning = remaining <= WARN_MS
+  const domain = DOMAIN_BY_KEY[q.domain]
+
+  return (
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+      {/* Status bar */}
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <Badge variant="secondary" className="font-medium">
+          {domain.name[lang]}
+        </Badge>
+        <span className="text-[13px] text-muted-foreground tabular-nums">
+          {t.questionOf(i + 1, total)}
+        </span>
+        <div className="ml-auto flex items-center gap-2">
+          <span className="hidden text-[12px] text-muted-foreground tabular-nums sm:inline">
+            {t.answeredCount(answeredCount, total)}
+          </span>
+          <div
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[13px] font-semibold tabular-nums',
+              warning
+                ? 'border-warning/50 bg-warning/10 text-warning'
+                : 'border-border bg-card text-foreground',
+            )}
+            aria-label={t.timeRemaining}
+            title={t.timeRemaining}
+          >
+            <Timer className="h-3.5 w-3.5" />
+            {formatDuration(remaining)}
+          </div>
+          <Button
+            variant="secondary"
+            size="iconSm"
+            className="lg:hidden"
+            aria-label={t.navigator}
+            onClick={() => setGridOpen(true)}
+          >
+            <LayoutGrid className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {warning && (
+        <div className="mb-4 flex items-center gap-2 rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-[13px] text-foreground animate-fade-in">
+          <AlertTriangle className="h-4 w-4 text-warning" />
+          {t.timeAlmostUp}
+        </div>
+      )}
+
+      <div className="grid gap-6 lg:grid-cols-[1fr_220px]">
+        {/* Question */}
+        <div className="min-w-0">
+          <Card className="p-6">
+            <p className="mb-3 rounded-md border border-border bg-surface px-4 py-3 text-[14px] leading-relaxed text-muted-foreground">
+              {q.scenario[lang]}
+            </p>
+            <h2 className="text-[17px] font-semibold leading-snug text-foreground">
+              {q.question[lang]}
+            </h2>
+
+            <div className="mt-5 space-y-2.5" role="radiogroup" aria-label={q.question[lang]}>
+              {q.options[lang].map((opt, idx) => {
+                const isSel = selected === idx
+                return (
+                  <button
+                    key={idx}
+                    role="radio"
+                    aria-checked={isSel}
+                    onClick={() => answer(idx)}
+                    className={cn(
+                      'flex w-full items-start gap-3 rounded-lg border p-3.5 text-left transition-colors duration-100',
+                      isSel
+                        ? 'border-primary bg-primary/10'
+                        : 'border-border bg-card hover:border-border-strong hover:bg-surface-hover',
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        'mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md border text-[12px] font-semibold',
+                        isSel
+                          ? 'border-primary bg-primary text-primary-foreground'
+                          : 'border-border-strong text-muted-foreground',
+                      )}
+                    >
+                      {LETTERS[idx]}
+                    </span>
+                    <span className="text-[14.5px] leading-relaxed text-foreground">{opt}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </Card>
+
+          {/* Footer nav */}
+          <div className="mt-4 flex items-center gap-2">
+            <Button variant="secondary" onClick={prev} disabled={i === 0}>
+              <ChevronLeft className="h-4 w-4" />
+              {t.previous}
+            </Button>
+            <Button
+              variant={isFlagged ? 'subtle' : 'outline'}
+              onClick={toggleFlag}
+              className={cn(isFlagged && 'text-warning')}
+            >
+              <Flag className={cn('h-4 w-4', isFlagged && 'fill-warning text-warning')} />
+              {isFlagged ? t.flagged : t.flag}
+            </Button>
+            <div className="ml-auto flex items-center gap-2">
+              {i === total - 1 ? (
+                <Button onClick={() => setConfirmOpen(true)}>{t.submitExam}</Button>
+              ) : (
+                <Button onClick={next}>
+                  {t.next}
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-3 flex justify-center">
+            <button
+              onClick={() => setConfirmOpen(true)}
+              className="text-[13px] font-medium text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground"
+            >
+              {t.submitExam}
+            </button>
+          </div>
+        </div>
+
+        {/* Desktop grid */}
+        <aside className="hidden lg:block">
+          <div className="sticky top-20">
+            <Card className="p-4">
+              <QuestionGrid />
+            </Card>
+          </div>
+        </aside>
+      </div>
+
+      {/* Mobile grid modal */}
+      <Modal open={gridOpen} onClose={() => setGridOpen(false)}>
+        <QuestionGrid onNavigate={() => setGridOpen(false)} />
+      </Modal>
+
+      {/* Submit confirm */}
+      <Modal open={confirmOpen} onClose={() => setConfirmOpen(false)} labelledBy="submit-title">
+        <h2 id="submit-title" className="font-serif text-lg font-semibold">
+          {t.submitTitle}
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+          {unanswered === 0 ? t.submitBodyAll : t.submitBodySome(unanswered)}
+        </p>
+        <div className="mt-5 flex justify-end gap-2">
+          <Button variant="ghost" onClick={() => setConfirmOpen(false)}>
+            {t.cancel}
+          </Button>
+          <Button
+            onClick={() => {
+              setConfirmOpen(false)
+              submit(false)
+            }}
+          >
+            {t.confirmSubmit}
+          </Button>
+        </div>
+      </Modal>
+    </div>
+  )
+}

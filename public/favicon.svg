@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="7" fill="#18171a"/>
+  <rect x="1.5" y="1.5" width="29" height="29" rx="5.5" fill="none" stroke="#383430" stroke-width="1"/>
+  <text x="16" y="21.5" font-family="Georgia, 'Times New Roman', serif" font-size="15" font-weight="600" fill="#c9a173" text-anchor="middle" letter-spacing="-0.5">cca</text>
+</svg>

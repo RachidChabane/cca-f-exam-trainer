@@ -10,6 +10,7 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
       '@data': fileURLToPath(new URL('./data', import.meta.url)),
+      '@resources': fileURLToPath(new URL('./resources', import.meta.url)),
     },
   },
   server: {

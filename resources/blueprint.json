@@ -1,0 +1,88 @@
+{
+  "exam": {
+    "code": "CCA-F",
+    "name": {
+      "en": "Claude Certified Architect — Foundations",
+      "fr": "Architecte Certifié Claude — Fondations"
+    },
+    "provider": "Anthropic",
+    "program": "Anthropic Claude Partner Network / Anthropic Academy",
+    "launched": "2026-03",
+    "level": "301 (applied practitioner)",
+    "format": "Proctored, scenario-based, multiple choice",
+    "mechanics": {
+      "question_count": 60,
+      "time_limit_minutes": 120,
+      "options_per_question": 4,
+      "correct_answers_per_question": 1,
+      "scaled_score": { "min": 100, "max": 1000, "pass": 720 },
+      "fee_usd": 99
+    },
+    "scoring_model": {
+      "note": "Anthropic's official scaling is proprietary and non-linear. This trainer uses a documented linear approximation so the 720 pass line maps to ~69% correct, consistent with the real exam's reported difficulty.",
+      "formula": "scaled = round(100 + (correct / total) * 900)",
+      "pass_scaled": 720,
+      "pass_raw_equivalent": "42 of 60 correct (~70%)"
+    }
+  },
+  "domains": [
+    {
+      "key": "agentic_architecture",
+      "name": { "en": "Agentic Architecture & Orchestration", "fr": "Architecture agentique et orchestration" },
+      "weight": 0.27,
+      "pool_target": 81,
+      "session_count": 16,
+      "covers": "Agentic loops, workflows vs. agents, prompt-chaining, routing, parallelization, orchestrator-worker, evaluator-optimizer, single- vs. multi-agent trade-offs, subagents and context isolation, session/state management, human-in-the-loop, the Agent SDK harness."
+    },
+    {
+      "key": "claude_code",
+      "name": { "en": "Claude Code Configuration & Workflows", "fr": "Configuration et workflows de Claude Code" },
+      "weight": 0.20,
+      "pool_target": 60,
+      "session_count": 12,
+      "covers": "CLAUDE.md memory hierarchy and imports, settings.json precedence and permissions, custom slash commands, hooks, project subagents, MCP configuration, headless/CI mode, plan mode, the Explore-Plan-Code-Commit workflow, GitHub Actions integration."
+    },
+    {
+      "key": "prompt_engineering",
+      "name": { "en": "Prompt Engineering & Structured Output", "fr": "Ingénierie des prompts et sorties structurées" },
+      "weight": 0.20,
+      "pool_target": 60,
+      "session_count": 12,
+      "covers": "Clear and direct instructions, multishot examples, chain-of-thought, XML tag structuring, system prompts, prefilling, output-format control, reliable JSON via tool use, temperature and stop sequences, prompt templates, evaluations and grading, hallucination mitigation."
+    },
+    {
+      "key": "tool_design_mcp",
+      "name": { "en": "Tool Design & MCP Integration", "fr": "Conception d'outils et intégration MCP" },
+      "weight": 0.18,
+      "pool_target": 54,
+      "session_count": 11,
+      "covers": "Tool definitions and input schemas, writing good tool descriptions, the tool_use/tool_result flow, parallel tool calls, forcing tool use, token-efficient tools, MCP architecture (host/client/server), MCP primitives (tools/resources/prompts), transports, the MCP connector, tool error handling and security."
+    },
+    {
+      "key": "context_management",
+      "name": { "en": "Context Management & Reliability", "fr": "Gestion du contexte et fiabilité" },
+      "weight": 0.15,
+      "pool_target": 45,
+      "session_count": 9,
+      "covers": "Context-window budgeting, prompt caching (cache_control, breakpoints, TTL, prefix ordering), context editing and tool-result clearing, compaction/summarization, agentic memory, retries and exponential backoff, idempotency, rate limits and 429/529 handling, streaming, cost optimization."
+    }
+  ],
+  "session": {
+    "question_count": 60,
+    "time_limit_minutes": 120,
+    "soft_warning_remaining_minutes": 10,
+    "sampling": "Without replacement within a session; per-domain counts follow session_count (16/12/12/11/9 = 60), mirroring the real domain distribution.",
+    "domain_session_counts": {
+      "agentic_architecture": 16,
+      "claude_code": 12,
+      "prompt_engineering": 12,
+      "tool_design_mcp": 11,
+      "context_management": 9
+    }
+  },
+  "pool": {
+    "total_target": 300,
+    "rounding_rule": "Pool: weight x 300, exact integers (81/60/60/54/45). Session: weight x 60 with largest-remainder rounding (16/12/12/11/9); the 0.8 remainder on Tool Design rounds up to keep the total at 60."
+  },
+  "sources_note": "Exam mechanics and domain weights were confirmed against first-party Anthropic announcements and the public CCA-F description in June 2026. See resources/README.md for the full source list and access dates."
+}

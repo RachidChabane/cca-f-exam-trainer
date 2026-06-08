@@ -1,0 +1,115 @@
+[
+  {
+    "id": "placeholder-aa-001",
+    "domain": "agentic_architecture",
+    "scenario": {
+      "en": "PLACEHOLDER — replaced by the generated pool. A support agent loops indefinitely on ambiguous tickets.",
+      "fr": "ESPACE RÉSERVÉ — remplacé par le pool généré. Un agent de support boucle indéfiniment sur des tickets ambigus."
+    },
+    "question": {
+      "en": "What is the best architectural fix?",
+      "fr": "Quelle est la meilleure correction architecturale ?"
+    },
+    "options": {
+      "en": ["Add a max-iteration stop and human handoff", "Increase temperature", "Remove all tools", "Switch to a larger model only"],
+      "fr": ["Ajouter une limite d'itérations et un transfert humain", "Augmenter la température", "Retirer tous les outils", "Passer uniquement à un modèle plus grand"]
+    },
+    "correct_index": 0,
+    "explanation": {
+      "en": "Bounding the agentic loop and escalating to a human is the recommended reliability pattern.",
+      "fr": "Borner la boucle agentique et escalader vers un humain est le motif de fiabilité recommandé."
+    },
+    "distractor_explanations": {
+      "en": ["correct", "Temperature does not bound loops.", "Removing tools breaks the task.", "A bigger model does not stop loops."],
+      "fr": ["correct", "La température ne borne pas les boucles.", "Retirer les outils casse la tâche.", "Un modèle plus grand n'arrête pas les boucles."]
+    }
+  },
+  {
+    "id": "placeholder-cc-001",
+    "domain": "claude_code",
+    "scenario": {
+      "en": "PLACEHOLDER — replaced by the generated pool. A team wants shared project conventions in Claude Code.",
+      "fr": "ESPACE RÉSERVÉ — remplacé par le pool généré. Une équipe veut partager des conventions de projet dans Claude Code."
+    },
+    "question": { "en": "Where should they put them?", "fr": "Où doivent-ils les placer ?" },
+    "options": {
+      "en": ["A committed CLAUDE.md at the project root", "A personal note", "The shell history", "An email"],
+      "fr": ["Un CLAUDE.md versionné à la racine du projet", "Une note personnelle", "L'historique du shell", "Un courriel"]
+    },
+    "correct_index": 0,
+    "explanation": {
+      "en": "Project memory lives in a committed CLAUDE.md so the whole team shares it.",
+      "fr": "La mémoire projet réside dans un CLAUDE.md versionné, partagé par toute l'équipe."
+    },
+    "distractor_explanations": {
+      "en": ["correct", "Not shared.", "Not read by Claude Code.", "Not project memory."],
+      "fr": ["correct", "Non partagé.", "Non lu par Claude Code.", "Pas de la mémoire projet."]
+    }
+  },
+  {
+    "id": "placeholder-pe-001",
+    "domain": "prompt_engineering",
+    "scenario": {
+      "en": "PLACEHOLDER — replaced by the generated pool. JSON output is occasionally malformed.",
+      "fr": "ESPACE RÉSERVÉ — remplacé par le pool généré. La sortie JSON est parfois mal formée."
+    },
+    "question": { "en": "Most reliable fix?", "fr": "Correction la plus fiable ?" },
+    "options": {
+      "en": ["Use tool use to enforce a schema", "Ask politely", "Raise max_tokens", "Lower temperature only"],
+      "fr": ["Utiliser l'utilisation d'outils pour imposer un schéma", "Demander poliment", "Augmenter max_tokens", "Baisser uniquement la température"]
+    },
+    "correct_index": 0,
+    "explanation": {
+      "en": "Tool use with an input schema enforces structured output reliably.",
+      "fr": "L'utilisation d'outils avec un schéma d'entrée impose une sortie structurée fiable."
+    },
+    "distractor_explanations": {
+      "en": ["correct", "Not enforceable.", "Does not fix structure.", "Helps a little, not enough."],
+      "fr": ["correct", "Non contraignant.", "Ne corrige pas la structure.", "Aide un peu, insuffisant."]
+    }
+  },
+  {
+    "id": "placeholder-td-001",
+    "domain": "tool_design_mcp",
+    "scenario": {
+      "en": "PLACEHOLDER — replaced by the generated pool. Claude misuses a tool with a vague description.",
+      "fr": "ESPACE RÉSERVÉ — remplacé par le pool généré. Claude utilise mal un outil à la description vague."
+    },
+    "question": { "en": "Best first fix?", "fr": "Meilleure première correction ?" },
+    "options": {
+      "en": ["Write a precise tool description and schema", "Add ten more tools", "Remove the schema", "Force tool_choice always"],
+      "fr": ["Écrire une description et un schéma d'outil précis", "Ajouter dix outils de plus", "Retirer le schéma", "Forcer tool_choice en permanence"]
+    },
+    "correct_index": 0,
+    "explanation": {
+      "en": "Clear tool descriptions and schemas are the highest-leverage fix for tool misuse.",
+      "fr": "Des descriptions et schémas d'outils clairs sont la correction la plus efficace contre le mauvais usage."
+    },
+    "distractor_explanations": {
+      "en": ["correct", "More tools worsens it.", "Schema helps, do not remove.", "Forcing is too blunt."],
+      "fr": ["correct", "Plus d'outils aggrave.", "Le schéma aide, ne pas retirer.", "Forcer est trop brutal."]
+    }
+  },
+  {
+    "id": "placeholder-cm-001",
+    "domain": "context_management",
+    "scenario": {
+      "en": "PLACEHOLDER — replaced by the generated pool. A long chat repeatedly resends a large static preamble.",
+      "fr": "ESPACE RÉSERVÉ — remplacé par le pool généré. Un long échange renvoie sans cesse un grand préambule statique."
+    },
+    "question": { "en": "Best cost optimization?", "fr": "Meilleure optimisation de coût ?" },
+    "options": {
+      "en": ["Enable prompt caching on the stable prefix", "Truncate user messages", "Disable streaming", "Use a smaller context window"],
+      "fr": ["Activer la mise en cache des prompts sur le préfixe stable", "Tronquer les messages utilisateur", "Désactiver le streaming", "Utiliser une fenêtre de contexte plus petite"]
+    },
+    "correct_index": 0,
+    "explanation": {
+      "en": "Prompt caching on the stable prefix avoids reprocessing it on each call.",
+      "fr": "La mise en cache des prompts sur le préfixe stable évite de le retraiter à chaque appel."
+    },
+    "distractor_explanations": {
+      "en": ["correct", "Hurts quality.", "Unrelated to cost.", "Does not address re-sending."],
+      "fr": ["correct", "Nuit à la qualité.", "Sans rapport avec le coût.", "Ne résout pas le renvoi."]
+    }
+  }
+]

@@ -1,0 +1,58 @@
+[
+  {
+    "id": "placeholder-course-001",
+    "course_title": { "en": "PLACEHOLDER — Building with the Claude API", "fr": "ESPACE RÉSERVÉ — Développer avec l'API Claude" },
+    "source_url": "https://anthropic.skilljar.com/claude-with-the-anthropic-api",
+    "domain": "prompt_engineering",
+    "summary": {
+      "en": "## Placeholder\n\nReplaced by the generated course summaries. This card verifies the study-mode layout renders markdown, **key concepts**, and check questions.",
+      "fr": "## Espace réservé\n\nRemplacé par les résumés de cours générés. Cette carte vérifie que le mode étude rend le markdown, les **concepts clés** et les questions de contrôle."
+    },
+    "key_concepts": {
+      "en": ["Messages API", "System prompts", "Tool use"],
+      "fr": ["API Messages", "Prompts système", "Utilisation d'outils"]
+    },
+    "check_questions": [
+      {
+        "q": { "en": "How do you enforce structured output?", "fr": "Comment imposer une sortie structurée ?" },
+        "a": { "en": "Define a tool with an input schema.", "fr": "Définir un outil avec un schéma d'entrée." }
+      },
+      {
+        "q": { "en": "What sets model behavior globally?", "fr": "Qu'est-ce qui définit le comportement global du modèle ?" },
+        "a": { "en": "The system prompt.", "fr": "Le prompt système." }
+      },
+      {
+        "q": { "en": "What carries the model's tool call?", "fr": "Qu'est-ce qui porte l'appel d'outil du modèle ?" },
+        "a": { "en": "A tool_use content block.", "fr": "Un bloc de contenu tool_use." }
+      }
+    ]
+  },
+  {
+    "id": "placeholder-course-002",
+    "course_title": { "en": "PLACEHOLDER — Introduction to MCP", "fr": "ESPACE RÉSERVÉ — Introduction au MCP" },
+    "source_url": "https://anthropic.skilljar.com/introduction-to-model-context-protocol",
+    "domain": "tool_design_mcp",
+    "summary": {
+      "en": "## Placeholder\n\nReplaced by the generated course summaries.",
+      "fr": "## Espace réservé\n\nRemplacé par les résumés de cours générés."
+    },
+    "key_concepts": {
+      "en": ["MCP tools", "MCP resources", "MCP prompts"],
+      "fr": ["Outils MCP", "Ressources MCP", "Prompts MCP"]
+    },
+    "check_questions": [
+      {
+        "q": { "en": "Name MCP's three primitives.", "fr": "Citez les trois primitives du MCP." },
+        "a": { "en": "Tools, resources, and prompts.", "fr": "Outils, ressources et prompts." }
+      },
+      {
+        "q": { "en": "What inspects a server?", "fr": "Qu'est-ce qui inspecte un serveur ?" },
+        "a": { "en": "The MCP Inspector.", "fr": "L'inspecteur MCP." }
+      },
+      {
+        "q": { "en": "Which primitive is read-only data?", "fr": "Quelle primitive correspond aux données en lecture seule ?" },
+        "a": { "en": "Resources.", "fr": "Les ressources." }
+      }
+    ]
+  }
+]
