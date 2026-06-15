@@ -1,0 +1,90 @@
+{
+  "by_theme": {
+    "customer_support": [
+      {
+        "id": "customer_support-trap-01",
+        "domain": "context_management",
+        "title": {
+          "en": "Feeding raw transcripts instead of structured summaries",
+          "fr": "Donner les transcriptions brutes au lieu de résumés structurés"
+        },
+        "trap": {
+          "en": "Passing the full raw chat or ticket transcript into the model on every turn so it 'has all the context'.",
+          "fr": "Passer toute la transcription brute du chat ou du ticket au modèle à chaque tour pour qu’il « ait tout le contexte »."
+        },
+        "why_wrong": {
+          "en": "Raw transcripts bloat the context window, raise latency and cost, and bury the few facts that matter under noise, which degrades accuracy on long tickets.",
+          "fr": "Les transcriptions brutes gonflent la fenêtre de contexte, augmentent latence et coût, et noient les rares faits importants sous le bruit, ce qui dégrade l’exactitude sur les tickets longs."
+        },
+        "right_approach": {
+          "en": "Distil the conversation into a structured running summary (customer, issue, steps taken, decision) and pass that, fetching raw detail only when a specific step needs it.",
+          "fr": "Distiller la conversation en un résumé structuré et évolutif (client, problème, étapes effectuées, décision) et transmettre celui-ci, en n’allant chercher le détail brut que lorsqu’une étape précise l’exige."
+        }
+      },
+      {
+        "id": "customer_support-trap-02",
+        "domain": "agentic_architecture",
+        "title": {
+          "en": "Trusting the model to self-enforce risky actions",
+          "fr": "Compter sur le modèle pour s’autoréguler sur les actions risquées"
+        },
+        "trap": {
+          "en": "Relying on a system-prompt rule like 'never refund more than $200 or touch contract disputes' as the actual safety control.",
+          "fr": "S’appuyer sur une règle d’invite système du type « ne jamais rembourser plus de 200 $ ni toucher aux litiges contractuels » comme véritable contrôle de sécurité."
+        },
+        "why_wrong": {
+          "en": "Prompt instructions are best-effort guidance, not a boundary; a single ambiguous ticket, jailbreak, or model slip can execute an irreversible action.",
+          "fr": "Les consignes d’invite sont indicatives, pas une frontière ; un seul ticket ambigu, une attaque ou une erreur du modèle peut exécuter une action irréversible."
+        },
+        "right_approach": {
+          "en": "Enforce limits in the tool or business layer (hard caps, allowlists) and route anything risky to a human escalation path; keep the prompt as guidance on top, not as the control.",
+          "fr": "Imposer les limites dans la couche outil ou métier (plafonds stricts, listes d’autorisation) et router tout ce qui est risqué vers une escalade humaine ; garder l’invite comme guide par-dessus, non comme le contrôle."
+        }
+      }
+    ]
+  },
+  "by_domain": {
+    "agentic_architecture": [
+      {
+        "id": "agentic_architecture-trap-01",
+        "domain": "agentic_architecture",
+        "title": {
+          "en": "Reaching for an agent when a workflow would do",
+          "fr": "Choisir un agent quand un workflow suffirait"
+        },
+        "trap": {
+          "en": "Building an open-ended agentic loop for a task whose steps are actually known and fixed.",
+          "fr": "Construire une boucle agentique ouverte pour une tâche dont les étapes sont en réalité connues et fixes."
+        },
+        "why_wrong": {
+          "en": "Agents trade latency, cost, and predictability for flexibility; using one where a fixed prompt-chain or workflow suffices adds failure modes and spend for no benefit.",
+          "fr": "Les agents échangent latence, coût et prévisibilité contre de la flexibilité ; en employer un là où un enchaînement d’invites ou un workflow fixe suffit ajoute des modes de défaillance et des dépenses sans bénéfice."
+        },
+        "right_approach": {
+          "en": "Reserve agents for open-ended problems where you cannot predict the number of steps; otherwise use a structured workflow (prompt chaining, routing) you can test and control.",
+          "fr": "Réserver les agents aux problèmes ouverts où l’on ne peut pas prévoir le nombre d’étapes ; sinon, utiliser un workflow structuré (enchaînement d’invites, routage) que l’on peut tester et contrôler."
+        }
+      },
+      {
+        "id": "agentic_architecture-trap-02",
+        "domain": "agentic_architecture",
+        "title": {
+          "en": "Running an agent with no stopping condition or budget",
+          "fr": "Lancer un agent sans condition d’arrêt ni budget"
+        },
+        "trap": {
+          "en": "Letting the agent loop until it 'decides' it is done, with no max-iteration count, cost ceiling, or success check.",
+          "fr": "Laisser l’agent boucler jusqu’à ce qu’il « décide » d’avoir fini, sans nombre d’itérations maximal, plafond de coût ni vérification de réussite."
+        },
+        "why_wrong": {
+          "en": "Without a clear success criterion and limits, an agent can loop, burn budget, and fail silently, especially on tasks it cannot actually complete.",
+          "fr": "Sans critère de réussite clair ni limites, un agent peut boucler, épuiser le budget et échouer en silence, surtout sur des tâches qu’il ne peut pas réellement accomplir."
+        },
+        "right_approach": {
+          "en": "Give the loop explicit success criteria, a max-step and cost budget, and human oversight on risky actions, so it terminates predictably and fails safe.",
+          "fr": "Donner à la boucle des critères de réussite explicites, un budget d’étapes et de coût maximal, et une supervision humaine sur les actions risquées, pour qu’elle se termine de façon prévisible et échoue sans danger."
+        }
+      }
+    ]
+  }
+}

@@ -1,12 +1,19 @@
 import scenariosRaw from '@data/scenarios.json'
 import coursesRaw from '@data/courses.json'
+import quizzesRaw from '@data/quizzes.json'
+import trapsRaw from '@data/exam_traps.json'
 import blueprintRaw from '@resources/blueprint.json'
-import type { Blueprint, Course, DomainKey, Question, ScenarioSet } from '@/types'
+import type { Blueprint, Course, DomainKey, QuizBank, Question, ScenarioSet, TrapBank } from '@/types'
 
 /** Canonical content, loaded from the JSON files at /data and /resources. */
 export const SCENARIO_SETS = scenariosRaw as ScenarioSet[]
 export const COURSES = coursesRaw as Course[]
 export const BLUEPRINT = blueprintRaw as Blueprint
+
+/** Study-mode mini-quizzes (per course + per scenario theme) and exam traps
+ * (grouped by scenario theme and by exam domain). */
+export const QUIZZES = quizzesRaw as QuizBank
+export const EXAM_TRAPS = trapsRaw as TrapBank
 
 /**
  * The flat question view. Every scenario question is flattened with its parent

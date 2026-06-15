@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight, ExternalLink, Eye, EyeOff, Sparkles } from 'lucide-react'
-import { DOMAIN_BY_KEY } from '@/data'
+import { DOMAIN_BY_KEY, QUIZZES } from '@/data'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Markdown } from '@/components/ui/Markdown'
+import { QuizList } from '@/components/study/QuizItem'
 import { cn } from '@/lib/cn'
 import { useLang, useT } from '@/lib/useT'
 import type { Course, CheckQuestion, DomainKey } from '@/types'
@@ -27,6 +28,7 @@ export function CourseReader({
     course.domain && course.domain in DOMAIN_BY_KEY
       ? DOMAIN_BY_KEY[course.domain as DomainKey].name[lang]
       : null
+  const quiz = QUIZZES.by_course[course.id] ?? []
 
   return (
     <article className="min-w-0" data-testid="course-reader">
@@ -75,8 +77,14 @@ export function CourseReader({
         <Markdown>{course.summary[lang]}</Markdown>
       </section>
 
-      {/* Check questions */}
-      {course.check_questions?.length > 0 && (
+      {/* Check yourself: an interactive mini-quiz when available, else the
+          original question/answer reveal cards. */}
+      {quiz.length > 0 ? (
+        <section className="mt-9">
+          <h2 className="mb-4 font-serif text-xl font-semibold">{t.checkUnderstanding}</h2>
+          <QuizList items={quiz} intro={t.quizCourseIntro} />
+        </section>
+      ) : course.check_questions?.length > 0 ? (
         <section className="mt-9">
           <h2 className="mb-4 font-serif text-xl font-semibold">{t.checkUnderstanding}</h2>
           <div className="space-y-3">
@@ -85,7 +93,7 @@ export function CourseReader({
             ))}
           </div>
         </section>
-      )}
+      ) : null}
 
       {/* Course nav */}
       <nav className="mt-10 flex items-center justify-between gap-2 border-t border-border pt-5">

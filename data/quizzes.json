@@ -1,0 +1,174 @@
+{
+  "by_course": {
+    "claude-101": [
+      {
+        "id": "claude-101-quiz-01",
+        "domain": "prompt_engineering",
+        "q": {
+          "en": "Why is iterating on a prompt presented as the key skill for getting better results with Claude?",
+          "fr": "Pourquoi l’itération sur une invite est-elle présentée comme la compétence clé pour obtenir de meilleurs résultats avec Claude ?"
+        },
+        "options": {
+          "en": [
+            "Each new prompt wipes Claude's memory, so you must restate every earlier instruction from scratch every time.",
+            "Longer prompts are inherently more accurate, so iterating mainly means making the prompt longer.",
+            "A first attempt often misses the mark; refining it by adding context, examples, or a clearer format and tone steers Claude toward what you actually need.",
+            "Iterating lets you lower the temperature step by step until the model becomes fully deterministic."
+          ],
+          "fr": [
+            "Chaque nouvelle invite efface la mémoire de Claude, il faut donc redonner toutes les consignes précédentes à chaque fois.",
+            "Les invites plus longues sont par nature plus précises, donc itérer revient surtout à allonger l’invite.",
+            "Une première tentative manque souvent sa cible ; l’affiner en ajoutant du contexte, des exemples ou un format et un ton plus clairs oriente Claude vers ce dont vous avez réellement besoin.",
+            "Itérer permet de baisser la température pas à pas jusqu’à ce que le modèle devienne totalement déterministe."
+          ]
+        },
+        "correct_index": 2,
+        "explanation": {
+          "en": "Anthropic frames prompting as iterative: a first answer often misses, and refining the request with the right context, examples, or a clearer format and tone guides Claude to the intended result without starting over.",
+          "fr": "Anthropic présente le prompting comme itératif : une première réponse manque souvent sa cible, et affiner la demande avec le bon contexte, des exemples ou un format et un ton plus clairs guide Claude vers le résultat visé sans tout recommencer."
+        },
+        "distractor_explanations": {
+          "en": [
+            "Within a conversation Claude keeps the earlier turns; iteration is about clarifying the request, not re-stating everything because memory was wiped.",
+            "Length is not quality. Irrelevant text can hurt; useful iteration adds the right context or constraints, not just more words.",
+            "",
+            "Temperature controls randomness, not correctness, and is unrelated to why refining the wording improves results."
+          ],
+          "fr": [
+            "Au sein d’une conversation, Claude conserve les tours précédents ; itérer consiste à clarifier la demande, pas à tout répéter parce que la mémoire aurait été effacée.",
+            "La longueur n’est pas la qualité. Un texte hors sujet peut nuire ; une itération utile ajoute le bon contexte ou les bonnes contraintes, pas seulement plus de mots.",
+            "",
+            "La température règle l’aléa, pas l’exactitude, et n’a rien à voir avec le fait qu’affiner la formulation améliore les résultats."
+          ]
+        }
+      },
+      {
+        "id": "claude-101-quiz-02",
+        "domain": "claude_code",
+        "q": {
+          "en": "In the Claude desktop app, what distinguishes the Cowork mode from Chat and Code?",
+          "fr": "Dans l’application de bureau Claude, qu’est-ce qui distingue le mode Cowork de Chat et de Code ?"
+        },
+        "options": {
+          "en": [
+            "Cowork is the voice-only mode, while Chat is text and Code renders diagrams.",
+            "Cowork is an agentic mode that takes on multi-step tasks and runs them end-to-end on your files; Chat is ordinary back-and-forth conversation and Code is the command-line agent for software work.",
+            "Cowork and Chat are identical; only Code is able to use tools.",
+            "Cowork is a strictly read-only research mode that can never modify files."
+          ],
+          "fr": [
+            "Cowork est le mode uniquement vocal, tandis que Chat est textuel et Code affiche des diagrammes.",
+            "Cowork est un mode agentique qui prend en charge des tâches en plusieurs étapes et les exécute de bout en bout sur vos fichiers ; Chat est la conversation classique et Code est l’agent en ligne de commande pour le travail logiciel.",
+            "Cowork et Chat sont identiques ; seul Code peut utiliser des outils.",
+            "Cowork est un mode de recherche strictement en lecture seule qui ne modifie jamais de fichiers."
+          ]
+        },
+        "correct_index": 1,
+        "explanation": {
+          "en": "The desktop app's three modes map to three jobs: Chat for conversation, Cowork as an agentic mode that runs multi-step tasks end-to-end on your files, and Code as the CLI agent for software work.",
+          "fr": "Les trois modes de l’application de bureau correspondent à trois usages : Chat pour la conversation, Cowork comme mode agentique qui exécute des tâches en plusieurs étapes de bout en bout sur vos fichiers, et Code comme agent en ligne de commande pour le travail logiciel."
+        },
+        "distractor_explanations": {
+          "en": [
+            "The modes are not split by input modality (voice/text/diagrams); they differ by how much agency they take on the task.",
+            "",
+            "Chat and Cowork are not the same: Cowork is agentic and acts on multi-step tasks, while Chat is plain conversation.",
+            "Cowork is not read-only; it acts on your files end-to-end. A read-only framing better fits plain Chat."
+          ],
+          "fr": [
+            "Les modes ne se distinguent pas par la modalité d’entrée (voix/texte/diagrammes) mais par le degré d’autonomie pris sur la tâche.",
+            "",
+            "Chat et Cowork ne sont pas identiques : Cowork est agentique et agit sur des tâches en plusieurs étapes, alors que Chat est une simple conversation.",
+            "Cowork n’est pas en lecture seule ; il agit sur vos fichiers de bout en bout. Une lecture seule correspond plutôt au simple Chat."
+          ]
+        }
+      }
+    ]
+  },
+  "by_theme": {
+    "customer_support": [
+      {
+        "id": "customer_support-quiz-01",
+        "domain": "agentic_architecture",
+        "q": {
+          "en": "A customer-support resolution agent can issue refunds. What is the soundest way to handle refunds above the auto-approve limit (say, over $200)?",
+          "fr": "Un agent de résolution du support client peut émettre des remboursements. Quelle est la façon la plus solide de gérer les remboursements au-dessus de la limite d’auto-approbation (disons plus de 200 $) ?"
+        },
+        "options": {
+          "en": [
+            "Let the model issue any refund but log large ones for a later human audit.",
+            "Raise the model's temperature so it becomes more cautious about large refunds.",
+            "Add a line to the system prompt telling the model never to exceed the limit, and rely on that alone.",
+            "Enforce the cap in the tool / business layer and route anything above it to a human via an escalation path, instead of trusting the model to self-limit."
+          ],
+          "fr": [
+            "Laisser le modèle émettre n’importe quel remboursement mais journaliser les plus gros pour un audit humain ultérieur.",
+            "Augmenter la température du modèle pour qu’il devienne plus prudent sur les gros remboursements.",
+            "Ajouter une ligne dans l’invite système disant au modèle de ne jamais dépasser la limite, et s’en remettre à cela seul.",
+            "Imposer le plafond dans la couche outil / métier et router tout dépassement vers un humain via un chemin d’escalade, plutôt que de compter sur le modèle pour s’autolimiter."
+          ]
+        },
+        "correct_index": 3,
+        "explanation": {
+          "en": "High-impact, irreversible actions need a hard guardrail outside the model: cap refunds in the tool or business logic and escalate larger ones to a human. Prompt instructions help, but they are not a security boundary.",
+          "fr": "Les actions à fort impact et irréversibles exigent un garde-fou ferme hors du modèle : plafonner les remboursements dans la logique outil ou métier et escalader les plus gros vers un humain. Les consignes d’invite aident, mais ne constituent pas une frontière de sécurité."
+        },
+        "distractor_explanations": {
+          "en": [
+            "Logging after the fact does not stop an over-limit refund from executing; the control must be preventive, in the tool layer.",
+            "Temperature changes randomness, not policy compliance; it cannot enforce a refund cap.",
+            "A prompt instruction is best-effort and can be ignored or bypassed; a monetary cap must be enforced in code, with escalation for exceptions.",
+            ""
+          ],
+          "fr": [
+            "Journaliser après coup n’empêche pas un remboursement hors limite de s’exécuter ; le contrôle doit être préventif, dans la couche outil.",
+            "La température change l’aléa, pas le respect des règles ; elle ne peut pas imposer un plafond de remboursement.",
+            "Une consigne d’invite est au mieux indicative et peut être ignorée ou contournée ; un plafond monétaire doit être imposé dans le code, avec escalade pour les exceptions.",
+            ""
+          ]
+        }
+      },
+      {
+        "id": "customer_support-quiz-02",
+        "domain": "context_management",
+        "q": {
+          "en": "The agent must answer from a large, frequently-updated policy knowledge base. What is the most reliable way to keep its answers grounded?",
+          "fr": "L’agent doit répondre à partir d’une base de connaissances de politiques vaste et fréquemment mise à jour. Quelle est la façon la plus fiable de garder ses réponses bien ancrées ?"
+        },
+        "options": {
+          "en": [
+            "Retrieve the relevant policy passages at query time and have the model answer from them, rather than baking the policies into the system prompt.",
+            "Paste the entire knowledge base into the system prompt so the model always has everything in context.",
+            "Fine-tune the model nightly on the whole knowledge base instead of retrieving anything.",
+            "Summarise the knowledge base once and hard-code that summary into the agent."
+          ],
+          "fr": [
+            "Récupérer les passages de politique pertinents au moment de la requête et faire répondre le modèle à partir d’eux, plutôt que d’intégrer les politiques dans l’invite système.",
+            "Coller toute la base de connaissances dans l’invite système pour que le modèle ait toujours tout en contexte.",
+            "Réentraîner le modèle chaque nuit sur toute la base de connaissances au lieu de récupérer quoi que ce soit.",
+            "Résumer la base de connaissances une fois et coder ce résumé en dur dans l’agent."
+          ]
+        },
+        "correct_index": 0,
+        "explanation": {
+          "en": "A large, changing knowledge base is best handled with retrieval (RAG): fetch the relevant passages per query so answers stay grounded and current. Stuffing everything into the prompt wastes context and goes stale; nightly fine-tuning is slow, costly, and still lags edits.",
+          "fr": "Une base vaste et évolutive se gère au mieux par récupération (RAG) : aller chercher les passages pertinents à chaque requête pour que les réponses restent ancrées et à jour. Tout mettre dans l’invite gaspille le contexte et se périme ; un réentraînement nocturne est lent, coûteux et reste en retard sur les modifications."
+        },
+        "distractor_explanations": {
+          "en": [
+            "",
+            "Pasting the whole base blows the context budget, raises latency and cost, and still goes out of date between edits; retrieval scales far better.",
+            "Fine-tuning bakes knowledge in slowly and expensively and cannot keep up with a frequently-updated base; retrieval reflects edits immediately.",
+            "A one-off hard-coded summary loses detail and drifts out of date as policies change; per-query retrieval stays accurate."
+          ],
+          "fr": [
+            "",
+            "Coller toute la base fait exploser le budget de contexte, augmente latence et coût, et se périme entre deux modifications ; la récupération passe bien mieux à l’échelle.",
+            "Le réentraînement intègre les connaissances lentement et coûteusement et ne peut suivre une base fréquemment mise à jour ; la récupération reflète les modifications immédiatement.",
+            "Un résumé figé perd des détails et se périme à mesure que les politiques changent ; une récupération par requête reste exacte."
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -75,6 +75,52 @@ export interface CheckQuestion {
   a: Bi
 }
 
+/** A self-contained multiple-choice quiz question used by the Study-mode
+ * mini-quizzes (per-course and per-theme). Unlike a ScenarioQuestion it does not
+ * lean on a shared scenario context: the stem stands on its own. Same answer
+ * model as the exam (1 correct + 3 distractors, each with a written rebuttal). */
+export interface QuizQuestion {
+  id: string
+  /** Exam domain this question maps to (for labelling / filtering). */
+  domain?: DomainKey
+  q: Bi
+  options: BiList
+  correct_index: number
+  /** Why the correct option is right. */
+  explanation: Bi
+  /** Per-option rebuttal, aligned by index; the correct slot holds "". */
+  distractor_explanations: BiList
+}
+
+/** A classic exam trap: the tempting-but-wrong instinct, why it fails, and the
+ * architecturally correct call. Grounded in first-party Anthropic guidance. */
+export interface ExamTrap {
+  id: string
+  /** Exam domain the trap belongs to (always set for by-domain traps). */
+  domain?: DomainKey
+  /** Short headline naming the trap. */
+  title: Bi
+  /** The tempting-but-wrong move a candidate is likely to pick. */
+  trap: Bi
+  /** Why that move is wrong. */
+  why_wrong: Bi
+  /** The correct architectural approach. */
+  right_approach: Bi
+}
+
+/** Study-mode mini-quizzes: one set per course (keyed by course id) and one set
+ * per scenario theme (keyed by theme id from src/scenarios.ts). */
+export interface QuizBank {
+  by_course: Record<string, QuizQuestion[]>
+  by_theme: Record<string, QuizQuestion[]>
+}
+
+/** Exam traps grouped two ways: by scenario theme and by exam domain. */
+export interface TrapBank {
+  by_theme: Record<string, ExamTrap[]>
+  by_domain: Partial<Record<DomainKey, ExamTrap[]>>
+}
+
 export interface Course {
   id: string
   course_title: Bi

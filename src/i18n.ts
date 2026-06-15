@@ -138,6 +138,29 @@ const en = {
   mapsToDomain: 'Exam domain',
   checkOf: (n: number, total: number) => `Question ${n} of ${total}`,
 
+  // Study mini-quizzes + exam traps
+  studyTabCourses: 'Courses',
+  studyTabQuiz: 'Quiz by theme',
+  studyTabTraps: 'Exam traps',
+  studyTabsLabel: 'Study sections',
+  quizThemeIntro:
+    'A quick multiple-choice quiz on the key architectural calls for this scenario theme. Pick an answer to see why it is right or wrong.',
+  quizCourseIntro:
+    'Check yourself: pick an answer to reveal why it is right and why the others fall short.',
+  quizPickTheme: 'Choose a theme',
+  quizTryAgain: 'Try again',
+  quizScore: (c: number, total: number) => `${c} / ${total} correct`,
+  quizEmpty: 'The quiz for this section is coming soon.',
+  trapsToggleTheme: 'By scenario',
+  trapsToggleDomain: 'By domain',
+  trapsIntro: 'The tempting-but-wrong moves that cost marks, with the correct call for each.',
+  trapPickTheme: 'Choose a theme',
+  trapPickDomain: 'Choose a domain',
+  trapThe: 'The trap',
+  trapWhy: 'Why it’s wrong',
+  trapRight: 'The right call',
+  trapsEmpty: 'The traps for this section are coming soon.',
+
   // Practice / drills / history
   practiceHeading: 'Practice by domain',
   practiceDesc: 'Untimed drills to grind a weak area: no countdown, full review after.',
@@ -297,6 +320,29 @@ const fr: typeof en = {
   nextCourse: 'Suivant',
   mapsToDomain: 'Domaine d’examen',
   checkOf: (n: number, total: number) => `Question ${n} sur ${total}`,
+
+  // Mini-quiz de révision + pièges d’examen
+  studyTabCourses: 'Cours',
+  studyTabQuiz: 'Quiz par thème',
+  studyTabTraps: 'Pièges d’examen',
+  studyTabsLabel: 'Sections de révision',
+  quizThemeIntro:
+    'Un quiz rapide à choix multiple sur les décisions d’architecture clés de ce thème de scénario. Choisissez une réponse pour voir pourquoi elle est juste ou fausse.',
+  quizCourseIntro:
+    'Testez-vous : choisissez une réponse pour découvrir pourquoi elle est juste et pourquoi les autres sont insuffisantes.',
+  quizPickTheme: 'Choisissez un thème',
+  quizTryAgain: 'Réessayer',
+  quizScore: (c: number, total: number) => `${c} / ${total} correctes`,
+  quizEmpty: 'Le quiz de cette section arrive bientôt.',
+  trapsToggleTheme: 'Par scénario',
+  trapsToggleDomain: 'Par domaine',
+  trapsIntro: 'Les choix tentants mais faux qui coûtent des points, avec la bonne décision pour chacun.',
+  trapPickTheme: 'Choisissez un thème',
+  trapPickDomain: 'Choisissez un domaine',
+  trapThe: 'Le piège',
+  trapWhy: 'Pourquoi c’est faux',
+  trapRight: 'La bonne approche',
+  trapsEmpty: 'Les pièges de cette section arrivent bientôt.',
 
   // Exercices / révisions ciblées / historique
   practiceHeading: 'Réviser par domaine',

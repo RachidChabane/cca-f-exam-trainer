@@ -211,6 +211,89 @@ if (courses != null) {
   }
 }
 
+// ---------- quizzes.json + exam_traps.json ----------
+const courseIds = new Set(Array.isArray(courses) ? courses.map((c) => c && c.id).filter(Boolean) : [])
+const norm = (s) => String(s).trim().toLowerCase().replace(/\s+/g, ' ')
+const quizIds = new Set()
+
+/** Validate one multiple-choice quiz question (same answer model as the exam). */
+function checkQuiz(q, at) {
+  if (!q || typeof q !== 'object') return err(`${at}: not an object`)
+  if (!isFilledStr(q.id)) err(`${at}: missing id`)
+  else if (quizIds.has(q.id)) err(`${at}: duplicate quiz id "${q.id}"`)
+  else quizIds.add(q.id)
+  if (q.domain != null && !DOMAINS.includes(q.domain)) err(`${at}: invalid domain "${q.domain}"`)
+  if (!isBiStr(q.q)) err(`${at}: q must have non-empty en & fr`)
+  if (!isBiStr(q.explanation)) err(`${at}: explanation must have non-empty en & fr`)
+  const ci = q.correct_index
+  if (!Number.isInteger(ci) || ci < 0 || ci > 3) err(`${at}: correct_index must be an integer in [0,3]`)
+  for (const lang of ['en', 'fr']) {
+    const opts = q.options && q.options[lang]
+    if (!Array.isArray(opts) || opts.length !== 4 || !opts.every(isFilledStr))
+      err(`${at}: options.${lang} must be 4 non-empty strings`)
+    else if (new Set(opts.map(norm)).size !== opts.length)
+      err(`${at}: options.${lang} has duplicate option text`)
+    const de = q.distractor_explanations && q.distractor_explanations[lang]
+    if (!Array.isArray(de) || de.length !== 4) err(`${at}: distractor_explanations.${lang} must be 4 strings`)
+    else if (Number.isInteger(ci) && ci >= 0 && ci <= 3) {
+      // The correct slot must be empty; the 3 distractor slots must each be filled.
+      de.forEach((d, k) => {
+        if (k === ci && isFilledStr(d)) err(`${at}: distractor_explanations.${lang}[${k}] (correct slot) must be empty`)
+        if (k !== ci && !isFilledStr(d)) err(`${at}: distractor_explanations.${lang}[${k}] must explain why that option is wrong`)
+      })
+    }
+  }
+}
+
+const quizzes = readJson('data/quizzes.json')
+if (quizzes != null) {
+  let nCourseQuiz = 0
+  let nThemeQuiz = 0
+  const byCourse = quizzes.by_course || {}
+  const byTheme = quizzes.by_theme || {}
+  for (const [cid, arr] of Object.entries(byCourse)) {
+    if (courseIds.size && !courseIds.has(cid)) err(`quizzes.by_course: unknown course id "${cid}"`)
+    if (!Array.isArray(arr)) err(`quizzes.by_course["${cid}"] must be an array`)
+    else arr.forEach((q, i) => { checkQuiz(q, `quizzes.by_course["${cid}"][${i}]`); nCourseQuiz++ })
+  }
+  for (const [tid, arr] of Object.entries(byTheme)) {
+    if (!THEMES.includes(tid)) err(`quizzes.by_theme: unknown theme id "${tid}"`)
+    if (!Array.isArray(arr)) err(`quizzes.by_theme["${tid}"] must be an array`)
+    else arr.forEach((q, i) => { checkQuiz(q, `quizzes.by_theme["${tid}"][${i}]`); nThemeQuiz++ })
+  }
+  console.log(`quizzes.json: ${nCourseQuiz} course quiz Q (${Object.keys(byCourse).length}/${courseIds.size || '?'} courses), ${nThemeQuiz} theme quiz Q (${Object.keys(byTheme).length}/${THEMES.length} themes)`)
+}
+
+const traps = readJson('data/exam_traps.json')
+if (traps != null) {
+  const trapIds = new Set()
+  const checkTrap = (tr, at, domainRequired) => {
+    if (!tr || typeof tr !== 'object') return err(`${at}: not an object`)
+    if (!isFilledStr(tr.id)) err(`${at}: missing id`)
+    else if (trapIds.has(tr.id)) err(`${at}: duplicate trap id "${tr.id}"`)
+    else trapIds.add(tr.id)
+    if (domainRequired && !DOMAINS.includes(tr.domain)) err(`${at}: domain must be a valid domain key`)
+    else if (tr.domain != null && !DOMAINS.includes(tr.domain)) err(`${at}: invalid domain "${tr.domain}"`)
+    for (const f of ['title', 'trap', 'why_wrong', 'right_approach'])
+      if (!isBiStr(tr[f])) err(`${at}: ${f} must have non-empty en & fr`)
+  }
+  let nThemeTrap = 0
+  let nDomainTrap = 0
+  const tByTheme = traps.by_theme || {}
+  const tByDomain = traps.by_domain || {}
+  for (const [tid, arr] of Object.entries(tByTheme)) {
+    if (!THEMES.includes(tid)) err(`exam_traps.by_theme: unknown theme id "${tid}"`)
+    if (!Array.isArray(arr)) err(`exam_traps.by_theme["${tid}"] must be an array`)
+    else arr.forEach((tr, i) => { checkTrap(tr, `exam_traps.by_theme["${tid}"][${i}]`, false); nThemeTrap++ })
+  }
+  for (const [did, arr] of Object.entries(tByDomain)) {
+    if (!DOMAINS.includes(did)) err(`exam_traps.by_domain: unknown domain key "${did}"`)
+    if (!Array.isArray(arr)) err(`exam_traps.by_domain["${did}"] must be an array`)
+    else arr.forEach((tr, i) => { checkTrap(tr, `exam_traps.by_domain["${did}"][${i}]`, true); nDomainTrap++ })
+  }
+  console.log(`exam_traps.json: ${nThemeTrap} theme traps (${Object.keys(tByTheme).length}/${THEMES.length} themes), ${nDomainTrap} domain traps (${Object.keys(tByDomain).length}/${DOMAINS.length} domains)`)
+}
+
 // ---------- report ----------
 if (warnings.length) {
   console.log('\nWarnings:')
