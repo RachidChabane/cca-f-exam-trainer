@@ -137,6 +137,26 @@ const en = {
   mapsToDomain: 'Exam domain',
   checkOf: (n: number, total: number) => `Question ${n} of ${total}`,
 
+  // Practice / drills / history
+  practiceHeading: 'Practice by domain',
+  practiceDesc: 'Untimed drills to grind a weak area — no countdown, full review after.',
+  drillButton: 'Drill',
+  untimed: 'Untimed',
+  drillResultsTitle: 'Drill results',
+  drillScoreLine: (c: number, t: number) => `${c} of ${t} correct`,
+  retryWrongCount: (n: number) => `Retry ${n} wrong`,
+  recentAttempts: 'Recent attempts',
+  recentNone: 'No attempts yet — finish a mock or a drill and your scores appear here.',
+  clearHistoryAction: 'Clear',
+  attemptFull: 'Mock',
+  attemptDrill: 'Drill',
+  resumeInProgress: 'You have an exam in progress.',
+  backToPractice: 'Back to practice',
+  scenarioStart: 'Scenario mode (4 of 6)',
+  scenarioDesc:
+    'A timed mock built like the real exam: 4 of the 6 fixed scenario themes, each framing a block of questions drawn from its domains.',
+  scenarioTag: 'Scenario',
+
   // Misc
   domainColon: 'Domain',
 }
@@ -272,6 +292,28 @@ const fr: typeof en = {
   nextCourse: 'Suivant',
   mapsToDomain: 'Domaine d’examen',
   checkOf: (n: number, total: number) => `Question ${n} sur ${total}`,
+
+  // Exercices / révisions ciblées / historique
+  practiceHeading: 'Réviser par domaine',
+  practiceDesc:
+    'Exercices sans chronomètre pour travailler un point faible — pas de compte à rebours, revue complète ensuite.',
+  drillButton: 'S’exercer',
+  untimed: 'Sans chronomètre',
+  drillResultsTitle: 'Résultats de l’exercice',
+  drillScoreLine: (c: number, t: number) => `${c} bonnes réponses sur ${t}`,
+  retryWrongCount: (n: number) => `Reprendre ${n} fausse${n === 1 ? '' : 's'}`,
+  recentAttempts: 'Tentatives récentes',
+  recentNone:
+    'Aucune tentative pour l’instant — terminez un examen ou un exercice et vos scores apparaîtront ici.',
+  clearHistoryAction: 'Effacer',
+  attemptFull: 'Examen',
+  attemptDrill: 'Exercice',
+  resumeInProgress: 'Vous avez un examen en cours.',
+  backToPractice: 'Retour aux exercices',
+  scenarioStart: 'Mode scénarios (4 sur 6)',
+  scenarioDesc:
+    'Un examen blanc chronométré bâti comme le vrai examen : 4 des 6 thèmes de scénario fixes, chacun encadrant un bloc de questions tirées de ses domaines.',
+  scenarioTag: 'Scénario',
 
   // Divers
   domainColon: 'Domaine',

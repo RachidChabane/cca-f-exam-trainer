@@ -1,7 +1,9 @@
-import { ArrowRight, BookOpen, GraduationCap } from 'lucide-react'
+import { ArrowRight, BookOpen, GraduationCap, PlayCircle } from 'lucide-react'
 import { BLUEPRINT, COURSES, DOMAINS, QUESTIONS } from '@/data'
+import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { useLang, useT } from '@/lib/useT'
+import { useExamStore } from '@/store/examStore'
 import { useUiStore } from '@/store/uiStore'
 
 function ModeCard({
@@ -49,7 +51,9 @@ export function HomeView() {
   const t = useT()
   const lang = useLang()
   const setView = useUiStore((s) => s.setView)
+  const session = useExamStore((s) => s.session)
   const mech = BLUEPRINT.exam.mechanics
+  const examInProgress = session?.status === 'active' && session.mode === 'exam'
 
   return (
     <div className="mx-auto max-w-5xl animate-fade-in px-4 py-12 sm:px-6 sm:py-16">
@@ -64,6 +68,20 @@ export function HomeView() {
           {t.homeSubtitle}
         </p>
       </section>
+
+      {examInProgress && (
+        <section className="mx-auto mt-8 max-w-3xl">
+          <Card className="flex flex-col items-start gap-3 border-primary/40 bg-primary/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+              <PlayCircle className="h-4 w-4 text-primary" />
+              {t.resumeInProgress}
+            </span>
+            <Button size="sm" onClick={() => setView('exam')}>
+              {t.resumeExam}
+            </Button>
+          </Card>
+        </section>
+      )}
 
       <section className="mt-10 grid gap-4 sm:grid-cols-2">
         <ModeCard

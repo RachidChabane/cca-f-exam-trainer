@@ -6,10 +6,10 @@
       "fr": "Architecte Certifié Claude — Fondations"
     },
     "provider": "Anthropic",
-    "program": "Anthropic Claude Partner Network / Anthropic Academy",
+    "program": "Claude Partner Network / Anthropic Academy",
     "launched": "2026-03",
-    "level": "301 (applied practitioner)",
-    "format": "Proctored, scenario-based, multiple choice",
+    "level": "301 (applied practitioner) — community-reported; the official exam guide states a target candidate (solution architect, ~6+ months experience) but assigns no numeric level",
+    "format": "Scenario-based, multiple choice (single correct answer, no guessing penalty); delivery/proctoring is community-reported",
     "mechanics": {
       "question_count": 60,
       "time_limit_minutes": 120,
@@ -18,8 +18,26 @@
       "scaled_score": { "min": 100, "max": 1000, "pass": 720 },
       "fee_usd": 99
     },
+    "mechanics_source": {
+      "note": "First-party = confirmed verbatim in the official 'Claude Certified Architect – Foundations Certification Exam Guide'. Community-reported = consistent across third-party prep sites (Panaversity, certsafari, open-exam-prep) but NOT in the official guide; treat as plausible defaults for simulation, not settled fact.",
+      "first_party": ["options_per_question (4: one correct, three distractors)", "correct_answers_per_question (1)", "no guessing penalty", "scaled_score 100-1000", "pass 720"],
+      "community_reported": ["question_count (60)", "time_limit_minutes (120)", "fee_usd (99 — also conflicts with documented free early access for the first ~5,000 partner employees)", "proctored", "level (301)"]
+    },
+    "scenarios": {
+      "count_presented": 4,
+      "pool": 6,
+      "note": "First-party: the official guide says the exam uses scenario-based questions where each scenario frames a SET of questions, and that 4 scenarios are presented per sitting, picked at random from a fixed pool of 6. This trainer currently samples 60 independent one-off scenario questions rather than grouping them under these 6 themes.",
+      "themes": [
+        "Customer Support Resolution Agent",
+        "Code Generation with Claude Code",
+        "Multi-Agent Research System",
+        "Developer Productivity with Claude",
+        "Claude Code for Continuous Integration",
+        "Structured Data Extraction"
+      ]
+    },
     "scoring_model": {
-      "note": "Anthropic's official scaling is proprietary and non-linear. This trainer uses a documented linear approximation so the 720 pass line maps to ~69% correct, consistent with the real exam's reported difficulty.",
+      "note": "First-party: results are reported as a scaled score of 100-1000 and the minimum passing score is 720 (per the official exam guide, which also notes scaled scoring equates scores across multiple exam forms, i.e. it is non-linear and form-dependent). This trainer uses a documented LINEAR approximation so the 720 pass line maps to ~70% correct; it will not match Anthropic's exact equated scaling.",
       "formula": "scaled = round(100 + (correct / total) * 900)",
       "pass_scaled": 720,
       "pass_raw_equivalent": "42 of 60 correct (~70%)"
@@ -33,6 +51,14 @@
       "pool_target": 81,
       "session_count": 16,
       "covers": "Agentic loops, workflows vs. agents, prompt-chaining, routing, parallelization, orchestrator-worker, evaluator-optimizer, single- vs. multi-agent trade-offs, subagents and context isolation, session/state management, human-in-the-loop, the Agent SDK harness."
+    },
+    {
+      "key": "tool_design_mcp",
+      "name": { "en": "Tool Design & MCP Integration", "fr": "Conception d'outils et intégration MCP" },
+      "weight": 0.18,
+      "pool_target": 54,
+      "session_count": 11,
+      "covers": "Tool definitions and input schemas, writing good tool descriptions, the tool_use/tool_result flow, parallel tool calls, forcing tool use, token-efficient tools, programmatic tool calling, MCP architecture (host/client/server), MCP primitives (tools/resources/prompts), transports (stdio vs. Streamable HTTP/SSE), the MCP connector, tool error handling and security."
     },
     {
       "key": "claude_code",
@@ -51,14 +77,6 @@
       "covers": "Clear and direct instructions, multishot examples, chain-of-thought, XML tag structuring, system prompts, prefilling, output-format control, reliable JSON via tool use, temperature and stop sequences, prompt templates, evaluations and grading, hallucination mitigation."
     },
     {
-      "key": "tool_design_mcp",
-      "name": { "en": "Tool Design & MCP Integration", "fr": "Conception d'outils et intégration MCP" },
-      "weight": 0.18,
-      "pool_target": 54,
-      "session_count": 11,
-      "covers": "Tool definitions and input schemas, writing good tool descriptions, the tool_use/tool_result flow, parallel tool calls, forcing tool use, token-efficient tools, MCP architecture (host/client/server), MCP primitives (tools/resources/prompts), transports, the MCP connector, tool error handling and security."
-    },
-    {
       "key": "context_management",
       "name": { "en": "Context Management & Reliability", "fr": "Gestion du contexte et fiabilité" },
       "weight": 0.15,
@@ -71,18 +89,18 @@
     "question_count": 60,
     "time_limit_minutes": 120,
     "soft_warning_remaining_minutes": 10,
-    "sampling": "Without replacement within a session; per-domain counts follow session_count (16/12/12/11/9 = 60), mirroring the real domain distribution.",
+    "sampling": "Without replacement within a session; per-domain counts follow session_count (16/11/12/12/9 = 60), mirroring the real domain distribution. Domains are ordered to match the official exam guide (Agentic, Tool/MCP, Claude Code, Prompt Eng., Context).",
     "domain_session_counts": {
       "agentic_architecture": 16,
+      "tool_design_mcp": 11,
       "claude_code": 12,
       "prompt_engineering": 12,
-      "tool_design_mcp": 11,
       "context_management": 9
     }
   },
   "pool": {
     "total_target": 300,
-    "rounding_rule": "Pool: weight x 300, exact integers (81/60/60/54/45). Session: weight x 60 with largest-remainder rounding (16/12/12/11/9); the 0.8 remainder on Tool Design rounds up to keep the total at 60."
+    "rounding_rule": "Pool: weight x 300, exact integers (81/54/60/60/45). Session: weight x 60 with largest-remainder rounding (16/11/12/12/9); the 0.8 remainder on Tool Design rounds up to keep the total at 60."
   },
-  "sources_note": "Exam mechanics and domain weights were confirmed against first-party Anthropic announcements and the public CCA-F description in June 2026. See resources/README.md for the full source list and access dates."
+  "sources_note": "Verified June 2026 against first-party Anthropic sources, including the official 'Claude Certified Architect – Foundations Certification Exam Guide' (hosted on the Anthropic Academy / Skilljar course CDN) and the Claude Partner Network announcement (anthropic.com/news/claude-partner-network, Mar 12 2026). FIRST-PARTY CONFIRMED: exam name + provider, March 2026 launch, the $100M Partner Network program, scenario-based multiple-choice format (4 options, 1 correct, no guessing penalty), the 4-of-6 scenario structure, scaled scoring 100-1000, pass = 720, and the five domains with their exact weights (27/18/20/20/15). COMMUNITY-REPORTED (third-party only, NOT in the official guide): question count (60), time limit (120 min), proctoring, fee ($99), and the '301' level — kept here as reasonable simulation defaults but not authoritative. See resources/README.md for the full source manifest and access dates."
 }

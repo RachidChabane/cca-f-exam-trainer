@@ -57,6 +57,8 @@ if (questions != null) {
     err('questions.json must be an array')
   } else {
     const ids = new Set()
+    const stems = new Map() // normalized scenario+question -> first id (near-duplicate detector)
+    const norm = (s) => String(s).trim().toLowerCase().replace(/\s+/g, ' ')
     questions.forEach((q, i) => {
       const at = `questions[${i}]${q && q.id ? ` (id=${q.id})` : ''}`
       if (!q || typeof q !== 'object') return err(`${at}: not an object`)
@@ -71,6 +73,8 @@ if (questions != null) {
         const opts = q.options && q.options[lang]
         if (!Array.isArray(opts) || opts.length !== 4 || !opts.every(isFilledStr))
           err(`${at}: options.${lang} must be 4 non-empty strings`)
+        else if (new Set(opts.map(norm)).size !== opts.length)
+          err(`${at}: options.${lang} has duplicate option text`)
         const de = q.distractor_explanations && q.distractor_explanations[lang]
         if (!Array.isArray(de) || de.length !== 4 || !de.every(isFilledStr))
           err(`${at}: distractor_explanations.${lang} must be 4 non-empty strings`)
@@ -78,6 +82,12 @@ if (questions != null) {
       if (!Number.isInteger(q.correct_index) || q.correct_index < 0 || q.correct_index > 3)
         err(`${at}: correct_index must be an integer in [0,3]`)
       if (!isBiStr(q.explanation)) err(`${at}: explanation must have non-empty en & fr`)
+      // Near-duplicate detector: same scenario + question stem (English) as an earlier item.
+      if (isBiStr(q.scenario) && isBiStr(q.question)) {
+        const key = `${norm(q.scenario.en)}||${norm(q.question.en)}`
+        if (stems.has(key)) warn(`${at}: near-duplicate stem of ${stems.get(key)} (identical scenario + question)`)
+        else stems.set(key, q.id)
+      }
     })
 
     console.log(`questions.json: ${questions.length} items`)

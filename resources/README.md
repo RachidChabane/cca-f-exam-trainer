@@ -22,24 +22,47 @@ CCA-F is Anthropic's first official technical certification, launched in
 architects building production applications with Claude and tests **architectural
 judgment** through realistic production scenarios.
 
-**Confirmed mechanics** (used in `blueprint.json`):
+> **Verification update (2026-06-15).** The mechanics below are split into what
+> is **confirmed in Anthropic's official exam guide** — the *Claude Certified
+> Architect – Foundations Certification Exam Guide*, published on the Anthropic
+> Academy / Skilljar course CDN — versus what is only **community-reported** by
+> third-party prep sites and absent from that guide. The trainer keeps the
+> community-reported numbers as reasonable simulation defaults; they are **not**
+> authoritative. Treat the official **Practice Exam** as your true readiness signal.
+
+**First-party confirmed** (official exam guide):
 
 | Property | Value |
 |---|---|
-| Questions | 60 |
-| Time limit | 120 minutes |
-| Options per question | 4 (single correct answer) |
-| Scoring | Scaled 100–1000, **pass = 720** |
-| Format | Proctored, scenario-based, multiple choice |
-| Level | 301 (applied practitioner) |
+| Format | Scenario-based, multiple choice |
+| Options per question | 4 — one correct, three distractors |
+| Guessing penalty | None (unanswered = incorrect) |
+| Scoring | Scaled **100–1000**, **pass = 720** (scaled scoring equates across forms — i.e. non-linear) |
+| Scenario structure | **4 scenarios per sitting, drawn at random from a fixed pool of 6**; each scenario frames a *set* of questions |
+| Domains & weights | 27 / 18 / 20 / 20 / 15 (below) |
 
-**Domains & weights:**
+**Community-reported only** (third-party prep sites; NOT in the official guide):
+
+| Property | Value | Note |
+|---|---|---|
+| Question count | 60 | consistent across prep sites; some dumps say 77 |
+| Time limit | 120 minutes | prep sites only |
+| Delivery | Proctored | prep sites only |
+| Fee | $99 | conflicts with documented free early access for the first ~5,000 partner-company employees |
+| Level | 301 / "applied practitioner" | varies (300 vs 301 vs "Level 3") across sources |
+
+**Domains & weights** (official exam-guide numbering — the trainer's domain order now matches this):
 
 1. Agentic Architecture & Orchestration — **27%**
-2. Claude Code Configuration & Workflows — **20%**
-3. Prompt Engineering & Structured Output — **20%**
-4. Tool Design & MCP Integration — **18%**
+2. Tool Design & MCP Integration — **18%**
+3. Claude Code Configuration & Workflows — **20%**
+4. Prompt Engineering & Structured Output — **20%**
 5. Context Management & Reliability — **15%**
+
+**Official exam scenario themes** (the pool of 6, 4 presented per sitting):
+Customer Support Resolution Agent · Code Generation with Claude Code ·
+Multi-Agent Research System · Developer Productivity with Claude ·
+Claude Code for Continuous Integration · Structured Data Extraction
 
 **Exam / program sources:**
 

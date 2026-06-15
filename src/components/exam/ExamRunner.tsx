@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Modal } from '@/components/ui/Modal'
 import { QuestionGrid } from '@/components/exam/QuestionGrid'
+import { SCENARIO_BY_ID } from '@/scenarios'
 import { cn } from '@/lib/cn'
 import { formatDuration, useCountdown } from '@/lib/useCountdown'
 import { useLang, useT } from '@/lib/useT'
@@ -27,8 +28,10 @@ export function ExamRunner() {
   const [gridOpen, setGridOpen] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
 
-  const remaining = useCountdown(session?.endsAt ?? 0, session?.status === 'active', () =>
-    submit(true),
+  const remaining = useCountdown(
+    session?.endsAt ?? 0,
+    (session?.timed ?? false) && session?.status === 'active',
+    () => submit(true),
   )
 
   if (!session) return null
@@ -40,13 +43,18 @@ export function ExamRunner() {
   const isFlagged = session.flagged[i]
   const answeredCount = session.answers.filter((a) => a !== null).length
   const unanswered = total - answeredCount
-  const warning = remaining <= WARN_MS
+  const warning = session.timed && remaining <= WARN_MS
   const domain = DOMAIN_BY_KEY[q.domain]
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
       {/* Status bar */}
       <div className="mb-4 flex flex-wrap items-center gap-3">
+        {session.themes?.[i] && SCENARIO_BY_ID[session.themes[i]] && (
+          <Badge variant="primary" className="font-medium">
+            {t.scenarioTag}: {SCENARIO_BY_ID[session.themes[i]].name[lang]}
+          </Badge>
+        )}
         <Badge variant="secondary" className="font-medium">
           {domain.name[lang]}
         </Badge>
@@ -57,19 +65,25 @@ export function ExamRunner() {
           <span className="hidden text-[12px] text-muted-foreground tabular-nums sm:inline">
             {t.answeredCount(answeredCount, total)}
           </span>
-          <div
-            className={cn(
-              'inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[13px] font-semibold tabular-nums',
-              warning
-                ? 'border-warning/50 bg-warning/10 text-warning'
-                : 'border-border bg-card text-foreground',
-            )}
-            aria-label={t.timeRemaining}
-            title={t.timeRemaining}
-          >
-            <Timer className="h-3.5 w-3.5" />
-            {formatDuration(remaining)}
-          </div>
+          {session.timed ? (
+            <div
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[13px] font-semibold tabular-nums',
+                warning
+                  ? 'border-warning/50 bg-warning/10 text-warning'
+                  : 'border-border bg-card text-foreground',
+              )}
+              aria-label={t.timeRemaining}
+              title={t.timeRemaining}
+            >
+              <Timer className="h-3.5 w-3.5" />
+              {formatDuration(remaining)}
+            </div>
+          ) : (
+            <Badge variant="outline" className="font-medium">
+              {t.untimed}
+            </Badge>
+          )}
           <Button
             variant="secondary"
             size="iconSm"
@@ -83,7 +97,11 @@ export function ExamRunner() {
       </div>
 
       {warning && (
-        <div className="mb-4 flex items-center gap-2 rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-[13px] text-foreground animate-fade-in">
+        <div
+          role="status"
+          aria-live="polite"
+          className="mb-4 flex items-center gap-2 rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-[13px] text-foreground animate-fade-in"
+        >
           <AlertTriangle className="h-4 w-4 text-warning" />
           {t.timeAlmostUp}
         </div>

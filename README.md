@@ -3,8 +3,9 @@
 A local, bilingual (🇬🇧 English / 🇫🇷 French) practice trainer for the
 **Claude Certified Architect — Foundations (CCA-F)** exam. Original,
 scenario-based questions and skimmable course summaries, grounded in Anthropic's
-official documentation. Everything runs locally; nothing is stored in the browser
-or sent to any backend.
+official documentation. Everything runs locally — your in-progress exam, results
+history, and preferences are saved only in your browser's `localStorage`, and
+nothing is ever sent to a backend.
 
 > 🇫🇷 **Version française plus bas** — voir [§ Français](#français).
 
@@ -19,6 +20,13 @@ or sent to any backend.
   (soft warning in the last 10 minutes, auto-submit at zero), question flagging,
   a navigator grid, a **scaled score (100–1000, pass 720)**, a **per-domain
   accuracy breakdown**, and a full answer review with explanations.
+- **Scenario mode** — a timed mock assembled like the real exam: **4 of the 6
+  fixed scenario themes**, each framing a block of questions drawn from its
+  official primary domains.
+- **Practice & progress** — untimed **per-domain drills**, a **retry-wrong-only**
+  pass after any session, **resume** of an in-progress timed mock after a refresh
+  or slept laptop, and a **recent-attempts** score history — all saved locally in
+  your browser.
 - **Study mode** — fast, original summaries of every course on the CCA-F learning
   path, with the key concepts surfaced and self-check questions whose answers stay
   hidden until you reveal them.
@@ -57,9 +65,16 @@ npm run check:data   # validate the question/course data files
 - **Study:** click **Study**, pick a course in the left index, read the summary,
   scan the key concepts, and test yourself with the **Show answer** check
   questions.
+- **Practice a single domain:** on the Exam screen, use **Practice by domain** to
+  start an untimed drill of your weakest area — no countdown, full review after.
+- **Retry your misses:** after any exam or drill, hit **Retry _n_ wrong** to
+  re-quiz only the questions you got wrong.
+- **Resume & track progress:** an in-progress timed mock survives a refresh or a
+  slept laptop (pick it back up from the home banner), and **Recent attempts** on
+  the Exam screen shows your score trend across sessions.
 - **Switch language:** use the **EN / FR** toggle (top-right). It changes
-  everything instantly. Language and theme are in-memory only — a refresh resets
-  to English + dark.
+  everything instantly. Language, theme, and progress persist across refreshes
+  (stored locally in your browser).
 
 ## 🗂️ Project layout
 
@@ -147,6 +162,15 @@ All questions and summaries are **original**, grounded in first-party Anthropic
 documentation — see [`resources/README.md`](./resources/README.md) for the full
 source manifest. No third-party question banks were used.
 
+> **About the exam facts.** Anthropic's official exam guide confirms the
+> **format** (scenario-based, 4 options, 1 correct, no guessing penalty), the
+> **scoring** (scaled 100–1000, pass 720), the **4-of-6 scenario structure**, and
+> the **five domains + weights** (27/18/20/20/15). The **60-question count**,
+> **120-minute** limit, **proctoring**, **$99** fee, and **"301" level** are
+> *community-reported* (third-party prep sites, not the official guide) — kept as
+> reasonable simulation defaults, but verify your real registration details with
+> Anthropic and treat the official **Practice Exam** as your true readiness gauge.
+
 ---
 
 <a name="français"></a>
@@ -156,8 +180,10 @@ source manifest. No third-party question banks were used.
 Un **entraîneur d'examen local et bilingue** (français / anglais) pour la
 certification **Architecte Certifié Claude — Fondations (CCA-F)**. Des questions
 originales fondées sur des scénarios et des résumés de cours faciles à parcourir,
-ancrés dans la documentation officielle d'Anthropic. Tout fonctionne en local ;
-rien n'est stocké dans le navigateur ni envoyé à un serveur.
+ancrés dans la documentation officielle d'Anthropic. Tout fonctionne en local —
+votre examen en cours, votre historique de résultats et vos préférences sont
+enregistrés uniquement dans le `localStorage` de votre navigateur, et rien n'est
+jamais envoyé à un serveur.
 
 ## ✨ Contenu
 
@@ -167,6 +193,13 @@ rien n'est stocké dans le navigateur ni envoyé à un serveur.
   minutes, soumission automatique à zéro), le marquage de questions, une grille de
   navigation, un **score normalisé (100–1000, seuil 720)**, une **répartition de
   la précision par domaine** et une revue complète des réponses avec explications.
+- **Mode scénarios** — un examen blanc chronométré bâti comme le vrai examen :
+  **4 des 6 thèmes de scénario fixes**, chacun encadrant un bloc de questions
+  tirées de ses domaines principaux officiels.
+- **Entraînement et progression** — des **exercices par domaine** sans
+  chronomètre, une reprise des **seules questions fausses** après une session, la
+  **reprise** d'un examen chronométré en cours après un rafraîchissement, et un
+  **historique des tentatives** — le tout enregistré localement dans votre navigateur.
 - **Mode révision** — des résumés rapides et originaux de chaque cours du parcours
   CCA-F, avec les concepts clés mis en évidence et des questions d'auto-évaluation
   dont la réponse reste masquée jusqu'à ce que vous la révéliez.
@@ -197,9 +230,17 @@ variable d'environnement, aucune base de données, aucun compte.
 - **Réviser :** **Réviser**, choisissez un cours dans l'index de gauche, lisez le
   résumé, parcourez les concepts clés et testez-vous avec les questions
   « Afficher la réponse ».
+- **Réviser un seul domaine :** sur l'écran Examen, utilisez **Réviser par
+  domaine** pour lancer un exercice sans chronomètre sur votre point faible —
+  pas de compte à rebours, revue complète ensuite.
+- **Reprendre vos erreurs :** après un examen ou un exercice, cliquez sur
+  **Reprendre _n_ fausses** pour ne réviser que les questions ratées.
+- **Reprise et suivi :** un examen chronométré en cours survit à un
+  rafraîchissement ou à une mise en veille (reprenez-le depuis la bannière
+  d'accueil), et **Tentatives récentes** affiche l'évolution de vos scores.
 - **Changer de langue :** la bascule **EN / FR** (en haut à droite) change tout
-  instantanément. La langue et le thème ne sont qu'en mémoire — un rafraîchissement
-  revient à l'anglais + sombre.
+  instantanément. La langue, le thème et la progression persistent entre les
+  rafraîchissements (stockés localement dans votre navigateur).
 
 ## ➕ Ajouter votre propre contenu
 
@@ -216,3 +257,13 @@ Toutes les questions et tous les résumés sont **originaux**, ancrés dans la
 documentation Anthropic de première partie — voir
 [`resources/README.md`](./resources/README.md). Aucune banque de questions tierce
 n'a été utilisée.
+
+> **À propos des faits d'examen.** Le guide officiel d'Anthropic confirme le
+> **format** (scénarios, 4 options, 1 correcte, sans pénalité), le **score**
+> (échelle 100–1000, seuil 720), la **structure 4 scénarios sur 6** et les **cinq
+> domaines + pondérations** (27/18/20/20/15). Le **nombre de 60 questions**, la
+> limite de **120 minutes**, la **surveillance**, les **frais de 99 $** et le
+> **niveau « 301 »** sont *rapportés par la communauté* (sites tiers, absents du
+> guide officiel) — conservés comme valeurs de simulation raisonnables, mais
+> vérifiez vos informations d'inscription réelles auprès d'Anthropic et utilisez
+> l'**examen blanc officiel** comme véritable indicateur de préparation.

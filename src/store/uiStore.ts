@@ -1,12 +1,14 @@
 import { create } from 'zustand'
+import { loadUi, saveUi } from '@/lib/persist'
 import type { Lang, Theme } from '@/types'
 
 export type View = 'home' | 'exam' | 'study'
 
 /**
  * UI session state — language, theme, and the active top-level view.
- * Deliberately in-memory only: nothing is written to localStorage or any
- * browser storage, per the app's session-only requirement.
+ * Persisted to localStorage (local only, nothing sent anywhere) so a refresh
+ * keeps your language/theme and drops you back where you were — important when
+ * resuming an in-progress exam.
  */
 interface UiState {
   lang: Lang
@@ -24,13 +26,18 @@ function applyTheme(theme: Theme) {
   document.documentElement.classList.toggle('light', theme === 'light')
 }
 
-// Apply the initial (dark) theme as soon as the module loads.
-applyTheme('dark')
+const saved = loadUi()
+const initialTheme: Theme = saved.theme ?? 'dark'
+const initialLang: Lang = saved.lang ?? 'en'
+const initialView: View = saved.view ?? 'home'
+
+// Apply the persisted (or default) theme as soon as the module loads.
+applyTheme(initialTheme)
 
 export const useUiStore = create<UiState>((set, get) => ({
-  lang: 'en',
-  theme: 'dark',
-  view: 'home',
+  lang: initialLang,
+  theme: initialTheme,
+  view: initialView,
   setLang: (lang) => set({ lang }),
   toggleLang: () => set({ lang: get().lang === 'en' ? 'fr' : 'en' }),
   setTheme: (theme) => {
@@ -44,3 +51,5 @@ export const useUiStore = create<UiState>((set, get) => ({
   },
   setView: (view) => set({ view }),
 }))
+
+useUiStore.subscribe((s) => saveUi({ lang: s.lang, theme: s.theme, view: s.view }))

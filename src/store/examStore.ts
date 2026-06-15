@@ -1,13 +1,37 @@
 import { create } from 'zustand'
-import { BLUEPRINT, QUESTIONS } from '@/data'
-import { sampleSession, type ExamSession } from '@/lib/scoring'
+import { DOMAIN_BY_KEY, QUESTIONS } from '@/data'
+import {
+  buildSession,
+  gradeSession,
+  sampleDrill,
+  sampleScenario,
+  sampleSession,
+  type ExamSession,
+} from '@/lib/scoring'
+import {
+  appendHistory,
+  clearActive,
+  clearHistory,
+  loadActive,
+  loadHistory,
+  saveActive,
+  type HistoryEntry,
+} from '@/lib/persist'
+import type { DomainKey } from '@/types'
 
 export type ExamPhase = 'intro' | 'active' | 'results' | 'review'
+
+/** Default size of an untimed single-domain drill (capped by what's available). */
+export const DRILL_COUNT = 15
 
 interface ExamState {
   session: ExamSession | null
   phase: ExamPhase
+  history: HistoryEntry[]
   start: () => void
+  startScenario: () => void
+  startDrill: (domain: DomainKey, count?: number) => void
+  retryWrong: () => void
   answer: (optionIndex: number) => void
   toggleFlag: () => void
   goto: (index: number) => void
@@ -17,31 +41,65 @@ interface ExamState {
   goToReview: () => void
   backToResults: () => void
   reset: () => void
+  clearPastResults: () => void
 }
 
-function newSession(): ExamSession {
-  const questions = sampleSession(QUESTIONS)
-  const durationMs = BLUEPRINT.session.time_limit_minutes * 60 * 1000
-  const startedAt = Date.now()
-  return {
-    questions,
-    answers: questions.map(() => null),
-    flagged: questions.map(() => false),
-    current: 0,
-    startedAt,
-    endsAt: startedAt + durationMs,
-    durationMs,
-    status: 'active',
-    autoSubmitted: false,
-    submittedAt: null,
-  }
+/** Record a finished session into the cross-session history. */
+function recordHistory(session: ExamSession): HistoryEntry[] {
+  const r = gradeSession(session)
+  return appendHistory({
+    at: session.submittedAt ?? Date.now(),
+    mode: session.mode,
+    domain: session.domain ?? null,
+    timed: session.timed,
+    scaled: r.scaled,
+    correct: r.correct,
+    total: r.total,
+    pass: r.pass,
+    perDomain: r.perDomain.map((d) => ({ key: d.key, correct: d.correct, total: d.total })),
+  })
 }
+
+const restored = loadActive()
 
 export const useExamStore = create<ExamState>((set, get) => ({
-  session: null,
-  phase: 'intro',
+  session: restored?.session ?? null,
+  phase: restored?.phase ?? 'intro',
+  history: loadHistory(),
 
-  start: () => set({ session: newSession(), phase: 'active' }),
+  start: () =>
+    set({ session: buildSession(sampleSession(QUESTIONS), { mode: 'exam', timed: true }), phase: 'active' }),
+
+  startScenario: () => {
+    const { questions, themes } = sampleScenario(QUESTIONS)
+    if (questions.length === 0) return
+    set({ session: buildSession(questions, { mode: 'exam', timed: true, themes }), phase: 'active' })
+  },
+
+  startDrill: (domain, count = DRILL_COUNT) => {
+    const questions = sampleDrill(QUESTIONS, domain, count)
+    if (questions.length === 0) return
+    set({
+      session: buildSession(questions, {
+        mode: 'drill',
+        timed: false,
+        domain,
+        label: DOMAIN_BY_KEY[domain].name,
+      }),
+      phase: 'active',
+    })
+  },
+
+  retryWrong: () => {
+    const s = get().session
+    if (!s) return
+    const wrong = s.questions.filter((q, i) => s.answers[i] !== q.correct_index)
+    if (wrong.length === 0) return
+    set({
+      session: buildSession(wrong, { mode: 'drill', timed: false }),
+      phase: 'active',
+    })
+  },
 
   answer: (optionIndex) => {
     const s = get().session
@@ -81,14 +139,28 @@ export const useExamStore = create<ExamState>((set, get) => ({
   submit: (auto = false) => {
     const s = get().session
     if (!s || s.status !== 'active') return
-    set({
-      session: { ...s, status: 'submitted', submittedAt: Date.now(), autoSubmitted: auto },
-      phase: 'results',
-    })
+    const submitted: ExamSession = {
+      ...s,
+      status: 'submitted',
+      submittedAt: Date.now(),
+      autoSubmitted: auto,
+    }
+    set({ session: submitted, phase: 'results', history: recordHistory(submitted) })
   },
 
   goToReview: () => set({ phase: 'review' }),
   backToResults: () => set({ phase: 'results' }),
 
   reset: () => set({ session: null, phase: 'intro' }),
+
+  clearPastResults: () => {
+    clearHistory()
+    set({ history: [] })
+  },
 }))
+
+// Persist the in-progress session + phase on every change so a refresh, tab-sleep,
+// or crash during a timed mock can be resumed. localStorage only — nothing leaves
+// the browser.
+useExamStore.subscribe((state) => saveActive(state.phase, state.session))
+if (restored == null) clearActive()
