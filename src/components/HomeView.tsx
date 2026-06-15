@@ -12,15 +12,17 @@ function ModeCard({
   desc,
   cta,
   onClick,
+  testid,
 }: {
   icon: React.ReactNode
   title: string
   desc: string
   cta: string
   onClick: () => void
+  testid?: string
 }) {
   return (
-    <button onClick={onClick} className="group text-left">
+    <button onClick={onClick} className="group text-left" data-testid={testid}>
       <Card className="flex h-full flex-col gap-4 p-6 transition-colors duration-150 hover:border-border-strong hover:bg-surface-hover">
         <span className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-surface text-primary [&_svg]:size-5">
           {icon}
@@ -76,7 +78,7 @@ export function HomeView() {
               <PlayCircle className="h-4 w-4 text-primary" />
               {t.resumeInProgress}
             </span>
-            <Button size="sm" onClick={() => setView('exam')}>
+            <Button size="sm" onClick={() => setView('exam')} data-testid="resume-exam">
               {t.resumeExam}
             </Button>
           </Card>
@@ -90,6 +92,7 @@ export function HomeView() {
           desc={t.examCardDesc}
           cta={t.examCardCta}
           onClick={() => setView('exam')}
+          testid="home-exam-card"
         />
         <ModeCard
           icon={<BookOpen />}
@@ -97,6 +100,7 @@ export function HomeView() {
           desc={t.studyCardDesc}
           cta={t.studyCardCta}
           onClick={() => setView('study')}
+          testid="home-study-card"
         />
       </section>
 

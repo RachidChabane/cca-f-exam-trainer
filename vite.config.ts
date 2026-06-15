@@ -4,7 +4,10 @@ import tailwindcss from '@tailwindcss/vite'
 import { fileURLToPath, URL } from 'node:url'
 
 // https://vite.dev/config/
+// `base` is '/' for local dev / preview / E2E, and is overridden to the GitHub
+// Pages project path (e.g. '/cca-f-exam-trainer/') via VITE_BASE in the deploy job.
 export default defineConfig({
+  base: process.env.VITE_BASE ?? '/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

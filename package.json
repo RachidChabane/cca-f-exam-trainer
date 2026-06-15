@@ -8,7 +8,13 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "check:data": "node scripts/check-data.mjs"
+    "check:data": "node scripts/check-data.mjs",
+    "fact-check": "node scripts/fact-check.mjs",
+    "fact-check:llm": "node scripts/fact-check-llm.mjs",
+    "verify": "npm run check:data && npm run fact-check && npm run build",
+    "pretest:e2e": "npm run build",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@fontsource/fraunces": "^5.2.9",
@@ -24,6 +30,8 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.104.1",
+    "@playwright/test": "^1.61.0",
     "@tailwindcss/vite": "^4.2.4",
     "@types/node": "^24.12.2",
     "@types/react": "^19.2.14",

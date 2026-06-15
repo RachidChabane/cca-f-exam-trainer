@@ -29,7 +29,7 @@ export function CourseReader({
       : null
 
   return (
-    <article className="min-w-0">
+    <article className="min-w-0" data-testid="course-reader">
       <header>
         {domainName && (
           <Badge variant="primary" className="mb-3">
@@ -121,6 +121,8 @@ function CheckItem({ item, number, total }: { item: CheckQuestion; number: numbe
           size="sm"
           onClick={() => setOpen((v) => !v)}
           className="shrink-0"
+          data-testid="reveal-answer"
+          aria-expanded={open}
         >
           {open ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
           {open ? t.hideAnswer : t.showAnswer}
@@ -133,7 +135,10 @@ function CheckItem({ item, number, total }: { item: CheckQuestion; number: numbe
         )}
       >
         <div className="overflow-hidden">
-          <p className="rounded-md border border-border bg-surface px-3.5 py-2.5 text-[13.5px] leading-relaxed text-foreground">
+          <p
+            data-testid="check-answer"
+            className="rounded-md border border-border bg-surface px-3.5 py-2.5 text-[13.5px] leading-relaxed text-foreground"
+          >
             {item.a[lang]}
           </p>
         </div>

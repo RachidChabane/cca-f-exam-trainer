@@ -49,9 +49,13 @@ no environment variables, no database, no accounts.
 Other scripts:
 
 ```bash
-npm run build        # type-check + production build
-npm run preview      # preview the production build
-npm run check:data   # validate the question/course data files
+npm run build         # type-check + production build
+npm run preview       # preview the production build
+npm run check:data    # validate the question/course data schema
+npm run fact-check    # verify the exam facts against the official guide
+npm run fact-check:llm # optional AI review of answer keys (needs ANTHROPIC_API_KEY)
+npm run verify        # check:data + fact-check + build, in one shot
+npm run test:e2e      # build, boot a preview server, run the Playwright suite
 ```
 
 ## 🧭 Using the app
@@ -76,6 +80,27 @@ npm run check:data   # validate the question/course data files
   everything instantly. Language, theme, and progress persist across refreshes
   (stored locally in your browser).
 
+## 🔁 CI/CD
+
+Every push and PR to `main` runs a GitHub Actions pipeline
+([`.github/workflows/ci.yml`](./.github/workflows/ci.yml)) with four jobs:
+
+1. **Validate** — schema validation (`check:data`), **automated fact-checking**
+   (`fact-check`), and a type-checked production build.
+2. **End-to-end** — the **Playwright** suite runs against the real production
+   bundle (served by `vite preview`); the HTML report is uploaded as an artifact.
+3. **AI fact-check** *(optional)* — if an `ANTHROPIC_API_KEY` repository secret is
+   set, Claude reviews a sample of answer keys for factual errors. A safe no-op
+   (and never a blocker) when the secret is absent.
+4. **Deploy** — on a green `main`, the app is built with the Pages base path and
+   published to **GitHub Pages**.
+
+The two fact-check layers are deliberate: `fact-check` is **deterministic** — it
+pins the first-party CCA-F parameters (domains, weights, scaled scoring, the
+4-of-6 scenarios) and fails the build on drift, while also enforcing that
+community-reported numbers stay *labeled* as such. `fact-check:llm` is the
+advisory AI layer for the answer keys themselves.
+
 ## 🗂️ Project layout
 
 ```
@@ -86,7 +111,12 @@ resources/
   blueprint.json     # exam mechanics, domains, weights, scoring
   README.md          # official source manifest (what was used to ground content)
 scripts/
-  check-data.mjs     # data validation
+  check-data.mjs     # data-schema validation
+  fact-check.mjs     # deterministic fact-check vs. the official exam guide
+  fact-check-llm.mjs # optional Claude-powered answer-key review
+e2e/                 # Playwright end-to-end tests
+playwright.config.ts # E2E config (runs against the production preview build)
+.github/workflows/   # CI/CD pipeline (validate · e2e · fact-check · deploy)
 src/                 # the Vite + React + TypeScript app
 ```
 

@@ -22,6 +22,7 @@ function NavTab({ view, label }: { view: View; label: string }) {
     <button
       onClick={() => setView(view)}
       aria-current={active ? 'page' : undefined}
+      data-testid={`nav-${view}`}
       className={cn(
         'h-8 rounded-md px-3 text-[13px] font-medium transition-colors duration-150',
         active
@@ -49,6 +50,7 @@ function LanguageToggle() {
           key={l}
           onClick={() => setLang(l)}
           aria-pressed={lang === l}
+          data-testid={`lang-${l}`}
           className={cn(
             'h-7 rounded-[5px] px-2.5 text-[12px] font-semibold uppercase tracking-wide transition-colors duration-150',
             lang === l
@@ -72,6 +74,7 @@ function ThemeToggle() {
     <button
       onClick={toggleTheme}
       aria-label={isDark ? t.themeToLight : t.themeToDark}
+      data-testid="theme-toggle"
       className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-surface-hover hover:text-foreground"
     >
       {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}

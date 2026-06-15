@@ -51,7 +51,7 @@ export function ExamRunner() {
       {/* Status bar */}
       <div className="mb-4 flex flex-wrap items-center gap-3">
         {session.themes?.[i] && SCENARIO_BY_ID[session.themes[i]] && (
-          <Badge variant="primary" className="font-medium">
+          <Badge variant="primary" className="font-medium" data-testid="scenario-tag">
             {t.scenarioTag}: {SCENARIO_BY_ID[session.themes[i]].name[lang]}
           </Badge>
         )}
@@ -75,12 +75,13 @@ export function ExamRunner() {
               )}
               aria-label={t.timeRemaining}
               title={t.timeRemaining}
+              data-testid="exam-timer"
             >
               <Timer className="h-3.5 w-3.5" />
               {formatDuration(remaining)}
             </div>
           ) : (
-            <Badge variant="outline" className="font-medium">
+            <Badge variant="outline" className="font-medium" data-testid="untimed-badge">
               {t.untimed}
             </Badge>
           )}
@@ -127,6 +128,7 @@ export function ExamRunner() {
                     role="radio"
                     aria-checked={isSel}
                     onClick={() => answer(idx)}
+                    data-testid={`option-${idx}`}
                     className={cn(
                       'flex w-full items-start gap-3 rounded-lg border p-3.5 text-left transition-colors duration-100',
                       isSel
@@ -153,7 +155,7 @@ export function ExamRunner() {
 
           {/* Footer nav */}
           <div className="mt-4 flex items-center gap-2">
-            <Button variant="secondary" onClick={prev} disabled={i === 0}>
+            <Button variant="secondary" onClick={prev} disabled={i === 0} data-testid="prev-question">
               <ChevronLeft className="h-4 w-4" />
               {t.previous}
             </Button>
@@ -161,15 +163,18 @@ export function ExamRunner() {
               variant={isFlagged ? 'subtle' : 'outline'}
               onClick={toggleFlag}
               className={cn(isFlagged && 'text-warning')}
+              data-testid="flag-question"
             >
               <Flag className={cn('h-4 w-4', isFlagged && 'fill-warning text-warning')} />
               {isFlagged ? t.flagged : t.flag}
             </Button>
             <div className="ml-auto flex items-center gap-2">
               {i === total - 1 ? (
-                <Button onClick={() => setConfirmOpen(true)}>{t.submitExam}</Button>
+                <Button onClick={() => setConfirmOpen(true)} data-testid="submit-exam-last">
+                  {t.submitExam}
+                </Button>
               ) : (
-                <Button onClick={next}>
+                <Button onClick={next} data-testid="next-question">
                   {t.next}
                   <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -180,6 +185,7 @@ export function ExamRunner() {
           <div className="mt-3 flex justify-center">
             <button
               onClick={() => setConfirmOpen(true)}
+              data-testid="submit-exam"
               className="text-[13px] font-medium text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground"
             >
               {t.submitExam}
@@ -219,6 +225,7 @@ export function ExamRunner() {
               setConfirmOpen(false)
               submit(false)
             }}
+            data-testid="confirm-submit"
           >
             {t.confirmSubmit}
           </Button>

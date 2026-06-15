@@ -39,7 +39,7 @@ export function ExamReview() {
   ]
 
   return (
-    <div className="mx-auto max-w-3xl animate-fade-in px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-3xl animate-fade-in px-4 py-8 sm:px-6" data-testid="exam-review">
       <div className="flex flex-wrap items-center gap-3">
         <Button variant="secondary" size="sm" onClick={backToResults}>
           <ChevronLeft className="h-4 w-4" />

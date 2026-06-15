@@ -69,10 +69,10 @@ export function ExamIntro() {
       </Card>
 
       <div className="mt-8 flex flex-col items-center gap-3">
-        <Button size="xl" onClick={start} className="px-8">
+        <Button size="xl" onClick={start} className="px-8" data-testid="start-exam">
           {t.startExam}
         </Button>
-        <Button variant="outline" onClick={startScenario}>
+        <Button variant="outline" onClick={startScenario} data-testid="start-scenario">
           <Layers className="h-4 w-4" />
           {t.scenarioStart}
         </Button>
@@ -107,6 +107,7 @@ export function ExamIntro() {
                 variant="secondary"
                 onClick={() => startDrill(d.key)}
                 disabled={(poolByDomain[d.key] ?? 0) === 0}
+                data-testid={`drill-${d.key}`}
               >
                 {t.drillButton}
               </Button>

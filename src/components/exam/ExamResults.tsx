@@ -52,6 +52,7 @@ export function ExamResults() {
           )}
           <div className="flex items-baseline gap-2">
             <span
+              data-testid="result-accuracy"
               className={cn(
                 'font-serif text-5xl font-semibold tabular-nums',
                 accPct >= 70 ? 'text-success' : 'text-foreground',
@@ -77,6 +78,7 @@ export function ExamResults() {
             <div className="flex flex-col items-center sm:items-start">
               <div className="flex items-baseline gap-1.5">
                 <span
+                  data-testid="result-scaled"
                   className={cn(
                     'font-serif text-5xl font-semibold tabular-nums',
                     pass ? 'text-success' : 'text-foreground',
@@ -94,6 +96,7 @@ export function ExamResults() {
               <Badge
                 variant={pass ? 'success' : 'destructive'}
                 className="px-3 py-1 text-[13px] font-semibold"
+                data-testid="result-verdict"
               >
                 {pass ? t.verdictPass : t.verdictFail}
               </Badge>
@@ -178,12 +181,12 @@ export function ExamResults() {
 
       {/* Actions */}
       <div className="mt-7 flex flex-wrap gap-2">
-        <Button onClick={goToReview}>
+        <Button onClick={goToReview} data-testid="review-answers">
           <ScrollText className="h-4 w-4" />
           {t.reviewAnswers}
         </Button>
         {wrong > 0 && (
-          <Button variant="secondary" onClick={retryWrong}>
+          <Button variant="secondary" onClick={retryWrong} data-testid="retry-wrong">
             <Repeat className="h-4 w-4" />
             {t.retryWrongCount(wrong)}
           </Button>
