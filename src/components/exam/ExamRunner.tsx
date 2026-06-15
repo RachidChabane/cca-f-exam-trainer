@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { AlertTriangle, ChevronLeft, ChevronRight, Flag, LayoutGrid, Timer } from 'lucide-react'
 import { BLUEPRINT, DOMAIN_BY_KEY } from '@/data'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { Markdown } from '@/components/ui/Markdown'
 import { Modal } from '@/components/ui/Modal'
 import { QuestionGrid } from '@/components/exam/QuestionGrid'
 import { SCENARIO_BY_ID } from '@/scenarios'
+import { computeBlocks } from '@/lib/scoring'
 import { cn } from '@/lib/cn'
 import { formatDuration, useCountdown } from '@/lib/useCountdown'
 import { useLang, useT } from '@/lib/useT'
@@ -28,6 +30,8 @@ export function ExamRunner() {
   const [gridOpen, setGridOpen] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
 
+  const blocks = useMemo(() => (session ? computeBlocks(session.questions) : []), [session])
+
   const remaining = useCountdown(
     session?.endsAt ?? 0,
     (session?.timed ?? false) && session?.status === 'active',
@@ -45,14 +49,19 @@ export function ExamRunner() {
   const unanswered = total - answeredCount
   const warning = session.timed && remaining <= WARN_MS
   const domain = DOMAIN_BY_KEY[q.domain]
+  const theme = SCENARIO_BY_ID[q.theme]
+
+  const block = blocks.find((b) => i >= b.start && i < b.start + b.count)
+  const posInScenario = block ? i - block.start + 1 : 1
+  const scenarioCount = block ? block.count : total
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
       {/* Status bar */}
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        {session.themes?.[i] && SCENARIO_BY_ID[session.themes[i]] && (
+        {theme && (
           <Badge variant="primary" className="font-medium" data-testid="scenario-tag">
-            {t.scenarioTag}: {SCENARIO_BY_ID[session.themes[i]].name[lang]}
+            {t.scenarioTag}: {theme.name[lang]}
           </Badge>
         )}
         <Badge variant="secondary" className="font-medium">
@@ -88,9 +97,9 @@ export function ExamRunner() {
           <Button
             variant="secondary"
             size="iconSm"
-            className="lg:hidden"
             aria-label={t.navigator}
             onClick={() => setGridOpen(true)}
+            data-testid="open-navigator"
           >
             <LayoutGrid className="h-4 w-4" />
           </Button>
@@ -108,18 +117,38 @@ export function ExamRunner() {
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_220px]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)] lg:items-start">
+        {/* Scenario context — sticky, stays visible across this scenario's whole set */}
+        <aside className="lg:sticky lg:top-20" data-testid="scenario-context">
+          <Card className="p-5">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-primary">
+                {t.scenarioLabel}
+              </span>
+              {theme && <Badge variant="outline">{theme.name[lang]}</Badge>}
+            </div>
+            <h2 className="font-serif text-lg font-semibold leading-snug text-foreground">
+              {q.scenarioTitle[lang]}
+            </h2>
+            {session.mode === 'exam' && (
+              <p className="mt-1 text-[12px] text-muted-foreground tabular-nums">
+                {t.scenarioProgress(posInScenario, scenarioCount)}
+              </p>
+            )}
+            <div className="mt-3 max-h-[42vh] overflow-auto rounded-md border border-border bg-surface px-4 py-3 text-[13.5px] leading-relaxed lg:max-h-[calc(100vh-12rem)]">
+              <Markdown>{q.scenarioContext[lang]}</Markdown>
+            </div>
+          </Card>
+        </aside>
+
         {/* Question */}
         <div className="min-w-0">
           <Card className="p-6">
-            <p className="mb-3 rounded-md border border-border bg-surface px-4 py-3 text-[14px] leading-relaxed text-muted-foreground">
-              {q.scenario[lang]}
-            </p>
             <h2 className="text-[17px] font-semibold leading-snug text-foreground">
-              {q.question[lang]}
+              {q.stem[lang]}
             </h2>
 
-            <div className="mt-5 space-y-2.5" role="radiogroup" aria-label={q.question[lang]}>
+            <div className="mt-5 space-y-2.5" role="radiogroup" aria-label={q.stem[lang]}>
               {q.options[lang].map((opt, idx) => {
                 const isSel = selected === idx
                 return (
@@ -192,19 +221,10 @@ export function ExamRunner() {
             </button>
           </div>
         </div>
-
-        {/* Desktop grid */}
-        <aside className="hidden lg:block">
-          <div className="sticky top-20">
-            <Card className="p-4">
-              <QuestionGrid />
-            </Card>
-          </div>
-        </aside>
       </div>
 
-      {/* Mobile grid modal */}
-      <Modal open={gridOpen} onClose={() => setGridOpen(false)}>
+      {/* Navigator modal */}
+      <Modal open={gridOpen} onClose={() => setGridOpen(false)} className="max-h-[80vh] overflow-y-auto">
         <QuestionGrid onNavigate={() => setGridOpen(false)} />
       </Modal>
 

@@ -8,7 +8,8 @@
  * *facts*: it pins the authoritative, first-party CCA-F exam parameters (verified
  * against Anthropic's official "Claude Certified Architect — Foundations
  * Certification Exam Guide") and fails the build if the blueprint, the app's
- * scenario data, or the README drift away from them.
+ * scenario data, or the README drift away from them — including the scenario-set
+ * structure (4 of 6 themes per sitting, each framing a 15-question set).
  *
  * It also enforces the trainer's honesty guarantee: the soft, community-reported
  * numbers (60 questions, 120 min, $99, "301") must stay *labeled* as
@@ -55,9 +56,29 @@ const OFFICIAL = {
     'Claude Code for Continuous Integration',
     'Structured Data Extraction',
   ],
+  // The trainer's faithful reconstruction of the scenario-set structure. The
+  // per-scenario split is the largest-remainder rounding of the weights to 15;
+  // it is a simulation choice (documented), not an official number — but it must
+  // stay internally consistent, which is what these checks enforce.
+  perScenarioSplit: {
+    agentic_architecture: 4,
+    tool_design_mcp: 3,
+    claude_code: 3,
+    prompt_engineering: 3,
+    context_management: 2,
+  },
+  questionsPerScenario: 15,
+  instancesPerTheme: 4,
+  // Theme ids used in data/scenarios.json (must match src/scenarios.ts).
+  themeIds: [
+    'customer_support',
+    'code_generation',
+    'multi_agent_research',
+    'developer_productivity',
+    'continuous_integration',
+    'structured_extraction',
+  ],
   // Numbers that are NOT in the official guide and must stay labeled as such.
-  // Use the blueprint's exact field tokens so the match can't be satisfied by an
-  // unrelated word that happens to contain a short substring like "fee"/"level".
   communityReportedKeywords: ['question_count', 'time_limit_minutes', 'fee_usd', 'proctored', 'level'],
 }
 
@@ -77,10 +98,10 @@ function readText(rel) {
   return readFileSync(join(root, rel), 'utf8')
 }
 
-let blueprint, questions, scenariosSrc, readme
+let blueprint, scenarios, scenariosSrc, readme
 try {
   blueprint = readJson('resources/blueprint.json')
-  questions = readJson('data/questions.json')
+  scenarios = readJson('data/scenarios.json')
   scenariosSrc = readText('src/scenarios.ts')
   readme = readText('README.md')
 } catch (e) {
@@ -125,22 +146,33 @@ for (const key of OFFICIAL.domainOrder) {
 }
 check(weightSum === 100, `domains: weights sum to 100% (got ${weightSum}%)`)
 
-/* ----------------------------- 3. scenarios ------------------------------- */
+/* --------------------------- 3. scenario structure ------------------------ */
 const sc = exam.scenarios ?? {}
 check(sc.count_presented === OFFICIAL.scenarios.countPresented, `scenarios: 4 presented per sitting`)
 check(sc.pool === OFFICIAL.scenarios.pool, `scenarios: fixed pool of 6 themes`)
+check(sc.instances_per_theme === OFFICIAL.instancesPerTheme, `scenarios: ${OFFICIAL.instancesPerTheme} instances per theme`)
+check(sc.questions_per_scenario === OFFICIAL.questionsPerScenario, `scenarios: ${OFFICIAL.questionsPerScenario} questions per scenario`)
 check(
   Array.isArray(sc.themes) && sc.themes.length === OFFICIAL.scenarios.pool,
   `scenarios: blueprint lists exactly 6 themes`,
 )
 for (const theme of OFFICIAL.scenarioThemes) {
-  check(
-    Array.isArray(sc.themes) && sc.themes.includes(theme),
-    `scenarios: blueprint includes theme "${theme}"`,
-  )
-  // The app's runtime scenario data (src/scenarios.ts) must carry the same themes.
+  check(Array.isArray(sc.themes) && sc.themes.includes(theme), `scenarios: blueprint includes theme "${theme}"`)
   check(scenariosSrc.includes(theme), `scenarios: src/scenarios.ts carries theme "${theme}"`)
 }
+// The per-scenario split must equal the official weights' largest-remainder
+// rounding to 15, and a 4-scenario sitting must hit the question_count.
+const split = sc.per_scenario_domain_split ?? {}
+let splitSum = 0
+for (const key of OFFICIAL.domainOrder) {
+  splitSum += split[key] ?? 0
+  check(split[key] === OFFICIAL.perScenarioSplit[key], `scenarios: per-scenario split for ${key} is ${OFFICIAL.perScenarioSplit[key]}`)
+}
+check(splitSum === OFFICIAL.questionsPerScenario, `scenarios: per-scenario split sums to 15 (got ${splitSum})`)
+check(
+  sc.count_presented * sc.questions_per_scenario === mech.question_count,
+  `scenarios: 4 scenarios × 15 = question_count (${sc.count_presented * sc.questions_per_scenario} vs ${mech.question_count})`,
+)
 
 /* --------------- 4. honesty: community-reported stays labeled --------------- */
 const msrc = exam.mechanics_source ?? {}
@@ -149,36 +181,55 @@ const firstParty = Array.isArray(msrc.first_party) ? msrc.first_party.join(' | '
 check(community.length > 0, `honesty: mechanics_source.community_reported is present`)
 check(firstParty.length > 0, `honesty: mechanics_source.first_party is present`)
 for (const kw of OFFICIAL.communityReportedKeywords) {
-  // Must be labeled community-reported …
   check(community.includes(kw), `honesty: "${kw}" is labeled community-reported`)
-  // … and must NOT be smuggled into the first-party list (the actual guarantee).
   check(!firstParty.includes(kw), `honesty: "${kw}" is NOT claimed as first-party`)
 }
-// The first-party list must claim the scaled scoring AND the 720 pass mark, which ARE official.
 check(
   firstParty.includes('scaled') && firstParty.includes('720'),
   `honesty: scaled scoring + 720 pass mark claimed as first-party`,
 )
-// The README must keep the public disclaimer in both languages.
 check(/community-reported/i.test(readme), `honesty: README keeps the EN community-reported disclaimer`)
 check(/rapport[eé]s? par la communaut[eé]/i.test(readme), `honesty: README keeps the FR community-reported disclaimer`)
 
-/* --------------------- 5. internal data ↔ blueprint ----------------------- */
+/* --------------------- 5. data ↔ blueprint consistency -------------------- */
 const counts = blueprint.session?.domain_session_counts ?? {}
 const sessionSum = OFFICIAL.domainOrder.reduce((s, k) => s + (counts[k] ?? 0), 0)
 check(
   sessionSum === mech.question_count,
   `consistency: per-domain session counts sum to question_count (${sessionSum} vs ${mech.question_count})`,
 )
-// Every domain has at least its target-sized pool of real questions behind it.
-const poolByDomain = {}
-for (const q of questions) poolByDomain[q.domain] = (poolByDomain[q.domain] ?? 0) + 1
-for (const d of domains) {
-  const have = poolByDomain[d.key] ?? 0
+
+// scenarios.json must realise the structure the blueprint describes.
+if (!Array.isArray(scenarios)) {
+  err('consistency: data/scenarios.json is not an array')
+} else {
+  const byTheme = {}
+  const poolByDomain = {}
+  let badSplits = 0
+  for (const s of scenarios) {
+    byTheme[s.theme] = (byTheme[s.theme] ?? 0) + 1
+    const sp = {}
+    for (const q of s.questions ?? []) {
+      poolByDomain[q.domain] = (poolByDomain[q.domain] ?? 0) + 1
+      sp[q.domain] = (sp[q.domain] ?? 0) + 1
+    }
+    for (const key of OFFICIAL.domainOrder) {
+      if ((sp[key] ?? 0) !== OFFICIAL.perScenarioSplit[key]) badSplits++
+    }
+  }
   check(
-    have >= (d.pool_target ?? 0),
-    `consistency: ${d.key} pool ${have} ≥ target ${d.pool_target}`,
+    scenarios.length === OFFICIAL.scenarios.pool * OFFICIAL.instancesPerTheme,
+    `consistency: scenarios.json has ${OFFICIAL.scenarios.pool * OFFICIAL.instancesPerTheme} scenarios (got ${scenarios.length})`,
   )
+  for (const t of OFFICIAL.themeIds) {
+    check(byTheme[t] === OFFICIAL.instancesPerTheme, `consistency: theme "${t}" has ${OFFICIAL.instancesPerTheme} instances (got ${byTheme[t] ?? 0})`)
+  }
+  check(badSplits === 0, `consistency: every scenario follows the 4/3/3/3/2 domain split`)
+  // Every domain's flattened pool must clear its weighted target.
+  for (const d of domains) {
+    const have = poolByDomain[d.key] ?? 0
+    check(have >= (d.pool_target ?? 0), `consistency: ${d.key} pool ${have} ≥ target ${d.pool_target}`)
+  }
 }
 
 /* ------------------------------- report ----------------------------------- */

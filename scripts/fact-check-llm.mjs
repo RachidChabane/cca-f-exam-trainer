@@ -44,7 +44,12 @@ try {
 }
 
 const LETTERS = ['A', 'B', 'C', 'D']
-const questions = JSON.parse(readFileSync(join(root, 'data/questions.json'), 'utf8'))
+// Flatten the scenario sets into individual questions, each carrying its parent
+// scenario's shared context so the model can judge the answer in context.
+const scenarios = JSON.parse(readFileSync(join(root, 'data/scenarios.json'), 'utf8'))
+const questions = scenarios.flatMap((s) =>
+  s.questions.map((q) => ({ ...q, scenarioContext: s.context, scenarioTitle: s.title })),
+)
 
 // Deterministic, even spread across the pool so the same sample re-checks each run.
 function sample(arr, n) {
@@ -57,8 +62,8 @@ const picked = sample(questions, SAMPLE)
 const items = picked.map((q) => ({
   id: q.id,
   domain: q.domain,
-  scenario: q.scenario.en,
-  question: q.question.en,
+  scenario: q.scenarioContext.en,
+  question: q.stem.en,
   options: q.options.en.map((o, i) => `${LETTERS[i]}. ${o}`),
   marked_correct: `${LETTERS[q.correct_index]}. ${q.options.en[q.correct_index]}`,
   explanation: q.explanation.en,

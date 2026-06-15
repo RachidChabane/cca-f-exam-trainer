@@ -12,7 +12,7 @@ import type { Bi, DomainKey, Lang, Theme } from '@/types'
  * small and self-heals if the question pool changes underneath it.
  */
 
-const ACTIVE_KEY = 'ccaf:active:v1'
+const ACTIVE_KEY = 'ccaf:active:v2'
 const HISTORY_KEY = 'ccaf:history:v1'
 const UI_KEY = 'ccaf:ui:v1'
 const HISTORY_MAX = 50
@@ -60,7 +60,6 @@ interface SerializedSession {
   timed: boolean
   domain?: DomainKey
   label?: Bi
-  themes?: string[]
 }
 
 export interface PersistedActive {
@@ -90,7 +89,6 @@ export function saveActive(phase: ExamPhase, session: ExamSession | null): void 
       timed: session.timed,
       domain: session.domain,
       label: session.label,
-      themes: session.themes,
     },
   }
   write(ACTIVE_KEY, JSON.stringify(payload))
@@ -120,7 +118,6 @@ export function loadActive(): PersistedActive | null {
       timed: s.timed,
       domain: s.domain,
       label: s.label,
-      themes: s.themes,
     }
     return { phase: p.phase, session }
   } catch {

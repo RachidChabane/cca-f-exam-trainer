@@ -19,11 +19,51 @@ export interface BiList {
   fr: string[]
 }
 
+/* --------------------------- scenario-set model --------------------------- */
+// The real CCA-F exam is scenario-based: a sitting presents 4 scenarios drawn at
+// random from a fixed pool of 6 themes, and EACH scenario frames a *set* of
+// linked questions sharing one dense production context. The trainer models that
+// directly: data/scenarios.json holds ScenarioSet[] (several instances per
+// theme), and a sitting picks 4 themes × one instance each.
+
+/** One question inside a scenario set. Its `stem` leans on the shared context
+ * ("Given the architecture above…") instead of restating it. */
+export interface ScenarioQuestion {
+  id: string
+  domain: DomainKey
+  stem: Bi
+  options: BiList
+  correct_index: number
+  explanation: Bi
+  distractor_explanations: BiList
+}
+
+/** A dense, multi-paragraph production scenario plus its linked question set. */
+export interface ScenarioSet {
+  id: string
+  /** One of the six fixed scenario-theme ids (see src/scenarios.ts). */
+  theme: string
+  /** 1-based instance number within its theme (themes have several instances). */
+  instance: number
+  title: Bi
+  /** Dense markdown context (may include exhibits: code, configs, logs, tables). */
+  context: Bi
+  /** The domains this set's questions span (all five). */
+  domains: DomainKey[]
+  questions: ScenarioQuestion[]
+}
+
+/** A scenario question flattened with its parent scenario's context, used by the
+ * runner, the per-domain drills, scoring, and the answer review. */
 export interface Question {
   id: string
   domain: DomainKey
-  scenario: Bi
-  question: Bi
+  /** Parent scenario identity (for navigator grouping + the scenario tag). */
+  scenarioId: string
+  theme: string
+  scenarioTitle: Bi
+  scenarioContext: Bi
+  stem: Bi
   options: BiList
   correct_index: number
   explanation: Bi
@@ -70,6 +110,15 @@ export interface Blueprint {
       correct_answers_per_question: number
       scaled_score: { min: number; max: number; pass: number }
       fee_usd: number
+    }
+    scenarios: {
+      count_presented: number
+      pool: number
+      instances_per_theme: number
+      questions_per_scenario: number
+      per_scenario_domain_split: Record<DomainKey, number>
+      note: string
+      themes: string[]
     }
     scoring_model: {
       note: string

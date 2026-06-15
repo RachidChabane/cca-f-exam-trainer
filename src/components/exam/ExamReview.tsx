@@ -4,6 +4,8 @@ import { DOMAIN_BY_KEY } from '@/data'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { Markdown } from '@/components/ui/Markdown'
+import { SCENARIO_BY_ID } from '@/scenarios'
 import { cn } from '@/lib/cn'
 import { useLang, useT } from '@/lib/useT'
 import { useExamStore } from '@/store/examStore'
@@ -127,8 +129,26 @@ function ReviewCard({
       </div>
 
       <div className="p-5">
-        <p className="mb-2 text-[13.5px] leading-relaxed text-muted-foreground">{q.scenario[lang]}</p>
-        <h3 className="text-[15.5px] font-semibold leading-snug">{q.question[lang]}</h3>
+        <div className="mb-2 flex flex-wrap items-center gap-2">
+          {SCENARIO_BY_ID[q.theme] && (
+            <Badge variant="outline" className="text-[11px]">
+              {SCENARIO_BY_ID[q.theme].name[lang]}
+            </Badge>
+          )}
+          <span className="text-[12.5px] font-medium text-muted-foreground">{q.scenarioTitle[lang]}</span>
+        </div>
+        <details className="group mb-3">
+          <summary className="cursor-pointer list-none text-[11px] font-semibold uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground">
+            <span className="inline-flex items-center gap-1.5">
+              <span className="transition-transform group-open:rotate-90">›</span>
+              {t.scenarioContextToggle}
+            </span>
+          </summary>
+          <div className="mt-2 rounded-md border border-border bg-surface px-4 py-3 text-[13px] leading-relaxed">
+            <Markdown>{q.scenarioContext[lang]}</Markdown>
+          </div>
+        </details>
+        <h3 className="text-[15.5px] font-semibold leading-snug">{q.stem[lang]}</h3>
 
         <ul className="mt-4 space-y-2">
           {q.options[lang].map((opt, idx) => {

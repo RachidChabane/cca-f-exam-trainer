@@ -1,11 +1,10 @@
 import { create } from 'zustand'
-import { DOMAIN_BY_KEY, QUESTIONS } from '@/data'
+import { DOMAIN_BY_KEY, QUESTIONS, SCENARIO_SETS } from '@/data'
 import {
   buildSession,
   gradeSession,
   sampleDrill,
-  sampleScenario,
-  sampleSession,
+  sampleScenarioExam,
   type ExamSession,
 } from '@/lib/scoring'
 import {
@@ -67,13 +66,19 @@ export const useExamStore = create<ExamState>((set, get) => ({
   phase: restored?.phase ?? 'intro',
   history: loadHistory(),
 
-  start: () =>
-    set({ session: buildSession(sampleSession(QUESTIONS), { mode: 'exam', timed: true }), phase: 'active' }),
+  // The primary exam IS the scenario-set sitting now: 4 of the 6 fixed themes,
+  // one random instance each, 15 linked questions per scenario (~60 total),
+  // timed. `startScenario` is a preserved alias for the same structure.
+  start: () => {
+    const { questions } = sampleScenarioExam(SCENARIO_SETS)
+    if (questions.length === 0) return
+    set({ session: buildSession(questions, { mode: 'exam', timed: true }), phase: 'active' })
+  },
 
   startScenario: () => {
-    const { questions, themes } = sampleScenario(QUESTIONS)
+    const { questions } = sampleScenarioExam(SCENARIO_SETS)
     if (questions.length === 0) return
-    set({ session: buildSession(questions, { mode: 'exam', timed: true, themes }), phase: 'active' })
+    set({ session: buildSession(questions, { mode: 'exam', timed: true }), phase: 'active' })
   },
 
   startDrill: (domain, count = DRILL_COUNT) => {

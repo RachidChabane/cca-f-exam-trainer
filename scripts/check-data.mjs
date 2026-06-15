@@ -1,18 +1,23 @@
 #!/usr/bin/env node
 /**
- * Validates data/questions.json and data/courses.json against the schema
- * invariants required by the CCA-F Exam Trainer.
+ * Validates data/scenarios.json and data/courses.json against the schema
+ * invariants required by the CCA-F Exam Trainer's scenario-set model.
  *
  *   node scripts/check-data.mjs
  *
- * Exits non-zero if any invariant is violated. Safe to run after appending
- * your own questions or courses.
+ * The exam is scenario-based: a fixed pool of 6 themes, several instances each,
+ * every scenario framing a SET of linked questions that share one dense context.
+ * A sitting draws 4 of the 6 themes (one instance each) → ~60 questions.
+ *
+ * Exits non-zero if any invariant is violated. Safe to run after adding your own
+ * scenarios or courses.
  */
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
+
 const DOMAINS = [
   'agentic_architecture',
   'claude_code',
@@ -20,6 +25,27 @@ const DOMAINS = [
   'tool_design_mcp',
   'context_management',
 ]
+// The six fixed scenario themes (ids) of the official exam.
+const THEMES = [
+  'customer_support',
+  'code_generation',
+  'multi_agent_research',
+  'developer_productivity',
+  'continuous_integration',
+  'structured_extraction',
+]
+// Every scenario's 15 questions follow this per-domain split — the largest-
+// remainder rounding of the 27/18/20/20/15 weights to 15 — so any 4-of-6 sitting
+// lands on the same ~60-question, weight-matched distribution.
+const PER_SCENARIO_SPLIT = {
+  agentic_architecture: 4,
+  tool_design_mcp: 3,
+  claude_code: 3,
+  prompt_engineering: 3,
+  context_management: 2,
+}
+const QUESTIONS_PER_SCENARIO = 15
+const INSTANCES_PER_THEME = 4
 const POOL_TARGET = {
   agentic_architecture: 81,
   claude_code: 60,
@@ -49,57 +75,105 @@ function isBiStr(v) {
   return v && typeof v === 'object' && isFilledStr(v.en) && isFilledStr(v.fr)
 }
 
-// ---------- questions.json ----------
-const questions = readJson('data/questions.json')
-const counts = Object.fromEntries(DOMAINS.map((d) => [d, 0]))
-if (questions != null) {
-  if (!Array.isArray(questions)) {
-    err('questions.json must be an array')
+// ---------- scenarios.json ----------
+const scenarios = readJson('data/scenarios.json')
+const domainCounts = Object.fromEntries(DOMAINS.map((d) => [d, 0]))
+const themeInstances = Object.fromEntries(THEMES.map((t) => [t, 0]))
+let totalQuestions = 0
+
+if (scenarios != null) {
+  if (!Array.isArray(scenarios)) {
+    err('scenarios.json must be an array')
   } else {
-    const ids = new Set()
-    const stems = new Map() // normalized scenario+question -> first id (near-duplicate detector)
+    const scenarioIds = new Set()
+    const questionIds = new Set()
+    const stems = new Map() // normalized stem -> first id (near-duplicate detector)
     const norm = (s) => String(s).trim().toLowerCase().replace(/\s+/g, ' ')
-    questions.forEach((q, i) => {
-      const at = `questions[${i}]${q && q.id ? ` (id=${q.id})` : ''}`
-      if (!q || typeof q !== 'object') return err(`${at}: not an object`)
-      if (!isFilledStr(q.id)) err(`${at}: missing id`)
-      else if (ids.has(q.id)) err(`${at}: duplicate id`)
-      else ids.add(q.id)
-      if (!DOMAINS.includes(q.domain)) err(`${at}: invalid domain "${q.domain}"`)
-      else counts[q.domain]++
-      if (!isBiStr(q.scenario)) err(`${at}: scenario must have non-empty en & fr`)
-      if (!isBiStr(q.question)) err(`${at}: question must have non-empty en & fr`)
-      for (const lang of ['en', 'fr']) {
-        const opts = q.options && q.options[lang]
-        if (!Array.isArray(opts) || opts.length !== 4 || !opts.every(isFilledStr))
-          err(`${at}: options.${lang} must be 4 non-empty strings`)
-        else if (new Set(opts.map(norm)).size !== opts.length)
-          err(`${at}: options.${lang} has duplicate option text`)
-        const de = q.distractor_explanations && q.distractor_explanations[lang]
-        if (!Array.isArray(de) || de.length !== 4 || !de.every(isFilledStr))
-          err(`${at}: distractor_explanations.${lang} must be 4 non-empty strings`)
+
+    scenarios.forEach((s, i) => {
+      const at = `scenarios[${i}]${s && s.id ? ` (id=${s.id})` : ''}`
+      if (!s || typeof s !== 'object') return err(`${at}: not an object`)
+      if (!isFilledStr(s.id)) err(`${at}: missing id`)
+      else if (scenarioIds.has(s.id)) err(`${at}: duplicate scenario id`)
+      else scenarioIds.add(s.id)
+      if (!THEMES.includes(s.theme)) err(`${at}: invalid theme "${s.theme}"`)
+      else themeInstances[s.theme]++
+      if (!Number.isInteger(s.instance) || s.instance < 1) err(`${at}: instance must be a positive integer`)
+      if (!isBiStr(s.title)) err(`${at}: title must have non-empty en & fr`)
+      if (!isBiStr(s.context)) err(`${at}: context must have non-empty en & fr`)
+      else if (s.context.en.length < 120 || s.context.fr.length < 120)
+        warn(`${at}: context looks thin (<120 chars) — scenarios should be dense`)
+      if (!Array.isArray(s.domains) || s.domains.length === 0 || !s.domains.every((d) => DOMAINS.includes(d)))
+        err(`${at}: domains must be a non-empty array of valid domain keys`)
+
+      if (!Array.isArray(s.questions)) {
+        err(`${at}: questions must be an array`)
+        return
       }
-      if (!Number.isInteger(q.correct_index) || q.correct_index < 0 || q.correct_index > 3)
-        err(`${at}: correct_index must be an integer in [0,3]`)
-      if (!isBiStr(q.explanation)) err(`${at}: explanation must have non-empty en & fr`)
-      // Near-duplicate detector: same scenario + question stem (English) as an earlier item.
-      if (isBiStr(q.scenario) && isBiStr(q.question)) {
-        const key = `${norm(q.scenario.en)}||${norm(q.question.en)}`
-        if (stems.has(key)) warn(`${at}: near-duplicate stem of ${stems.get(key)} (identical scenario + question)`)
-        else stems.set(key, q.id)
+      if (s.questions.length !== QUESTIONS_PER_SCENARIO)
+        err(`${at}: must have exactly ${QUESTIONS_PER_SCENARIO} questions (has ${s.questions.length})`)
+
+      const split = Object.fromEntries(DOMAINS.map((d) => [d, 0]))
+      s.questions.forEach((q, j) => {
+        const qat = `${at}.questions[${j}]${q && q.id ? ` (id=${q.id})` : ''}`
+        if (!q || typeof q !== 'object') return err(`${qat}: not an object`)
+        if (!isFilledStr(q.id)) err(`${qat}: missing id`)
+        else if (questionIds.has(q.id)) err(`${qat}: duplicate question id`)
+        else questionIds.add(q.id)
+        if (!DOMAINS.includes(q.domain)) err(`${qat}: invalid domain "${q.domain}"`)
+        else {
+          split[q.domain]++
+          domainCounts[q.domain]++
+          totalQuestions++
+        }
+        if (!isBiStr(q.stem)) err(`${qat}: stem must have non-empty en & fr`)
+        for (const lang of ['en', 'fr']) {
+          const opts = q.options && q.options[lang]
+          if (!Array.isArray(opts) || opts.length !== 4 || !opts.every(isFilledStr))
+            err(`${qat}: options.${lang} must be 4 non-empty strings`)
+          else if (new Set(opts.map(norm)).size !== opts.length)
+            err(`${qat}: options.${lang} has duplicate option text`)
+          const de = q.distractor_explanations && q.distractor_explanations[lang]
+          if (!Array.isArray(de) || de.length !== 4 || !de.every(isFilledStr))
+            err(`${qat}: distractor_explanations.${lang} must be 4 non-empty strings`)
+        }
+        if (!Number.isInteger(q.correct_index) || q.correct_index < 0 || q.correct_index > 3)
+          err(`${qat}: correct_index must be an integer in [0,3]`)
+        if (!isBiStr(q.explanation)) err(`${qat}: explanation must have non-empty en & fr`)
+        // Near-duplicate detector across all questions (by stem).
+        if (isBiStr(q.stem)) {
+          const key = norm(q.stem.en)
+          if (stems.has(key)) warn(`${qat}: near-duplicate stem of ${stems.get(key)}`)
+          else stems.set(key, q.id)
+        }
+      })
+
+      // Per-scenario domain split must match exactly, so every 4-of-6 sitting is weight-correct.
+      for (const d of DOMAINS) {
+        if (split[d] !== PER_SCENARIO_SPLIT[d])
+          err(`${at}: domain split for ${d} is ${split[d]}, expected ${PER_SCENARIO_SPLIT[d]}`)
       }
     })
 
-    console.log(`questions.json: ${questions.length} items`)
+    console.log(`scenarios.json: ${scenarios.length} scenarios, ${totalQuestions} questions`)
+    for (const t of THEMES) {
+      const got = themeInstances[t]
+      const flag = got === INSTANCES_PER_THEME ? 'ok' : got >= 1 ? `${got} instance(s)` : 'MISSING'
+      const line = `  ${t.padEnd(24)} ${String(got).padStart(2)} instance(s)  ${flag}`
+      if (got < 1) err(`theme "${t}" has no scenarios`)
+      else if (got !== INSTANCES_PER_THEME) warn(line.trim())
+      console.log(line)
+    }
+    console.log('  per-domain pool (flattened):')
     for (const d of DOMAINS) {
-      const got = counts[d]
+      const got = domainCounts[d]
       const target = POOL_TARGET[d]
-      const flag = got === target ? 'ok' : got >= target ? 'ok (>= target)' : 'BELOW target'
-      const line = `  ${d.padEnd(22)} ${String(got).padStart(4)} / ${target}  ${flag}`
+      const flag = got >= target ? 'ok (>= target)' : 'BELOW target'
+      const line = `    ${d.padEnd(22)} ${String(got).padStart(4)} / ${target}  ${flag}`
       if (got < target) warn(line.trim())
       console.log(line)
     }
-    if (questions.length < 300) warn(`pool has ${questions.length} questions (< 300 target)`)
+    if (scenarios.length < THEMES.length) warn(`only ${scenarios.length} scenarios — fewer than the 6 themes`)
   }
 }
 

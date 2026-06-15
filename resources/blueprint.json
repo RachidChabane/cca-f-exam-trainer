@@ -26,7 +26,16 @@
     "scenarios": {
       "count_presented": 4,
       "pool": 6,
-      "note": "First-party: the official guide says the exam uses scenario-based questions where each scenario frames a SET of questions, and that 4 scenarios are presented per sitting, picked at random from a fixed pool of 6. This trainer currently samples 60 independent one-off scenario questions rather than grouping them under these 6 themes.",
+      "instances_per_theme": 4,
+      "questions_per_scenario": 15,
+      "per_scenario_domain_split": {
+        "agentic_architecture": 4,
+        "tool_design_mcp": 3,
+        "claude_code": 3,
+        "prompt_engineering": 3,
+        "context_management": 2
+      },
+      "note": "First-party: the official guide says the exam uses scenario-based questions where each scenario frames a SET of questions, and that 4 scenarios are presented per sitting, picked at random from a fixed pool of 6. This trainer now mirrors that structure directly: data/scenarios.json holds 4 distinct instances of each of the 6 themes (24 scenarios); a sitting draws 4 themes at random and one random instance of each, presenting 4 scenarios × 15 linked questions = 60. Every scenario's 15 questions carry the SAME per-domain split (4/3/3/3/2 — the largest-remainder rounding of the 27/18/20/20/15 weights to 15), so any 4-of-6 sitting lands on the same weight-matched distribution (16/12/12/12/8). That is a faithful approximation: the exact weights would be 16.2/10.8/12/12/9, so the realized sitting runs ~+1 on Tool Design and ~-1 on Context Management — a one-question rounding effect, documented here.",
       "themes": [
         "Customer Support Resolution Agent",
         "Code Generation with Claude Code",
@@ -57,7 +66,7 @@
       "name": { "en": "Tool Design & MCP Integration", "fr": "Conception d'outils et intégration MCP" },
       "weight": 0.18,
       "pool_target": 54,
-      "session_count": 11,
+      "session_count": 12,
       "covers": "Tool definitions and input schemas, writing good tool descriptions, the tool_use/tool_result flow, parallel tool calls, forcing tool use, token-efficient tools, programmatic tool calling, MCP architecture (host/client/server), MCP primitives (tools/resources/prompts), transports (stdio vs. Streamable HTTP/SSE), the MCP connector, tool error handling and security."
     },
     {
@@ -81,7 +90,7 @@
       "name": { "en": "Context Management & Reliability", "fr": "Gestion du contexte et fiabilité" },
       "weight": 0.15,
       "pool_target": 45,
-      "session_count": 9,
+      "session_count": 8,
       "covers": "Context-window budgeting, prompt caching (cache_control, breakpoints, TTL, prefix ordering), context editing and tool-result clearing, compaction/summarization, agentic memory, retries and exponential backoff, idempotency, rate limits and 429/529 handling, streaming, cost optimization."
     }
   ],
@@ -89,18 +98,18 @@
     "question_count": 60,
     "time_limit_minutes": 120,
     "soft_warning_remaining_minutes": 10,
-    "sampling": "Without replacement within a session; per-domain counts follow session_count (16/11/12/12/9 = 60), mirroring the real domain distribution. Domains are ordered to match the official exam guide (Agentic, Tool/MCP, Claude Code, Prompt Eng., Context).",
+    "sampling": "A sitting draws 4 of the 6 scenario themes at random and one random instance of each; the 4 scenarios are laid out as contiguous blocks (the shared context stays pinned while you work that scenario's set) and questions are shuffled within each block. Because every scenario carries the 4/3/3/3/2 split, the realized per-domain counts are 16/12/12/12/8 = 60 on every sitting. Domains are ordered to match the official exam guide (Agentic, Tool/MCP, Claude Code, Prompt Eng., Context).",
     "domain_session_counts": {
       "agentic_architecture": 16,
-      "tool_design_mcp": 11,
+      "tool_design_mcp": 12,
       "claude_code": 12,
       "prompt_engineering": 12,
-      "context_management": 9
+      "context_management": 8
     }
   },
   "pool": {
-    "total_target": 300,
-    "rounding_rule": "Pool: weight x 300, exact integers (81/54/60/60/45). Session: weight x 60 with largest-remainder rounding (16/11/12/12/9); the 0.8 remainder on Tool Design rounds up to keep the total at 60."
+    "total_target": 360,
+    "rounding_rule": "Pool: 6 themes × 4 instances × 15 questions = 360 (per-domain 96/72/72/72/48, each ≥ the 81/54/60/60/45 weighted targets). Per scenario: 4/3/3/3/2 — the largest-remainder rounding of 27/18/20/20/15 to 15. Sitting: 4 scenarios × 15 = 60 at 16/12/12/12/8."
   },
   "sources_note": "Verified June 2026 against first-party Anthropic sources, including the official 'Claude Certified Architect – Foundations Certification Exam Guide' (hosted on the Anthropic Academy / Skilljar course CDN) and the Claude Partner Network announcement (anthropic.com/news/claude-partner-network, Mar 12 2026). FIRST-PARTY CONFIRMED: exam name + provider, March 2026 launch, the $100M Partner Network program, scenario-based multiple-choice format (4 options, 1 correct, no guessing penalty), the 4-of-6 scenario structure, scaled scoring 100-1000, pass = 720, and the five domains with their exact weights (27/18/20/20/15). COMMUNITY-REPORTED (third-party only, NOT in the official guide): question count (60), time limit (120 min), proctoring, fee ($99), and the '301' level — kept here as reasonable simulation defaults but not authoritative. See resources/README.md for the full source manifest and access dates."
 }

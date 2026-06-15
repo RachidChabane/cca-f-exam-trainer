@@ -27,7 +27,7 @@ const en = {
     'Original, scenario-based questions and skimmable course summaries — grounded in Anthropic’s official documentation. Everything runs locally, in your language.',
   examCardTitle: 'Exam mode',
   examCardDesc:
-    'Sit a timed, 60-question mock exam that mirrors the real domain weights, then review every answer with full explanations.',
+    'Sit a timed mock built like the real exam: 4 of 6 scenario sets, each framing ~15 linked questions under one dense production context. Full review after.',
   examCardCta: 'Start a practice exam',
   studyCardTitle: 'Study mode',
   studyCardDesc:
@@ -47,7 +47,7 @@ const en = {
   // Exam intro
   examIntroTitle: 'Practice exam',
   examIntroDesc:
-    'A fresh, randomly sampled 60-question session, weighted across the five domains exactly like the real exam. You have 120 minutes. You can flag questions, jump around with the navigator, and revisit answers before submitting.',
+    'A fresh sitting built like the real exam: 4 of the 6 fixed scenario themes, each framing a ~15-question set that shares one dense production context (≈60 questions, 120 minutes). The scenario stays pinned beside every question. Flag, jump with the navigator, and revisit before submitting.',
   examFormatHeading: 'This session',
   distributionHeading: 'Domain distribution',
   startExam: 'Start exam',
@@ -154,8 +154,11 @@ const en = {
   backToPractice: 'Back to practice',
   scenarioStart: 'Scenario mode (4 of 6)',
   scenarioDesc:
-    'A timed mock built like the real exam: 4 of the 6 fixed scenario themes, each framing a block of questions drawn from its domains.',
+    'The same scenario-set structure as the exam above — 4 of the 6 fixed themes, each framing its linked question set. A preserved entry point for your study plan.',
   scenarioTag: 'Scenario',
+  scenarioLabel: 'Scenario',
+  scenarioProgress: (n: number, total: number) => `Question ${n} of ${total} in this scenario`,
+  scenarioContextToggle: 'Scenario context',
 
   // Misc
   domainColon: 'Domain',
@@ -181,7 +184,7 @@ const fr: typeof en = {
     'Des questions originales fondées sur des scénarios et des résumés de cours faciles à parcourir — ancrés dans la documentation officielle d’Anthropic. Tout fonctionne en local, dans votre langue.',
   examCardTitle: 'Mode examen',
   examCardDesc:
-    'Passez un examen blanc chronométré de 60 questions, pondéré comme le vrai examen, puis revoyez chaque réponse avec des explications complètes.',
+    'Passez un examen blanc bâti comme le vrai : 4 jeux de scénarios sur 6, chacun encadrant ~15 questions liées sous un même contexte de production dense. Revue complète ensuite.',
   examCardCta: 'Démarrer un examen blanc',
   studyCardTitle: 'Mode révision',
   studyCardDesc:
@@ -201,7 +204,7 @@ const fr: typeof en = {
   // Présentation de l’examen
   examIntroTitle: 'Examen blanc',
   examIntroDesc:
-    'Une nouvelle session de 60 questions tirées au hasard, pondérée sur les cinq domaines exactement comme le vrai examen. Vous disposez de 120 minutes. Vous pouvez marquer des questions, naviguer librement et revoir vos réponses avant de soumettre.',
+    'Une session bâtie comme le vrai examen : 4 des 6 thèmes de scénario fixes, chacun encadrant un jeu d’environ 15 questions partageant un même contexte de production dense (≈60 questions, 120 minutes). Le scénario reste épinglé à côté de chaque question. Marquez, naviguez et revoyez avant de soumettre.',
   examFormatHeading: 'Cette session',
   distributionHeading: 'Répartition par domaine',
   startExam: 'Commencer l’examen',
@@ -312,8 +315,11 @@ const fr: typeof en = {
   backToPractice: 'Retour aux exercices',
   scenarioStart: 'Mode scénarios (4 sur 6)',
   scenarioDesc:
-    'Un examen blanc chronométré bâti comme le vrai examen : 4 des 6 thèmes de scénario fixes, chacun encadrant un bloc de questions tirées de ses domaines.',
+    'La même structure en jeux de scénarios que l’examen ci-dessus — 4 des 6 thèmes fixes, chacun encadrant son jeu de questions liées. Un point d’entrée conservé pour votre plan de révision.',
   scenarioTag: 'Scénario',
+  scenarioLabel: 'Scénario',
+  scenarioProgress: (n: number, total: number) => `Question ${n} sur ${total} de ce scénario`,
+  scenarioContextToggle: 'Contexte du scénario',
 
   // Divers
   domainColon: 'Domaine',

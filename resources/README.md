@@ -64,6 +64,15 @@ Customer Support Resolution Agent · Code Generation with Claude Code ·
 Multi-Agent Research System · Developer Productivity with Claude ·
 Claude Code for Continuous Integration · Structured Data Extraction
 
+> **How the trainer realizes this.** `data/scenarios.json` holds **4 distinct
+> instances of each of the 6 themes (24 scenarios, 360 questions)**; each scenario
+> frames a **15-question set** under one dense shared context. A sitting draws 4 of
+> the 6 themes and one random instance of each (4 × 15 = 60). Every scenario uses
+> the same per-domain split (4/3/3/3/2 — the largest-remainder rounding of the
+> 27/18/20/20/15 weights to 15), so any 4-of-6 sitting lands on the official domain
+> distribution (realized 16/12/12/12/8; a ~one-question rounding effect on Tool
+> Design and Context Management, documented in `blueprint.json`).
+
 **Exam / program sources:**
 
 - Anthropic — *Claude Partner Network* announcement ($100M investment, introduces

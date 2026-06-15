@@ -15,14 +15,22 @@ nothing is ever sent to a backend.
 
 ## ✨ What's inside
 
-- **Exam mode** — a timed, 60-question mock exam, randomly sampled to mirror the
-  real domain weights (no repeats within a session), with a 120-minute countdown
-  (soft warning in the last 10 minutes, auto-submit at zero), question flagging,
-  a navigator grid, a **scaled score (100–1000, pass 720)**, a **per-domain
-  accuracy breakdown**, and a full answer review with explanations.
-- **Scenario mode** — a timed mock assembled like the real exam: **4 of the 6
-  fixed scenario themes**, each framing a block of questions drawn from its
-  official primary domains.
+- **Exam mode (scenario sets)** — a timed mock built like the real exam: **4 of
+  the 6 fixed scenario themes**, each presented as a dense, multi-paragraph
+  production scenario (with exhibits — configs, code, logs, tables) that **frames
+  a set of ~15 linked questions**. The scenario context stays **pinned beside
+  every question** in its set, the way the real exam makes you reason over one
+  situation at a time. ~60 questions, a 120-minute countdown (soft warning in the
+  last 10 minutes, auto-submit at zero), flagging, a **scenario-grouped
+  navigator**, a **scaled score (100–1000, pass 720)**, a **per-domain accuracy
+  breakdown**, and a full answer review with explanations.
+- **A deep pool for replay** — the trainer ships **4 distinct instances of each of
+  the 6 themes (24 scenarios, 360 questions)**. Each sitting picks one random
+  instance per theme, so no two sittings feel alike. Every scenario carries the
+  same per-domain split (4/3/3/3/2 — the rounding of the 27/18/20/20/15 weights to
+  15), so any 4-of-6 sitting lands on the real domain distribution.
+- **Scenario mode (4 of 6)** — a preserved entry point (referenced by external
+  study plans) that launches the same scenario-set sitting as Exam mode.
 - **Practice & progress** — untimed **per-domain drills**, a **retry-wrong-only**
   pass after any session, **resume** of an in-progress timed mock after a refresh
   or slept laptop, and a **recent-attempts** score history — all saved locally in
@@ -105,7 +113,7 @@ advisory AI layer for the answer keys themselves.
 
 ```
 data/
-  questions.json     # the exam question pool (bilingual)
+  scenarios.json     # the scenario-set pool: 24 scenarios × 15 linked questions (bilingual)
   courses.json       # the course summaries (bilingual)
 resources/
   blueprint.json     # exam mechanics, domains, weights, scoring
@@ -125,33 +133,48 @@ src/                 # the Vite + React + TypeScript app
 Both data files are plain JSON arrays — **append** items and the app picks them
 up on the next reload. Run `npm run check:data` to validate.
 
-### Add a question — append to `data/questions.json`
+### Add a scenario — append to `data/scenarios.json`
+
+Each item is a **scenario set**: one dense, shared production context plus its 15
+linked questions (split `4/3/3/3/2` across the five domains).
 
 ```jsonc
 {
-  "id": "aa-082",                         // unique id
-  "domain": "agentic_architecture",        // one of the 5 domain keys below
-  "scenario": { "en": "…", "fr": "…" },
-  "question": { "en": "…", "fr": "…" },
-  "options": {
-    "en": ["A …", "B …", "C …", "D …"],    // exactly 4
-    "fr": ["A …", "B …", "C …", "D …"]     // same 4, aligned by index
-  },
-  "correct_index": 0,                      // 0–3, identical for both languages
-  "explanation": { "en": "why it's best", "fr": "…" },
-  "distractor_explanations": {
-    "en": ["why A …", "why B …", "why C …", "why D …"],  // 4, aligned to options
-    "fr": ["…", "…", "…", "…"]
-  }
+  "id": "customer_support-05",             // unique id, "<theme>-NN"
+  "theme": "customer_support",             // one of the 6 theme ids below
+  "instance": 5,                           // instance number within the theme
+  "title": { "en": "…", "fr": "…" },
+  "context": { "en": "## dense markdown + an exhibit", "fr": "…" },  // shared by every question
+  "domains": ["agentic_architecture","tool_design_mcp","claude_code","prompt_engineering","context_management"],
+  "questions": [
+    {
+      "id": "customer_support-05-q01",
+      "domain": "agentic_architecture",     // one of the 5 domain keys
+      "stem": { "en": "Given the architecture above, …", "fr": "…" },  // leans on the context
+      "options": {
+        "en": ["A …", "B …", "C …", "D …"],  // exactly 4
+        "fr": ["A …", "B …", "C …", "D …"]   // same 4, aligned by index
+      },
+      "correct_index": 0,                    // 0–3, identical for both languages
+      "explanation": { "en": "why it's best", "fr": "…" },
+      "distractor_explanations": {
+        "en": ["Correct: …", "why B …", "why C …", "why D …"],  // 4, aligned to options
+        "fr": ["Correct : …", "…", "…", "…"]
+      }
+    }
+    // … 15 questions: agentic ×4, tool_design_mcp ×3, claude_code ×3, prompt_engineering ×3, context_management ×2
+  ]
 }
 ```
 
+Theme ids: `customer_support`, `code_generation`, `multi_agent_research`,
+`developer_productivity`, `continuous_integration`, `structured_extraction`.
 Domain keys: `agentic_architecture`, `claude_code`, `prompt_engineering`,
 `tool_design_mcp`, `context_management`.
 
-> Sessions sample per-domain counts from `resources/blueprint.json`
-> (`session.domain_session_counts`). Adding more questions deepens the pool the
-> session draws from — you don't need to change anything else.
+> A sitting draws 4 of the 6 themes and one random instance of each. Adding more
+> instances per theme deepens replay value — `npm run check:data` enforces the
+> 15-question, 4/3/3/3/2 shape so every 4-of-6 sitting stays weight-correct.
 
 ### Add a course summary — append to `data/courses.json`
 
@@ -217,15 +240,22 @@ jamais envoyé à un serveur.
 
 ## ✨ Contenu
 
-- **Mode examen** — un examen blanc chronométré de 60 questions, tirées au hasard
-  pour refléter la pondération réelle des domaines (sans répétition dans une
-  session), avec un compte à rebours de 120 minutes (alerte dans les 10 dernières
-  minutes, soumission automatique à zéro), le marquage de questions, une grille de
-  navigation, un **score normalisé (100–1000, seuil 720)**, une **répartition de
-  la précision par domaine** et une revue complète des réponses avec explications.
-- **Mode scénarios** — un examen blanc chronométré bâti comme le vrai examen :
-  **4 des 6 thèmes de scénario fixes**, chacun encadrant un bloc de questions
-  tirées de ses domaines principaux officiels.
+- **Mode examen (jeux de scénarios)** — un examen blanc chronométré bâti comme le
+  vrai : **4 des 6 thèmes de scénario fixes**, chacun présenté comme un scénario de
+  production dense et multi-paragraphe (avec des pièces jointes — configs, code,
+  journaux, tableaux) qui **encadre un jeu d'environ 15 questions liées**. Le
+  contexte du scénario reste **épinglé à côté de chaque question** de son jeu.
+  ≈60 questions, compte à rebours de 120 minutes (alerte dans les 10 dernières
+  minutes, soumission automatique à zéro), marquage, un **navigateur groupé par
+  scénario**, un **score normalisé (100–1000, seuil 720)**, une **répartition de la
+  précision par domaine** et une revue complète des réponses.
+- **Un pool profond pour la rejouabilité** — l'entraîneur fournit **4 instances
+  distinctes de chacun des 6 thèmes (24 scénarios, 360 questions)**. Chaque session
+  choisit une instance au hasard par thème, donc deux sessions ne se ressemblent
+  jamais. Chaque scénario porte la même répartition par domaine (4/3/3/3/2), donc
+  toute combinaison 4 sur 6 retombe sur la pondération réelle.
+- **Mode scénarios (4 sur 6)** — un point d'entrée conservé (référencé par des
+  plans de révision externes) qui lance la même session en jeux de scénarios.
 - **Entraînement et progression** — des **exercices par domaine** sans
   chronomètre, une reprise des **seules questions fausses** après une session, la
   **reprise** d'un examen chronométré en cours après un rafraîchissement, et un
