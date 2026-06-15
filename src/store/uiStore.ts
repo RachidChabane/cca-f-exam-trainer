@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { loadUi, saveUi } from '@/lib/persist'
 import type { Lang, Theme } from '@/types'
 
-export type View = 'home' | 'exam' | 'study'
+export type View = 'home' | 'exam' | 'study' | 'about'
 
 /**
  * UI session state — language, theme, and the active top-level view.

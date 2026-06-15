@@ -106,6 +106,7 @@ export function AppHeader() {
           <NavTab view="home" label={t.navHome} />
           <NavTab view="exam" label={t.navExam} />
           <NavTab view="study" label={t.navStudy} />
+          <NavTab view="about" label={t.navAbout} />
         </nav>
 
         <div className="ml-auto flex items-center gap-2">

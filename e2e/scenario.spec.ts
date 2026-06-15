@@ -18,7 +18,7 @@ test('the scenario context stays pinned while you work the set', async ({ page }
   // The shared scenario context is shown alongside the question…
   const context = page.getByTestId('scenario-context')
   await expect(context).toBeVisible()
-  const firstScenario = await context.locator('h2').innerText()
+  const firstScenario = await context.locator('h2').first().innerText()
 
   // …and stays visible as you advance through the scenario's linked questions.
   await page.getByTestId('option-0').click()
