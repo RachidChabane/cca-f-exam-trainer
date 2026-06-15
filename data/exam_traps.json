@@ -3,42 +3,612 @@
     "customer_support": [
       {
         "id": "customer_support-trap-01",
-        "domain": "context_management",
+        "domain": "agentic_architecture",
         "title": {
-          "en": "Feeding raw transcripts instead of structured summaries",
-          "fr": "Donner les transcriptions brutes au lieu de résumés structurés"
+          "en": "Reaching for a full agent when a workflow would do",
+          "fr": "Recourir à un agent complet alors qu'un workflow suffirait"
         },
         "trap": {
-          "en": "Passing the full raw chat or ticket transcript into the model on every turn so it 'has all the context'.",
-          "fr": "Passer toute la transcription brute du chat ou du ticket au modèle à chaque tour pour qu’il « ait tout le contexte »."
+          "en": "Building the whole support system as one autonomous agent that decides every step dynamically, because that feels the most capable and future-proof for any ticket that comes in.",
+          "fr": "Construire tout le système de support comme un seul agent autonome qui décide dynamiquement de chaque étape, parce que cela semble le plus capable et le plus pérenne pour n'importe quel ticket qui arrive."
         },
         "why_wrong": {
-          "en": "Raw transcripts bloat the context window, raise latency and cost, and bury the few facts that matter under noise, which degrades accuracy on long tickets.",
-          "fr": "Les transcriptions brutes gonflent la fenêtre de contexte, augmentent latence et coût, et noient les rares faits importants sous le bruit, ce qui dégrade l’exactitude sur les tickets longs."
+          "en": "Most support tickets follow predictable, well-scoped paths (look up an order, send a reset link) that a fixed workflow handles more reliably, cheaply, and testably. Wrapping those in full agentic autonomy adds latency, cost, and non-determinism, and makes failures harder to debug. Anthropic's guidance is to use the simplest pattern that works and add autonomy only where the task genuinely needs dynamic, multi-step reasoning.",
+          "fr": "La plupart des tickets de support suivent des chemins prévisibles et bien cadrés (rechercher une commande, envoyer un lien de réinitialisation) qu'un workflow fixe gère plus fiablement, à moindre coût et de façon plus testable. Les envelopper dans une autonomie agentique complète ajoute latence, coût et non-déterminisme, et rend les défaillances plus difficiles à déboguer. La recommandation d'Anthropic est d'utiliser le schéma le plus simple qui fonctionne et de n'ajouter de l'autonomie que là où la tâche nécessite réellement un raisonnement dynamique en plusieurs étapes."
         },
         "right_approach": {
-          "en": "Distil the conversation into a structured running summary (customer, issue, steps taken, decision) and pass that, fetching raw detail only when a specific step needs it.",
-          "fr": "Distiller la conversation en un résumé structuré et évolutif (client, problème, étapes effectuées, décision) et transmettre celui-ci, en n’allant chercher le détail brut que lorsqu’une étape précise l’exige."
+          "en": "Handle the predictable majority with workflows of predefined steps, and route only the open-ended cases (multi-step complaints, ambiguous investigations) to an autonomous agent. Right-size the architecture to the task instead of defaulting to maximum autonomy everywhere.",
+          "fr": "Traiter la majorité prévisible avec des workflows d'étapes prédéfinies, et n'orienter que les cas ouverts (réclamations en plusieurs étapes, investigations ambiguës) vers un agent autonome. Dimensionner l'architecture au juste pour la tâche plutôt que de choisir par défaut l'autonomie maximale partout."
         }
       },
       {
         "id": "customer_support-trap-02",
-        "domain": "agentic_architecture",
+        "domain": "tool_design_mcp",
         "title": {
-          "en": "Trusting the model to self-enforce risky actions",
-          "fr": "Compter sur le modèle pour s’autoréguler sur les actions risquées"
+          "en": "Trusting the prompt to guard an irreversible action",
+          "fr": "Compter sur l'invite pour protéger une action irréversible"
         },
         "trap": {
-          "en": "Relying on a system-prompt rule like 'never refund more than $200 or touch contract disputes' as the actual safety control.",
-          "fr": "S’appuyer sur une règle d’invite système du type « ne jamais rembourser plus de 200 $ ni toucher aux litiges contractuels » comme véritable contrôle de sécurité."
+          "en": "Giving the agent an unconstrained `issue_refund` tool and relying on a firmly worded system prompt (\"only refund when clearly justified, never above policy limits\") to keep it safe.",
+          "fr": "Donner à l'agent un outil `issue_refund` sans contrainte et compter sur une invite système fermement formulée (\"ne rembourser que si clairement justifié, jamais au-dessus des limites de la politique\") pour assurer la sécurité."
         },
         "why_wrong": {
-          "en": "Prompt instructions are best-effort guidance, not a boundary; a single ambiguous ticket, jailbreak, or model slip can execute an irreversible action.",
-          "fr": "Les consignes d’invite sont indicatives, pas une frontière ; un seul ticket ambigu, une attaque ou une erreur du modèle peut exécuter une action irréversible."
+          "en": "A prompt is a soft instruction, not an enforced boundary. The model can misjudge a case, be steered by a manipulative or prompt-injected request, or simply hallucinate a justification, and nothing in the code stops an erroneous, irreversible money movement. For high-stakes actions, model-level instructions are not a guardrail.",
+          "fr": "Une invite est une consigne souple, pas une limite imposée. Le modèle peut mal juger un cas, être orienté par une requête manipulatrice ou par injection d'invite, ou simplement halluciner une justification, et rien dans le code n'arrête un mouvement d'argent irréversible et erroné. Pour les actions à fort enjeu, les consignes au niveau du modèle ne sont pas un garde-fou."
         },
         "right_approach": {
-          "en": "Enforce limits in the tool or business layer (hard caps, allowlists) and route anything risky to a human escalation path; keep the prompt as guidance on top, not as the control.",
-          "fr": "Imposer les limites dans la couche outil ou métier (plafonds stricts, listes d’autorisation) et router tout ce qui est risqué vers une escalade humaine ; garder l’invite comme guide par-dessus, non comme le contrôle."
+          "en": "Enforce the limits in the tool and code path: a hard maximum auto-approvable amount, validation of refund eligibility, and mandatory human confirmation above the threshold. Deterministic, code-level guardrails contain the blast radius regardless of what the model decides.",
+          "fr": "Imposer les limites dans l'outil et le chemin de code : un montant maximal auto-approuvable strict, une validation de l'éligibilité au remboursement, et une confirmation humaine obligatoire au-dessus du seuil. Des garde-fous déterministes au niveau du code limitent le rayon d'impact quelle que soit la décision du modèle."
+        }
+      },
+      {
+        "id": "customer_support-trap-03",
+        "domain": "context_management",
+        "title": {
+          "en": "Pasting the whole policy KB into every prompt",
+          "fr": "Coller toute la base de connaissances de politique dans chaque invite"
+        },
+        "trap": {
+          "en": "Loading the entire policy handbook into the context on every request so the agent \"has everything it could possibly need\" to answer any policy question.",
+          "fr": "Charger l'intégralité du manuel de politique dans le contexte à chaque requête pour que l'agent \"ait tout ce dont il pourrait avoir besoin\" pour répondre à n'importe quelle question de politique."
+        },
+        "why_wrong": {
+          "en": "A huge context is not free signal: it inflates cost and latency on every turn, and burying the one relevant clause among hundreds of irrelevant pages actually degrades accuracy because the model has to find the needle in the haystack. Context engineering treats the window as a scarce budget to curate, not a bucket to fill.",
+          "fr": "Un énorme contexte n'est pas du signal gratuit : il gonfle le coût et la latence à chaque tour, et noyer l'unique clause pertinente parmi des centaines de pages non pertinentes dégrade en fait la précision car le modèle doit trouver l'aiguille dans la botte de foin. L'ingénierie du contexte traite la fenêtre comme un budget rare à curer, pas comme un seau à remplir."
+        },
+        "right_approach": {
+          "en": "Index the handbook and retrieve only the passages relevant to the specific question, placing those in context with their source for citation. This keeps the context lean and high-signal, grounds the answer in the exact policy, and updates instantly when the handbook changes by re-indexing.",
+          "fr": "Indexer le manuel et ne récupérer que les passages pertinents pour la question précise, en les plaçant dans le contexte avec leur source pour citation. Cela garde le contexte léger et à fort signal, ancre la réponse dans la politique exacte, et se met à jour instantanément lorsque le manuel change par réindexation."
+        }
+      },
+      {
+        "id": "customer_support-trap-04",
+        "domain": "context_management",
+        "title": {
+          "en": "Carrying the full raw transcript every turn",
+          "fr": "Transporter le transcript brut intégral à chaque tour"
+        },
+        "trap": {
+          "en": "On a long, multi-turn support conversation, re-sending the entire verbatim transcript on every turn because \"any summary might lose a detail that matters later.\"",
+          "fr": "Sur une longue conversation de support en plusieurs tours, renvoyer le transcript intégral mot pour mot à chaque tour parce que \"tout résumé pourrait perdre un détail qui comptera plus tard\"."
+        },
+        "why_wrong": {
+          "en": "The raw transcript grows without bound, so cost and latency climb every turn and the relevant state (goal, commitments, open items) gets diluted among small talk and dead ends. Past a point this also hurts the model's ability to track what matters. Verbatim retention is not the same as good memory.",
+          "fr": "Le transcript brut croît sans limite, donc coût et latence augmentent à chaque tour et l'état pertinent (objectif, engagements, points ouverts) se dilue parmi les bavardages et les impasses. Au-delà d'un certain point, cela nuit aussi à la capacité du modèle à suivre ce qui compte. La rétention mot pour mot n'équivaut pas à une bonne mémoire."
+        },
+        "right_approach": {
+          "en": "Maintain a compact, structured running summary of the durable state (customer goal, steps taken, promises made, open items) and carry that forward, retrieving specific older turns on demand only when a precise detail is needed. Compaction preserves what the agent must act on without the token bloat.",
+          "fr": "Maintenir un résumé courant compact et structuré de l'état durable (objectif du client, étapes effectuées, promesses faites, points ouverts) et le transmettre, en récupérant des tours anciens précis à la demande uniquement lorsqu'un détail exact est nécessaire. La compaction préserve ce sur quoi l'agent doit agir sans la surcharge de tokens."
+        }
+      },
+      {
+        "id": "customer_support-trap-05",
+        "domain": "agentic_architecture",
+        "title": {
+          "en": "Treating escalation as a failure to avoid",
+          "fr": "Traiter l'escalade comme un échec à éviter"
+        },
+        "trap": {
+          "en": "Designing the agent to resolve every ticket on its own and only escalate as a last resort after exhausting all tools, on the belief that frequent handoffs mean the agent isn't good enough.",
+          "fr": "Concevoir l'agent pour résoudre chaque ticket par lui-même et n'escalader qu'en dernier recours après avoir épuisé tous les outils, en pensant que des transferts fréquents signifient que l'agent n'est pas assez bon."
+        },
+        "why_wrong": {
+          "en": "Escalating only after everything is exhausted delays handoff past the point of customer frustration and, worse, can let the agent take a high-stakes or irreversible action before any human sees it. Some cases (low confidence, distress, out-of-policy or high-stakes requests) need human judgment by design, and refusing to escalate underfits exactly those moments.",
+          "fr": "N'escalader qu'après avoir tout épuisé retarde le transfert au-delà du point de frustration du client et, pire, peut laisser l'agent prendre une action à fort enjeu ou irréversible avant qu'un humain ne la voie. Certains cas (faible confiance, détresse, demandes hors politique ou à fort enjeu) nécessitent un jugement humain par conception, et refuser d'escalader sous-dimensionne précisément ces moments."
+        },
+        "right_approach": {
+          "en": "Define explicit escalation triggers (low confidence, high-stakes or irreversible action, repeated failure, customer distress, out-of-policy requests) and hand off promptly when any fires, passing a structured context summary so the human starts informed. Escalation is a designed safety feature, not a sign of failure.",
+          "fr": "Définir des déclencheurs d'escalade explicites (faible confiance, action à fort enjeu ou irréversible, échecs répétés, détresse du client, demandes hors politique) et transférer rapidement dès que l'un se produit, en transmettant un résumé structuré du contexte pour que l'humain démarre informé. L'escalade est une fonctionnalité de sécurité conçue, pas un signe d'échec."
+        }
+      }
+    ],
+    "code_generation": [
+      {
+        "id": "code_generation-trap-01",
+        "domain": "context_management",
+        "title": {
+          "en": "Stuffing the whole repo into CLAUDE.md",
+          "fr": "Entasser tout le dépôt dans CLAUDE.md"
+        },
+        "trap": {
+          "en": "Making the project's `CLAUDE.md` huge by pasting in every coding standard, the full architecture doc, and long file listings, on the theory that more memory means better answers.",
+          "fr": "Rendre le `CLAUDE.md` du projet énorme en y collant chaque norme de codage, tout le document d'architecture et de longues listes de fichiers, en pensant que plus de mémoire signifie de meilleures réponses."
+        },
+        "why_wrong": {
+          "en": "`CLAUDE.md` is loaded into context at the start of every session, so a bloated file spends the token budget on every turn, raising cost and latency and crowding out the actual task. Past a point it also dilutes the rules that matter, so instruction-following gets worse, not better.",
+          "fr": "`CLAUDE.md` est chargé dans le contexte au début de chaque session ; un fichier surchargé consomme donc le budget de tokens à chaque tour, augmentant coût et latence et évinçant la tâche réelle. Au-delà d'un certain point, il dilue aussi les règles importantes, donc le respect des consignes empire au lieu de s'améliorer."
+        },
+        "right_approach": {
+          "en": "Keep `CLAUDE.md` concise and high-signal: the few durable rules, key commands, and pointers. Let the agent read detailed docs or explore files on demand, and scope local conventions to subdirectory memory so they load only when work happens there.",
+          "fr": "Garder `CLAUDE.md` concis et à fort signal : les quelques règles durables, les commandes clés et des pointeurs. Laisser l'agent lire la doc détaillée ou explorer les fichiers à la demande, et restreindre les conventions locales à la mémoire de sous-répertoire pour qu'elles ne se chargent que lorsque le travail s'y déroule."
+        }
+      },
+      {
+        "id": "code_generation-trap-02",
+        "domain": "claude_code",
+        "title": {
+          "en": "Running CI headless with all permissions granted",
+          "fr": "Lancer la CI headless avec toutes les permissions accordées"
+        },
+        "trap": {
+          "en": "To make a non-interactive CI job 'just work', launching headless Claude Code with a blanket bypass that auto-approves every tool call, including arbitrary shell and network access.",
+          "fr": "Pour qu'un job CI non interactif « fonctionne tout seul », lancer Claude Code en headless avec un contournement global qui approuve automatiquement chaque appel d'outil, y compris l'exécution shell arbitraire et l'accès réseau."
+        },
+        "why_wrong": {
+          "en": "Headless runs have no human in the loop, so a blanket approval hands an autonomous agent unbounded power in your CI environment, which often holds secrets and deploy credentials. A single bad command or prompt-injected instruction can exfiltrate or destroy. Bypassing approvals is convenience traded for a large attack surface.",
+          "fr": "Les exécutions headless n'ont pas d'humain dans la boucle ; une approbation globale confie donc à un agent autonome un pouvoir illimité dans votre environnement CI, qui détient souvent des secrets et des identifiants de déploiement. Une seule mauvaise commande ou une instruction injectée peut exfiltrer ou détruire. Contourner les approbations échange du confort contre une large surface d'attaque."
+        },
+        "right_approach": {
+          "en": "Run headless with a tightly scoped allowlist: pre-grant only the specific tools and commands the job needs (e.g. the formatter, the test runner), and deny everything else. Apply least privilege so the autonomous agent cannot exceed the task.",
+          "fr": "Lancer en headless avec une liste d'autorisations étroitement restreinte : ne pré-accorder que les outils et commandes précis dont le job a besoin (par exemple le formateur, le lanceur de tests), et tout refuser d'autre. Appliquer le moindre privilège pour que l'agent autonome ne puisse pas dépasser la tâche."
+        }
+      },
+      {
+        "id": "code_generation-trap-03",
+        "domain": "agentic_architecture",
+        "title": {
+          "en": "Trusting generated code without a verification loop",
+          "fr": "Faire confiance au code généré sans boucle de vérification"
+        },
+        "trap": {
+          "en": "Letting the agent write a large multi-file change and committing it because it looks correct and compiles in your head, without having the agent run tests, a type check, or a build.",
+          "fr": "Laisser l'agent écrire un grand changement multi-fichiers et le committer parce qu'il a l'air correct et « compile dans votre tête », sans faire exécuter de tests, de vérification de types ou de build par l'agent."
+        },
+        "why_wrong": {
+          "en": "Plausible-looking code is not verified code. Without an executable check, the agent has no ground-truth signal, subtle bugs and broken edge cases slip through, and you have removed the one thing that makes autonomous generation reliable: the ability to catch and fix its own errors.",
+          "fr": "Du code qui a l'air plausible n'est pas du code vérifié. Sans contrôle exécutable, l'agent n'a aucun signal de vérité terrain, des bugs subtils et des cas limites cassés passent, et vous avez supprimé la seule chose qui rend la génération autonome fiable : la capacité à détecter et corriger ses propres erreurs."
+        },
+        "right_approach": {
+          "en": "Build a generate-verify-fix loop: have the agent run the test suite (and/or type checker, linter, build) after changes, read the failures, and iterate until the check passes. Verifiable feedback is the architectural backbone, not an optional step.",
+          "fr": "Construire une boucle générer-vérifier-corriger : faire exécuter la suite de tests (et/ou le vérificateur de types, le linter, le build) par l'agent après les changements, lire les échecs et itérer jusqu'à ce que le contrôle passe. Le retour vérifiable est la colonne vertébrale architecturale, pas une étape optionnelle."
+        }
+      },
+      {
+        "id": "code_generation-trap-04",
+        "domain": "tool_design_mcp",
+        "title": {
+          "en": "Wrapping a fixed prompt as an MCP server",
+          "fr": "Emballer une invite fixe comme un serveur MCP"
+        },
+        "trap": {
+          "en": "Standardizing a repeatable workflow (the team's PR-writing or release procedure) by building an MCP server whose job is to hand the model the workflow instructions.",
+          "fr": "Standardiser un flux répétable (la procédure d'écriture de PR ou de release de l'équipe) en construisant un serveur MCP dont le rôle est de donner au modèle les instructions du flux."
+        },
+        "why_wrong": {
+          "en": "MCP is for exposing tools, data, and resources, that is, real external capabilities the agent invokes, not for packaging a prompt. Using an MCP server to deliver static instructions is over-engineering: it adds a process, transport, and protocol where a simple committed Markdown file would do, and it confuses two distinct primitives.",
+          "fr": "MCP sert à exposer des outils, des données et des ressources, c'est-à-dire de vraies capacités externes que l'agent invoque, pas à empaqueter une invite. Utiliser un serveur MCP pour livrer des instructions statiques est de la sur-ingénierie : cela ajoute un processus, un transport et un protocole là où un simple fichier Markdown versionné suffirait, et cela confond deux primitives distinctes."
+        },
+        "right_approach": {
+          "en": "Capture a repeatable prompt workflow as a custom slash command (a Markdown file under `.claude/commands/`), committed and shared with the team. Reserve MCP for connecting actual external systems (ticketing, observability, databases) as tools and data.",
+          "fr": "Capturer un flux d'invite répétable comme une commande slash personnalisée (un fichier Markdown sous `.claude/commands/`), versionnée et partagée avec l'équipe. Réserver MCP à la connexion de vrais systèmes externes (tickets, observabilité, bases de données) comme outils et données."
+        }
+      },
+      {
+        "id": "code_generation-trap-05",
+        "domain": "context_management",
+        "title": {
+          "en": "Running an entire feature in one ballooning session",
+          "fr": "Mener toute une fonctionnalité dans une seule session qui gonfle"
+        },
+        "trap": {
+          "en": "Driving a long multi-step feature, lots of exploration, dozens of file reads, several refactors, in a single ever-growing Claude Code conversation, never resetting or delegating.",
+          "fr": "Mener une longue fonctionnalité en plusieurs étapes, beaucoup d'exploration, des dizaines de lectures de fichiers, plusieurs refactorisations, dans une seule conversation Claude Code en croissance continue, sans jamais réinitialiser ni déléguer."
+        },
+        "why_wrong": {
+          "en": "As the session grows, stale exploration output and old tool results pile up in context. The window fills with noise, the signal-to-cost ratio collapses, latency and cost climb, and the agent's focus and accuracy degrade because the relevant facts are buried under accumulated history.",
+          "fr": "À mesure que la session grandit, des sorties d'exploration périmées et d'anciens résultats d'outils s'accumulent dans le contexte. La fenêtre se remplit de bruit, le rapport signal/coût s'effondre, latence et coût grimpent, et la concentration et l'exactitude de l'agent se dégradent car les faits pertinents sont enfouis sous l'historique accumulé."
+        },
+        "right_approach": {
+          "en": "Manage context deliberately: delegate exploration to subagents that return only conclusions, clear or compact the context at natural task boundaries, and start fresh sessions for distinct sub-tasks so the working window stays lean and on-topic.",
+          "fr": "Gérer le contexte délibérément : déléguer l'exploration à des sous-agents qui ne renvoient que des conclusions, nettoyer ou compacter le contexte aux frontières naturelles de tâches, et démarrer des sessions neuves pour les sous-tâches distinctes afin que la fenêtre de travail reste légère et ciblée."
+        }
+      }
+    ],
+    "multi_agent_research": [
+      {
+        "id": "multi_agent_research-trap-01",
+        "domain": "agentic_architecture",
+        "title": {
+          "en": "Reaching for multi-agent on every task",
+          "fr": "Recourir au multi-agents pour chaque tâche"
+        },
+        "trap": {
+          "en": "Concluding that because a multi-agent research system outperformed a single agent on a hard, open-ended benchmark, you should route all queries (including simple fact lookups and tasks needing one shared context) through an orchestrator with several subagents.",
+          "fr": "Conclure que, parce qu'un système de recherche multi-agents a surpassé un agent unique sur un test difficile et ouvert, vous devriez router toutes les requêtes (y compris les recherches de faits simples et les tâches nécessitant un contexte partagé unique) via un orchestrateur avec plusieurs sous-agents."
+        },
+        "why_wrong": {
+          "en": "Multi-agent systems consume far more tokens (Anthropic saw roughly 15x a single chat) and add coordination overhead. They only earn that cost when the task is high-value, naturally parallelizable, and too big for one context. For simple lookups or tightly coupled tasks where subagents would need to share state constantly, a single agent is faster, cheaper, and often more reliable.",
+          "fr": "Les systèmes multi-agents consomment bien plus de tokens (Anthropic a observé environ 15x une conversation unique) et ajoutent de la coordination. Ils ne rentabilisent ce coût que lorsque la tâche est à forte valeur, naturellement parallélisable et trop vaste pour un seul contexte. Pour des recherches simples ou des tâches fortement couplées où les sous-agents devraient partager leur état en permanence, un agent unique est plus rapide, moins coûteux et souvent plus fiable."
+        },
+        "right_approach": {
+          "en": "Match the architecture to the task. Default to a single agent and reserve the orchestrator-worker pattern for queries that genuinely benefit from parallel breadth-first exploration and exceed one context window. Gate the choice on value, parallelizability, and context size, not on which approach won one benchmark.",
+          "fr": "Adapter l'architecture à la tâche. Privilégier par défaut un agent unique et réserver le motif orchestrateur-ouvrier aux requêtes qui bénéficient réellement d'une exploration parallèle en largeur et dépassent une seule fenêtre de contexte. Conditionner le choix à la valeur, à la parallélisabilité et à la taille du contexte, pas au fait qu'une approche ait gagné un test."
+        }
+      },
+      {
+        "id": "multi_agent_research-trap-02",
+        "domain": "context_management",
+        "title": {
+          "en": "Funneling every subagent's raw output into the lead",
+          "fr": "Faire remonter toute la sortie brute de chaque sous-agent vers l'agent principal"
+        },
+        "trap": {
+          "en": "Designing subagents to return their full search transcripts and complete raw tool output to the lead agent, so the lead has all the evidence and can decide everything itself.",
+          "fr": "Concevoir les sous-agents pour qu'ils renvoient à l'agent principal l'intégralité de leurs transcriptions de recherche et de leur sortie d'outils brute, afin que l'agent principal dispose de toutes les preuves et puisse tout décider lui-même."
+        },
+        "why_wrong": {
+          "en": "This destroys the main reason subagents exist: context isolation. Each subagent's separate context is meant to absorb bulky, noisy raw output so the lead does not have to. Dumping all of it back into the lead floods its context window, raises cost and latency, and crowds out the planning and synthesis the lead is supposed to do.",
+          "fr": "Cela détruit la raison principale d'être des sous-agents : l'isolation du contexte. Le contexte séparé de chaque sous-agent est censé absorber la sortie brute, volumineuse et bruitée, pour que l'agent principal n'ait pas à le faire. Tout y reverser sature la fenêtre de contexte de l'agent principal, augmente coût et latence, et évince la planification et la synthèse qu'il doit assurer."
+        },
+        "right_approach": {
+          "en": "Have each subagent do the heavy reading in its own context and return only a distilled, high-signal summary plus the sources behind its claims. The lead works from those condensed findings, keeping its context focused on coordination and synthesis.",
+          "fr": "Faire que chaque sous-agent effectue la lecture lourde dans son propre contexte et ne renvoie qu'un résumé distillé à fort signal, accompagné des sources étayant ses affirmations. L'agent principal travaille à partir de ces résultats condensés, gardant son contexte centré sur la coordination et la synthèse."
+        }
+      },
+      {
+        "id": "multi_agent_research-trap-03",
+        "domain": "prompt_engineering",
+        "title": {
+          "en": "Trusting the lead to delegate well without explicit instructions",
+          "fr": "Faire confiance à l'agent principal pour bien déléguer sans consignes explicites"
+        },
+        "trap": {
+          "en": "Assuming a capable lead agent will naturally split work cleanly, so you give it only a high-level goal and let it improvise the subagent tasks however it sees fit.",
+          "fr": "Supposer qu'un agent principal compétent répartira naturellement le travail proprement, et ne lui donner qu'un objectif de haut niveau en le laissant improviser les tâches des sous-agents comme bon lui semble."
+        },
+        "why_wrong": {
+          "en": "Anthropic found subagent performance hinges on delegation quality. Without explicit objectives, output formats, tool/source guidance, and clear boundaries, the lead tends to spawn vague or overlapping tasks, leading to duplicated effort, scope drift, and gaps. The orchestrator's prompt must actively teach it how to decompose and delegate.",
+          "fr": "Anthropic a constaté que la performance des sous-agents dépend de la qualité de la délégation. Sans objectifs explicites, formats de sortie, indications d'outils/sources et limites claires, l'agent principal tend à lancer des tâches floues ou redondantes, entraînant duplication, dérive de périmètre et lacunes. L'invite de l'orchestrateur doit lui apprendre activement à décomposer et à déléguer."
+        },
+        "right_approach": {
+          "en": "Prompt the lead with explicit delegation rules: for each subagent give a clear objective, the expected output format, which tools and sources to use, and non-overlapping boundaries. Scale the number and effort of subagents to the query's complexity rather than spawning a fixed swarm.",
+          "fr": "Munir l'invite de l'agent principal de règles de délégation explicites : pour chaque sous-agent, donner un objectif clair, le format de sortie attendu, les outils et sources à utiliser, et des limites non chevauchantes. Dimensionner le nombre et l'effort des sous-agents selon la complexité de la requête plutôt que de lancer un essaim fixe."
+        }
+      },
+      {
+        "id": "multi_agent_research-trap-04",
+        "domain": "claude_code",
+        "title": {
+          "en": "Writing citations after the report instead of from sources",
+          "fr": "Rédiger les citations après le rapport plutôt qu'à partir des sources"
+        },
+        "trap": {
+          "en": "Letting the lead agent write the polished final report first, then asking it to sprinkle in citations afterward from what it remembers, to make the answer look well-grounded.",
+          "fr": "Laisser l'agent principal rédiger d'abord le rapport final soigné, puis lui demander d'y ajouter ensuite des citations d'après ses souvenirs, pour que la réponse paraisse bien étayée."
+        },
+        "why_wrong": {
+          "en": "Citations reconstructed from memory after writing are frequently fabricated or attached to the wrong source, which is exactly the failure grounding is supposed to prevent. A research system's value is verifiable, source-backed claims; post-hoc citations give a false impression of rigor while breaking the link between claim and evidence.",
+          "fr": "Les citations reconstruites de mémoire après rédaction sont souvent fabriquées ou rattachées à la mauvaise source, justement l'échec que l'ancrage doit prévenir. La valeur d'un système de recherche réside dans des affirmations vérifiables et étayées ; des citations a posteriori donnent une fausse impression de rigueur tout en rompant le lien entre l'affirmation et la preuve."
+        },
+        "right_approach": {
+          "en": "Carry sources alongside claims throughout: subagents return findings paired with the documents they actually retrieved, and a dedicated citation step maps each statement in the final report to that real evidence, so every claim is traceable.",
+          "fr": "Transporter les sources avec les affirmations tout du long : les sous-agents renvoient des résultats associés aux documents réellement récupérés, et une étape de citation dédiée fait correspondre chaque déclaration du rapport final à cette preuve réelle, de sorte que chaque affirmation soit traçable."
+        }
+      },
+      {
+        "id": "multi_agent_research-trap-05",
+        "domain": "agentic_architecture",
+        "title": {
+          "en": "Assuming a failed subagent dooms the whole run",
+          "fr": "Supposer qu'un sous-agent en échec condamne toute l'exécution"
+        },
+        "trap": {
+          "en": "Building the orchestrator so that if any subagent errors out, times out, or returns garbage, the entire research run is aborted and restarted from scratch, treating the multi-agent system as all-or-nothing.",
+          "fr": "Construire l'orchestrateur de sorte que si un sous-agent échoue, expire ou renvoie n'importe quoi, toute l'exécution de recherche est avortée et relancée de zéro, traitant le système multi-agents comme du tout ou rien."
+        },
+        "why_wrong": {
+          "en": "Long-running agentic systems accumulate state across many steps, so errors are inevitable and a full restart is enormously wasteful in tokens and time, and it discards good work the other subagents already completed. Anthropic emphasizes resilience: let the system recover from where it failed rather than from the beginning.",
+          "fr": "Les systèmes agentiques de longue durée accumulent un état sur de nombreuses étapes, donc les erreurs sont inévitables et un redémarrage complet gaspille énormément de tokens et de temps, tout en jetant le bon travail déjà accompli par les autres sous-agents. Anthropic insiste sur la résilience : laisser le système reprendre là où il a échoué plutôt qu'au début."
+        },
+        "right_approach": {
+          "en": "Design for graceful failure handling: let the lead detect a failed or low-quality subagent, retry or re-dispatch just that sub-task (or route around it), and resume from durable state rather than restarting the whole run. Keep the successful subagents' results and synthesize what is available.",
+          "fr": "Concevoir pour une gestion gracieuse des échecs : laisser l'agent principal détecter un sous-agent en échec ou de faible qualité, réessayer ou redistribuer seulement cette sous-tâche (ou la contourner), et reprendre depuis un état durable plutôt que de tout relancer. Conserver les résultats des sous-agents réussis et synthétiser ce qui est disponible."
+        }
+      }
+    ],
+    "developer_productivity": [
+      {
+        "id": "developer_productivity-trap-01",
+        "domain": "claude_code",
+        "title": {
+          "en": "Trusting CLAUDE.md to enforce a mandatory step",
+          "fr": "Compter sur CLAUDE.md pour imposer une étape obligatoire"
+        },
+        "trap": {
+          "en": "Writing \"always run the test suite and never commit on a red build\" into CLAUDE.md and treating it as a guaranteed enforcement, because it is checked into the repo.",
+          "fr": "Écrire \"toujours lancer la suite de tests et ne jamais committer sur un build rouge\" dans CLAUDE.md et le traiter comme une garantie d'application, parce que c'est versionné dans le dépôt."
+        },
+        "why_wrong": {
+          "en": "CLAUDE.md is context the model reads as guidance; it influences behavior but does not deterministically enforce anything. The model may skip, deprioritize, or forget the instruction under a full context window, so a safety-critical gate built on it can silently fail.",
+          "fr": "CLAUDE.md est du contexte que le modèle lit comme une indication ; il influence le comportement mais n'impose rien de manière déterministe. Le modèle peut sauter, déprioriser ou oublier la consigne sous une fenêtre de contexte chargée, donc un garde-fou critique bâti dessus peut échouer silencieusement."
+        },
+        "right_approach": {
+          "en": "Use a hook for anything that must always happen: a PreToolUse or PostToolUse hook runs deterministically and can block the action on a non-zero exit. Keep CLAUDE.md for guidance and conventions, and put hard gates in hooks (or CI).",
+          "fr": "Utiliser un hook pour tout ce qui doit toujours se produire : un hook PreToolUse ou PostToolUse s'exécute de manière déterministe et peut bloquer l'action sur une sortie non nulle. Garder CLAUDE.md pour les indications et conventions, et placer les garde-fous stricts dans les hooks (ou la CI)."
+        }
+      },
+      {
+        "id": "developer_productivity-trap-02",
+        "domain": "context_management",
+        "title": {
+          "en": "Pasting the whole repo to be safe",
+          "fr": "Coller tout le dépôt par précaution"
+        },
+        "trap": {
+          "en": "On a big codebase, dumping dozens of files (or the whole tree) into the prompt so Claude \"has everything it needs\" and cannot miss relevant code.",
+          "fr": "Sur une grande base de code, déverser des dizaines de fichiers (ou tout l'arbre) dans l'invite pour que Claude \"ait tout ce qu'il faut\" et ne puisse rien manquer."
+        },
+        "why_wrong": {
+          "en": "Flooding context with low-relevance tokens dilutes attention, raises cost and latency, and can push out the parts that matter once the window fills. More text is not more understanding; signal-to-noise is what drives quality.",
+          "fr": "Inonder le contexte de tokens peu pertinents dilue l'attention, augmente le coût et la latence, et peut évincer les parties importantes une fois la fenêtre pleine. Plus de texte n'est pas plus de compréhension ; c'est le rapport signal sur bruit qui détermine la qualité."
+        },
+        "right_approach": {
+          "en": "Scope the task to the relevant package or files and let the agent search and read more on demand. Point it at entry points and tests, and rely on its file tools to pull in exactly what each step needs.",
+          "fr": "Cadrer la tâche sur le paquet ou les fichiers pertinents et laisser l'agent chercher et lire davantage à la demande. Le diriger vers les points d'entrée et les tests, et s'appuyer sur ses outils de fichiers pour intégrer exactement ce dont chaque étape a besoin."
+        }
+      },
+      {
+        "id": "developer_productivity-trap-03",
+        "domain": "agentic_architecture",
+        "title": {
+          "en": "Full autonomy to maximize speed",
+          "fr": "Autonomie totale pour maximiser la vitesse"
+        },
+        "trap": {
+          "en": "Letting the dev agent merge to main and deploy on its own, reasoning that the whole point of automation is to remove humans from the loop entirely.",
+          "fr": "Laisser l'agent de développement fusionner sur main et déployer tout seul, en se disant que tout l'intérêt de l'automatisation est de retirer complètement les humains de la boucle."
+        },
+        "why_wrong": {
+          "en": "Autonomy should be bounded by the cost and reversibility of actions, not by speed alone. Merge-and-deploy is high-cost and hard to undo, so removing the human checkpoint there trades a small time saving for a large blast radius when the agent is wrong.",
+          "fr": "L'autonomie doit être bornée par le coût et la réversibilité des actions, pas par la seule vitesse. Fusionner-et-déployer est coûteux et difficile à annuler, donc retirer le point de contrôle humain à cet endroit échange un petit gain de temps contre un large rayon d'impact quand l'agent se trompe."
+        },
+        "right_approach": {
+          "en": "Automate the low-risk, reviewable steps (open the PR, run tests, draft the summary) and keep a human approval gate at the costly, irreversible boundary (merge, deploy). Match the autonomy level to each action's risk.",
+          "fr": "Automatiser les étapes à faible risque et vérifiables (ouvrir la PR, lancer les tests, rédiger le résumé) et garder un point d'approbation humain à la frontière coûteuse et irréversible (fusion, déploiement). Faire correspondre le niveau d'autonomie au risque de chaque action."
+        }
+      },
+      {
+        "id": "developer_productivity-trap-04",
+        "domain": "tool_design_mcp",
+        "title": {
+          "en": "Asking the model instead of giving it a tool",
+          "fr": "Interroger le modèle au lieu de lui donner un outil"
+        },
+        "trap": {
+          "en": "When Claude needs live data from an internal system (open tickets, current deploy status), prompting it to recall or infer the answer rather than wiring up an MCP server or tool.",
+          "fr": "Quand Claude a besoin de données en direct d'un système interne (tickets ouverts, statut de déploiement courant), lui demander de se rappeler ou de déduire la réponse plutôt que de brancher un serveur ou outil MCP."
+        },
+        "why_wrong": {
+          "en": "The model has no live access to your internal systems and its training data has a cutoff, so asking it to \"know\" current state invites confident but fabricated answers. Live, accurate state must come from a tool call, not from the model's parameters.",
+          "fr": "Le modèle n'a aucun accès en direct à vos systèmes internes et ses données d'entraînement ont une date de coupure, donc lui demander de \"connaître\" l'état courant invite des réponses sûres mais inventées. Un état à jour et exact doit provenir d'un appel d'outil, pas des paramètres du modèle."
+        },
+        "right_approach": {
+          "en": "Expose the internal system through an MCP server (or a defined tool) with a clear, well-described interface, so Claude fetches real data at request time. Write the integration once against MCP and reuse it across Claude Code, editors, and other clients.",
+          "fr": "Exposer le système interne via un serveur MCP (ou un outil défini) avec une interface claire et bien décrite, pour que Claude récupère des données réelles au moment de la requête. Écrire l'intégration une seule fois contre MCP et la réutiliser dans Claude Code, les éditeurs et les autres clients."
+        }
+      },
+      {
+        "id": "developer_productivity-trap-05",
+        "domain": "prompt_engineering",
+        "title": {
+          "en": "Vague instructions plus a bigger model",
+          "fr": "Consignes vagues plus un modèle plus gros"
+        },
+        "trap": {
+          "en": "When code generations come back wrong, reaching first for a larger or newer model while keeping a one-line prompt like \"fix the bug\" with no spec, context, or success criteria.",
+          "fr": "Quand les générations de code reviennent fausses, se tourner d'abord vers un modèle plus grand ou plus récent tout en gardant une invite d'une ligne comme \"corrige le bug\", sans spécification, contexte ni critère de réussite."
+        },
+        "why_wrong": {
+          "en": "If the prompt does not state the expected behavior, the relevant code, and how success is judged, a stronger model still has to guess; it just guesses more fluently. The bottleneck is underspecification, and swapping models does not supply the missing context.",
+          "fr": "Si l'invite n'énonce pas le comportement attendu, le code pertinent et la façon de juger la réussite, un modèle plus puissant doit quand même deviner ; il devine simplement de manière plus fluide. Le goulot d'étranglement est la sous-spécification, et changer de modèle ne fournit pas le contexte manquant."
+        },
+        "right_approach": {
+          "en": "Tighten the prompt first: give the exact behavior, the relevant code and tests, constraints, and a verifiable success criterion (the tests pass), and ask Claude to reason then check its work. Improve the prompt before changing the model.",
+          "fr": "Resserrer d'abord l'invite : donner le comportement exact, le code et les tests pertinents, les contraintes et un critère de réussite vérifiable (les tests passent), et demander à Claude de raisonner puis de vérifier son travail. Améliorer l'invite avant de changer de modèle."
+        }
+      }
+    ],
+    "continuous_integration": [
+      {
+        "id": "continuous_integration-trap-01",
+        "domain": "tool_design_mcp",
+        "title": {
+          "en": "Reaching for --dangerously-skip-permissions to unblock CI",
+          "fr": "Recourir à --dangerously-skip-permissions pour débloquer la CI"
+        },
+        "trap": {
+          "en": "The headless job stalls on permission prompts it cannot answer, so the instinct is to add `--dangerously-skip-permissions` so every tool is auto-approved and the pipeline finally runs green.",
+          "fr": "Le job headless se bloque sur des demandes de permission auxquelles il ne peut répondre, donc l'instinct est d'ajouter `--dangerously-skip-permissions` pour que chaque outil soit auto-approuvé et que le pipeline passe enfin au vert."
+        },
+        "why_wrong": {
+          "en": "That flag removes all guardrails: the agent can run any shell command, write any file, and call any tool with no check. In CI the agent often processes untrusted input (a PR diff, an issue body), so a prompt-injection or a bad inference now has full blast radius, including exfiltrating secrets available to the runner. It fixes the symptom (prompts) by deleting the safety mechanism.",
+          "fr": "Ce drapeau supprime tous les garde-fous : l'agent peut lancer n'importe quelle commande shell, écrire n'importe quel fichier et appeler n'importe quel outil sans contrôle. En CI, l'agent traite souvent des entrées non fiables (un diff de PR, le corps d'une issue), donc une injection d'invite ou une mauvaise inférence dispose désormais d'un rayon d'impact total, y compris l'exfiltration des secrets accessibles au runner. Cela corrige le symptôme (les demandes) en supprimant le mécanisme de sécurité."
+        },
+        "right_approach": {
+          "en": "Keep permissions on and pre-approve a narrow allowlist of exactly the tools and command patterns the job needs (for example read, edit, and `npm test`), so it runs unattended without prompts while everything else stays denied. Scope the runner's secrets to the minimum, and treat untrusted PR/issue content as such.",
+          "fr": "Garder les permissions actives et pré-approuver une liste d'autorisation étroite des outils et motifs de commandes précis dont le job a besoin (par exemple lecture, édition et `npm test`), pour qu'il s'exécute sans surveillance ni demande tandis que tout le reste reste refusé. Restreindre les secrets du runner au minimum et traiter le contenu non fiable des PR/issues comme tel."
+        }
+      },
+      {
+        "id": "continuous_integration-trap-02",
+        "domain": "agentic_architecture",
+        "title": {
+          "en": "Trusting CLAUDE.md to enforce a hard merge gate",
+          "fr": "Compter sur CLAUDE.md pour imposer une porte de fusion stricte"
+        },
+        "trap": {
+          "en": "To guarantee that tests always run before a commit, you write `ALWAYS run npm test before committing` in CLAUDE.md, in bold, and consider the gate enforced.",
+          "fr": "Pour garantir que les tests s'exécutent toujours avant un commit, vous écrivez `TOUJOURS lancer npm test avant de committer` dans CLAUDE.md, en gras, et considérez la porte comme imposée."
+        },
+        "why_wrong": {
+          "en": "CLAUDE.md is guidance to a probabilistic model, not a control the harness enforces. The model usually follows it, but `usually` is not `always`: under a long or distracting run it can skip the step, and you only discover the gap when broken code merges. Emphasis and capitals do not change that it is advisory.",
+          "fr": "CLAUDE.md est une directive à un modèle probabiliste, pas un contrôle imposé par le harnais. Le modèle la suit généralement, mais « généralement » n'est pas « toujours » : lors d'une exécution longue ou distrayante, il peut sauter l'étape, et vous ne découvrez la faille que lorsque du code cassé est fusionné. L'emphase et les majuscules ne changent rien au fait que c'est consultatif."
+        },
+        "right_approach": {
+          "en": "Enforce the invariant with a deterministic mechanism: a Claude Code hook that runs the tests and blocks on failure, and/or a required CI status check on the branch that must pass before merge. Use CLAUDE.md for preferences and conventions, and reserve hooks and required checks for guarantees.",
+          "fr": "Imposer l'invariant avec un mécanisme déterministe : un hook Claude Code qui lance les tests et bloque en cas d'échec, et/ou une vérification de statut CI requise sur la branche qui doit passer avant la fusion. Utiliser CLAUDE.md pour les préférences et conventions, et réserver les hooks et vérifications requises aux garanties."
+        }
+      },
+      {
+        "id": "continuous_integration-trap-03",
+        "domain": "claude_code",
+        "title": {
+          "en": "Driving the interactive REPL from a CI script",
+          "fr": "Piloter le REPL interactif depuis un script CI"
+        },
+        "trap": {
+          "en": "You script CI by launching plain `claude` and piping a here-doc of keystrokes into it, treating the interactive REPL as if it were a batch command.",
+          "fr": "Vous scriptez la CI en lançant `claude` simple et en y injectant un here-doc de frappes clavier, traitant le REPL interactif comme s'il s'agissait d'une commande par lots."
+        },
+        "why_wrong": {
+          "en": "The interactive REPL expects a TTY and a human turn-taking loop; feeding it piped input is brittle, hangs when the agent asks something you did not anticipate, and gives you no clean exit code or machine-readable result to branch on. It is the wrong entry point for automation.",
+          "fr": "Le REPL interactif attend un TTY et une boucle de tours humaine ; lui fournir une entrée par tube est fragile, se bloque quand l'agent demande quelque chose que vous n'aviez pas prévu, et ne vous donne aucun code de sortie propre ni résultat lisible par machine sur lequel brancher. C'est le mauvais point d'entrée pour l'automatisation."
+        },
+        "right_approach": {
+          "en": "Use headless mode: `claude -p \"<prompt>\"` runs non-interactively, returns an exit code, and supports `--output-format json` for structured results your pipeline can parse. Put the full instruction in the prompt and define a fallback for when the agent is blocked, since no one is there to answer.",
+          "fr": "Utiliser le mode headless : `claude -p \"<prompt>\"` s'exécute de manière non interactive, renvoie un code de sortie et prend en charge `--output-format json` pour des résultats structurés que votre pipeline peut parser. Mettre l'instruction complète dans l'invite et définir une solution de repli en cas de blocage de l'agent, puisque personne n'est là pour répondre."
+        }
+      },
+      {
+        "id": "continuous_integration-trap-04",
+        "domain": "context_management",
+        "title": {
+          "en": "One giant headless run for the whole repo",
+          "fr": "Une seule exécution headless géante pour tout le dépôt"
+        },
+        "trap": {
+          "en": "To save on job setup, you funnel an entire large task (audit every service, fix every lint error across the repo) into a single `claude -p` call with all the files pasted in, assuming one big run is more efficient than many small ones.",
+          "fr": "Pour économiser sur la mise en place du job, vous canalisez une tâche entière et volumineuse (auditer chaque service, corriger chaque erreur de lint du dépôt) dans un seul appel `claude -p` avec tous les fichiers collés, en supposant qu'une grosse exécution est plus efficace que plusieurs petites."
+        },
+        "why_wrong": {
+          "en": "Context is finite and the run accumulates it. A monolithic job balloons toward the context limit, costs more because every turn re-pays for material it no longer needs, and when it fails late you lose the whole run with no isolation of which unit broke. Bigger is not cheaper here; it is more fragile.",
+          "fr": "Le contexte est fini et l'exécution l'accumule. Un job monolithique gonfle vers la limite de contexte, coûte plus cher car chaque tour re-paye du matériel dont il n'a plus besoin, et lorsqu'il échoue tardivement vous perdez toute l'exécution sans isolation de l'unité défaillante. Plus gros n'est pas moins cher ici ; c'est plus fragile."
+        },
+        "right_approach": {
+          "en": "Decompose the batch into scoped units, for example per-file or per-batch invocations, or subagents with isolated context, so each loads only what it needs, stays under the limit, fails independently, and can be retried alone. Let agents pull context on demand instead of pre-loading the whole repo.",
+          "fr": "Décomposer le lot en unités cadrées, par exemple des invocations par fichier ou par lot, ou des sous-agents au contexte isolé, afin que chacune ne charge que le nécessaire, reste sous la limite, échoue indépendamment et puisse être rejouée seule. Laisser les agents récupérer le contexte à la demande plutôt que de précharger tout le dépôt."
+        }
+      },
+      {
+        "id": "continuous_integration-trap-05",
+        "domain": "prompt_engineering",
+        "title": {
+          "en": "Leaving the agent free to ask questions in CI",
+          "fr": "Laisser l'agent libre de poser des questions en CI"
+        },
+        "trap": {
+          "en": "You give the headless job an open-ended prompt like `improve the code where you see fit, and ask me if anything is unclear`, reusing the same wording that works well in an interactive session.",
+          "fr": "Vous donnez au job headless une invite ouverte comme « améliore le code là où tu le juges utile, et demande-moi si quelque chose n'est pas clair », en réutilisant la formulation qui marche bien en session interactive."
+        },
+        "why_wrong": {
+          "en": "In CI there is no human to answer, so a clarifying question becomes a dead end: the run stalls, times out, or guesses and edits things you never intended. Open-ended scope also invites unrelated changes, making the step non-deterministic and hard to review. Interactive-style prompts do not transfer to unattended runs.",
+          "fr": "En CI, aucun humain ne peut répondre, donc une question de clarification devient une impasse : l'exécution se bloque, expire, ou devine et modifie des choses que vous n'aviez jamais voulues. Une portée ouverte invite aussi des changements sans rapport, rendant l'étape non déterministe et difficile à relire. Les invites de style interactif ne se transposent pas aux exécutions sans surveillance."
+        },
+        "right_approach": {
+          "en": "Write a self-contained, bounded prompt for non-interactive use: state the exact scope, the success criteria, and explicitly what to do when blocked (report the missing information and exit non-zero, do not ask). Provide everything the agent needs up front so the run is deterministic and the exit code is meaningful.",
+          "fr": "Rédiger une invite autonome et bornée pour un usage non interactif : préciser la portée exacte, les critères de réussite et explicitement la conduite à tenir en cas de blocage (signaler l'information manquante et sortir avec un code non nul, ne pas demander). Fournir d'emblée tout ce dont l'agent a besoin pour que l'exécution soit déterministe et le code de sortie significatif."
+        }
+      }
+    ],
+    "structured_extraction": [
+      {
+        "id": "structured_extraction-trap-01",
+        "domain": "prompt_engineering",
+        "title": {
+          "en": "Prefilling an opening brace to force JSON",
+          "fr": "Préfixer une accolade ouvrante pour forcer du JSON"
+        },
+        "trap": {
+          "en": "The familiar trick for clean JSON is to prefill the assistant turn with '{' so the model just keeps going from there, skipping any preamble.",
+          "fr": "L'astuce familière pour du JSON propre est de préfixer le tour assistant avec '{' pour que le modèle continue simplement à partir de là, en sautant tout préambule."
+        },
+        "why_wrong": {
+          "en": "Last-assistant-turn prefills now return a 400 error on Opus 4.6, 4.7, 4.8 and Sonnet 4.6 : the technique no longer works on current models. Even where it once worked, it never validated structure: nested fields could still be malformed.",
+          "fr": "Les préfixes du dernier tour assistant renvoient désormais une erreur 400 sur Opus 4.6, 4.7, 4.8 et Sonnet 4.6 : la technique ne fonctionne plus sur les modèles actuels. Et même quand elle fonctionnait, elle ne validait aucune structure : les champs imbriqués pouvaient rester mal formés."
+        },
+        "right_approach": {
+          "en": "Use structured outputs: output_config.format with a json_schema (via messages.parse() for automatic validation), or a strict tool. The API constrains the shape so the result parses, with no prefill needed.",
+          "fr": "Utilisez les sorties structurées : output_config.format avec un json_schema (via messages.parse() pour une validation automatique), ou un outil strict. L'API contraint la forme pour que le résultat se parse, sans aucun préfixe."
+        }
+      },
+      {
+        "id": "structured_extraction-trap-02",
+        "domain": "prompt_engineering",
+        "title": {
+          "en": "Marking optional fields as required to avoid nulls",
+          "fr": "Marquer les champs optionnels comme requis pour éviter les nulls"
+        },
+        "trap": {
+          "en": "To keep the output uniform you mark every field required, reasoning that a fully-populated record is cleaner than one with nulls scattered through it.",
+          "fr": "Pour garder une sortie uniforme, vous marquez chaque champ comme requis, en raisonnant qu'un enregistrement entièrement rempli est plus propre qu'un enregistrement parsemé de nulls."
+        },
+        "why_wrong": {
+          "en": "When the source genuinely lacks a value, a required field forces the model to invent one : you trade clean-looking output for hallucinated data. In factual extraction, a fabricated tax ID or date is far worse than an honest null.",
+          "fr": "Quand la source n'a vraiment pas de valeur, un champ requis force le modèle à en inventer une : vous échangez une sortie d'apparence propre contre des données hallucinées. En extraction factuelle, un identifiant fiscal ou une date fabriqués sont bien pires qu'un null honnête."
+        },
+        "right_approach": {
+          "en": "Make genuinely-optional fields nullable and instruct the model to return null when the value is absent. The key stays present and predictable for downstream parsing, and the model is never pushed to fabricate.",
+          "fr": "Rendez les champs réellement optionnels nullable et demandez au modèle de renvoyer null en cas d'absence. La clé reste présente et prévisible pour le parsing en aval, et le modèle n'est jamais poussé à fabriquer."
+        }
+      },
+      {
+        "id": "structured_extraction-trap-03",
+        "domain": "context_management",
+        "title": {
+          "en": "Trusting a 1M window to swallow any document",
+          "fr": "Croire qu'une fenêtre de 1 M avale n'importe quel document"
+        },
+        "trap": {
+          "en": "Opus 4.8 has a 1M-token context window, so you assume you can drop any single document in whole and extract in one call : no chunking machinery needed.",
+          "fr": "Opus 4.8 a une fenêtre de contexte de 1 M de tokens, donc vous supposez pouvoir déposer n'importe quel document entier en une fois et extraire en un seul appel, sans aucune mécanique de découpage."
+        },
+        "why_wrong": {
+          "en": "A window is large, not infinite. Documents above 1M tokens are rejected, not silently truncated, and even within the window very long inputs can degrade recall on fields buried deep in the text. 'It usually fits' is not a design.",
+          "fr": "Une fenêtre est grande, pas infinie. Les documents au-delà de 1 M de tokens sont rejetés, pas tronqués silencieusement, et même dans la fenêtre des entrées très longues peuvent dégrader le rappel sur des champs enfouis profondément dans le texte. 'Ça tient en général' n'est pas une conception."
+        },
+        "right_approach": {
+          "en": "Measure input size with count_tokens. For oversized documents, chunk, extract each chunk against the same schema, then merge and deduplicate : using overlap or a reconciliation pass for records that straddle a boundary.",
+          "fr": "Mesurez la taille d'entrée avec count_tokens. Pour les documents trop grands, découpez, extrayez chaque segment face au même schéma, puis fusionnez et dédupliquez, en utilisant un chevauchement ou une passe de réconciliation pour les enregistrements à cheval sur une frontière."
+        }
+      },
+      {
+        "id": "structured_extraction-trap-04",
+        "domain": "tool_design_mcp",
+        "title": {
+          "en": "Relying on the tool description to enforce the schema",
+          "fr": "Compter sur la description de l'outil pour imposer le schéma"
+        },
+        "trap": {
+          "en": "You write a detailed extraction tool description : 'always return ISO-8601 dates, only use the four allowed status values' : and assume Claude's tool call arguments will therefore conform.",
+          "fr": "Vous rédigez une description d'outil d'extraction détaillée : 'renvoie toujours des dates ISO-8601, n'utilise que les quatre valeurs de statut autorisées', et vous supposez que les arguments de l'appel d'outil de Claude s'y conformeront donc."
+        },
+        "why_wrong": {
+          "en": "A description guides behavior but enforces nothing. Without schema-level enforcement the model can still emit a malformed date or an out-of-set status, and your downstream code breaks on the exception you assumed could not happen.",
+          "fr": "Une description oriente le comportement mais n'impose rien. Sans application au niveau du schéma, le modèle peut encore émettre une date mal formée ou un statut hors ensemble, et votre code en aval casse sur l'exception que vous pensiez impossible."
+        },
+        "right_approach": {
+          "en": "Encode the constraints in the input_schema (enum for the status set, format for dates) and set strict: true so the API validates the tool arguments. Keep the description for intent and when-to-call guidance, not as the enforcement layer.",
+          "fr": "Encodez les contraintes dans l'input_schema (enum pour l'ensemble de statuts, format pour les dates) et définissez strict: true pour que l'API valide les arguments de l'outil. Gardez la description pour l'intention et le moment d'appel, pas comme couche d'application."
+        }
+      },
+      {
+        "id": "structured_extraction-trap-05",
+        "domain": "agentic_architecture",
+        "title": {
+          "en": "Reaching for an agent loop to do plain extraction",
+          "fr": "Choisir une boucle d'agent pour une simple extraction"
+        },
+        "trap": {
+          "en": "Because the documents are messy and varied, you build a multi-step agent with tools that loops, re-reads, and 'decides' when each extraction is complete, assuming more autonomy means more accuracy.",
+          "fr": "Parce que les documents sont désordonnés et variés, vous construisez un agent multi-étapes avec des outils qui boucle, relit et 'décide' quand chaque extraction est complète, en supposant que plus d'autonomie signifie plus de précision."
+        },
+        "why_wrong": {
+          "en": "Extraction is a well-specified, single-call task: one document in, one structured record out. An agent loop adds latency, cost, and new failure modes (runaway loops, tool errors) without improving a task that does not require open-ended exploration. It is the wrong architecture tier.",
+          "fr": "L'extraction est une tâche bien spécifiée à appel unique : un document en entrée, un enregistrement structuré en sortie. Une boucle d'agent ajoute latence, coût et nouveaux modes de défaillance (boucles incontrôlées, erreurs d'outils) sans améliorer une tâche qui ne nécessite pas d'exploration ouverte. C'est le mauvais niveau d'architecture."
+        },
+        "right_approach": {
+          "en": "Stay at the single-LLM-call tier with structured outputs. For high volume with no latency requirement, submit those calls through the Message Batches API at 50% cost. Reserve agent loops for genuinely multi-step, hard-to-specify work.",
+          "fr": "Restez au niveau de l'appel LLM unique avec sorties structurées. Pour un fort volume sans exigence de latence, soumettez ces appels via l'API Message Batches à 50 % du coût. Réservez les boucles d'agent au travail vraiment multi-étapes et difficile à spécifier."
         }
       }
     ]
@@ -49,40 +619,508 @@
         "id": "agentic_architecture-trap-01",
         "domain": "agentic_architecture",
         "title": {
-          "en": "Reaching for an agent when a workflow would do",
-          "fr": "Choisir un agent quand un workflow suffirait"
+          "en": "Reaching for an agent when a fixed workflow would do",
+          "fr": "Choisir un agent alors qu'un flux de travail fixe suffirait"
         },
         "trap": {
-          "en": "Building an open-ended agentic loop for a task whose steps are actually known and fixed.",
-          "fr": "Construire une boucle agentique ouverte pour une tâche dont les étapes sont en réalité connues et fixes."
+          "en": "The candidate assumes that the most capable, most modern design is always an autonomous agent that decides its own steps and tool calls in a loop, so they pick the agent for a task whose steps are known and predictable in advance.",
+          "fr": "Le candidat suppose que la conception la plus performante et la plus moderne est toujours un agent autonome qui décide lui-même de ses étapes et de ses appels d'outils dans une boucle, et il choisit donc l'agent pour une tâche dont les étapes sont connues et prévisibles à l'avance."
         },
         "why_wrong": {
-          "en": "Agents trade latency, cost, and predictability for flexibility; using one where a fixed prompt-chain or workflow suffices adds failure modes and spend for no benefit.",
-          "fr": "Les agents échangent latence, coût et prévisibilité contre de la flexibilité ; en employer un là où un enchaînement d’invites ou un workflow fixe suffit ajoute des modes de défaillance et des dépenses sans bénéfice."
+          "en": "Anthropic's guidance in Building Effective Agents draws a clear line between workflows (LLMs and tools orchestrated through predefined code paths) and agents (LLMs that dynamically direct their own process). Agents trade higher latency, cost, and unpredictability for flexibility. When the task decomposes into a fixed sequence of subtasks, that flexibility is wasted: you pay for autonomy you do not use and you lose the determinism, testability, and cost control that a coded path gives you.",
+          "fr": "Les recommandations d'Anthropic dans Building Effective Agents tracent une frontière nette entre les flux de travail (des LLM et des outils orchestrés par des chemins de code prédéfinis) et les agents (des LLM qui dirigent dynamiquement leur propre processus). Les agents échangent une latence, un coût et une imprévisibilité plus élevés contre de la flexibilité. Quand la tâche se décompose en une séquence fixe de sous-tâches, cette flexibilité est gaspillée : on paie pour une autonomie inutilisée et on perd le déterminisme, la testabilité et la maîtrise des coûts qu'offre un chemin codé."
         },
         "right_approach": {
-          "en": "Reserve agents for open-ended problems where you cannot predict the number of steps; otherwise use a structured workflow (prompt chaining, routing) you can test and control.",
-          "fr": "Réserver les agents aux problèmes ouverts où l’on ne peut pas prévoir le nombre d’étapes ; sinon, utiliser un workflow structuré (enchaînement d’invites, routage) que l’on peut tester et contrôler."
+          "en": "Start with the simplest solution that works and add complexity only when it demonstrably improves outcomes. Use a workflow (for example prompt chaining, routing, or parallelization) when the steps are predictable. Reserve agents for open-ended problems where you cannot predict the number of steps and cannot hard-code a fixed path, and where the model needs to decide tool use and direction at runtime.",
+          "fr": "Commencez par la solution la plus simple qui fonctionne et n'ajoutez de la complexité que lorsqu'elle améliore réellement les résultats. Utilisez un flux de travail (par exemple l'enchaînement de prompts, le routage ou la parallélisation) quand les étapes sont prévisibles. Réservez les agents aux problèmes ouverts où l'on ne peut ni prédire le nombre d'étapes ni coder un chemin fixe, et où le modèle doit décider de l'usage des outils et de sa direction à l'exécution."
         }
       },
       {
         "id": "agentic_architecture-trap-02",
         "domain": "agentic_architecture",
         "title": {
-          "en": "Running an agent with no stopping condition or budget",
-          "fr": "Lancer un agent sans condition d’arrêt ni budget"
+          "en": "Running the agent loop with no stopping condition or budget",
+          "fr": "Lancer la boucle de l'agent sans condition d'arrêt ni budget"
         },
         "trap": {
-          "en": "Letting the agent loop until it 'decides' it is done, with no max-iteration count, cost ceiling, or success check.",
-          "fr": "Laisser l’agent boucler jusqu’à ce qu’il « décide » d’avoir fini, sans nombre d’itérations maximal, plafond de coût ni vérification de réussite."
+          "en": "The candidate designs the agent loop to keep calling tools and reasoning until the model itself decides the task is done, trusting that the model will naturally converge and stop on its own.",
+          "fr": "Le candidat conçoit la boucle de l'agent pour continuer à appeler des outils et à raisonner jusqu'à ce que le modèle lui-même décide que la tâche est terminée, en se fiant au fait que le modèle convergera et s'arrêtera naturellement de lui-même."
         },
         "why_wrong": {
-          "en": "Without a clear success criterion and limits, an agent can loop, burn budget, and fail silently, especially on tasks it cannot actually complete.",
-          "fr": "Sans critère de réussite clair ni limites, un agent peut boucler, épuiser le budget et échouer en silence, surtout sur des tâches qu’il ne peut pas réellement accomplir."
+          "en": "An agent runs in a loop, using the environment's feedback to decide its next action. Without explicit guardrails, that loop can run away: the model may keep retrying, spiral into redundant tool calls, or fail to recognize a dead end, driving unbounded token cost and latency. Anthropic's guidance stresses that agents need stopping conditions and that you should maintain control over execution, including limits on the number of iterations.",
+          "fr": "Un agent s'exécute dans une boucle, en utilisant les retours de l'environnement pour décider de sa prochaine action. Sans garde-fous explicites, cette boucle peut s'emballer : le modèle peut réessayer indéfiniment, partir dans des appels d'outils redondants ou ne pas reconnaître une impasse, ce qui entraîne un coût en jetons et une latence sans borne. Les recommandations d'Anthropic insistent sur le fait que les agents ont besoin de conditions d'arrêt et qu'il faut garder la maîtrise de l'exécution, y compris des limites sur le nombre d'itérations."
         },
         "right_approach": {
-          "en": "Give the loop explicit success criteria, a max-step and cost budget, and human oversight on risky actions, so it terminates predictably and fails safe.",
-          "fr": "Donner à la boucle des critères de réussite explicites, un budget d’étapes et de coût maximal, et une supervision humaine sur les actions risquées, pour qu’elle se termine de façon prévisible et échoue sans danger."
+          "en": "Define explicit stopping conditions and a budget before deployment: a maximum number of loop iterations or tool calls, a token or time ceiling, and clear termination triggers (task completed, success criteria met, or escalation to a human). The agent should stop when the goal is reached, when it hits a checkpoint, or when it exhausts its budget, never on faith that it will quit on its own.",
+          "fr": "Définissez des conditions d'arrêt explicites et un budget avant le déploiement : un nombre maximal d'itérations de boucle ou d'appels d'outils, un plafond de jetons ou de temps, et des déclencheurs de fin clairs (tâche accomplie, critères de succès atteints, ou remontée vers un humain). L'agent doit s'arrêter quand l'objectif est atteint, quand il franchit un point de contrôle, ou quand il épuise son budget, jamais en pariant qu'il cessera de lui-même."
+        }
+      },
+      {
+        "id": "agentic_architecture-trap-03",
+        "domain": "agentic_architecture",
+        "title": {
+          "en": "Deploying an agent with no measurable success criteria",
+          "fr": "Déployer un agent sans critères de succès mesurables"
+        },
+        "trap": {
+          "en": "The candidate writes a rich goal description in the prompt and assumes that a well-stated objective is enough, leaving the agent to judge for itself whether its output is good, with no objective definition of done.",
+          "fr": "Le candidat rédige une description d'objectif riche dans le prompt et suppose qu'un but bien formulé suffit, laissant l'agent juger lui-même si sa sortie est satisfaisante, sans définition objective de l'achèvement."
+        },
+        "why_wrong": {
+          "en": "Agents operate on incomplete information and act on the environment, so without a concrete, checkable definition of success they cannot reliably tell whether they are finished or whether they have drifted. Anthropic's evaluation guidance emphasizes verifiable success criteria and ground truth so progress can be measured; the multi-agent research work notes that vague goals lead to redundant or misdirected work and that clear evaluation is essential to making agents reliable.",
+          "fr": "Les agents opèrent avec des informations incomplètes et agissent sur l'environnement ; sans une définition concrète et vérifiable du succès, ils ne peuvent pas déterminer de façon fiable s'ils ont terminé ou s'ils ont dérivé. Les recommandations d'Anthropic sur l'évaluation mettent l'accent sur des critères de succès vérifiables et une vérité terrain permettant de mesurer la progression ; les travaux sur la recherche multi-agents soulignent que des objectifs flous mènent à un travail redondant ou mal orienté et qu'une évaluation claire est essentielle pour rendre les agents fiables."
+        },
+        "right_approach": {
+          "en": "Specify explicit, measurable success criteria up front and give the agent (or an LLM-as-judge or test harness) a way to verify its output against them: tests that must pass, a schema the result must satisfy, factual checks, or a rubric. Build evaluations early so you can measure performance, catch drift, and iterate, rather than relying on the agent's unverified self-assessment.",
+          "fr": "Spécifiez dès le départ des critères de succès explicites et mesurables, et donnez à l'agent (ou à un LLM juge ou à un banc de tests) un moyen de vérifier sa sortie au regard de ces critères : des tests qui doivent réussir, un schéma que le résultat doit respecter, des vérifications factuelles, ou une grille d'évaluation. Construisez les évaluations tôt afin de pouvoir mesurer la performance, détecter la dérive et itérer, plutôt que de vous fier à l'auto-évaluation non vérifiée de l'agent."
+        }
+      },
+      {
+        "id": "agentic_architecture-trap-04",
+        "domain": "agentic_architecture",
+        "title": {
+          "en": "Letting the agent take high-stakes actions with no human in the loop",
+          "fr": "Laisser l'agent effectuer des actions à fort enjeu sans humain dans la boucle"
+        },
+        "trap": {
+          "en": "The candidate, wanting maximum automation, grants the agent autonomous authority to execute irreversible or high-impact actions (sending external emails, deleting data, moving money, deploying to production) directly, trusting the model's judgment at the moment of action.",
+          "fr": "Le candidat, soucieux d'une automatisation maximale, accorde à l'agent l'autorité autonome d'exécuter directement des actions irréversibles ou à fort impact (envoyer des courriels externes, supprimer des données, transférer de l'argent, déployer en production), en se fiant au jugement du modèle au moment de l'action."
+        },
+        "why_wrong": {
+          "en": "Agents act with real-world consequences and can compound errors, so trust must be built gradually. Anthropic's guidance recommends guardrails and human checkpoints, especially for irreversible or high-risk actions, and notes that giving an agent more autonomy raises the cost of mistakes. Full autonomy on high-stakes operations removes the safety net exactly where the downside is largest.",
+          "fr": "Les agents agissent avec des conséquences réelles et peuvent amplifier les erreurs, c'est pourquoi la confiance doit se construire progressivement. Les recommandations d'Anthropic préconisent des garde-fous et des points de contrôle humains, en particulier pour les actions irréversibles ou à haut risque, et soulignent qu'accorder plus d'autonomie à un agent augmente le coût des erreurs. Une autonomie totale sur les opérations à fort enjeu supprime le filet de sécurité précisément là où le risque est le plus grand."
+        },
+        "right_approach": {
+          "en": "Insert human-in-the-loop checkpoints for risky, irreversible, or high-impact actions: the agent proposes, a human approves before execution. Scope permissions tightly, prefer reversible or sandboxed actions, and expand autonomy only as the agent earns trust in lower-stakes settings. Match the level of oversight to the cost of an error.",
+          "fr": "Insérez des points de contrôle humains pour les actions risquées, irréversibles ou à fort impact : l'agent propose, un humain approuve avant l'exécution. Restreignez étroitement les permissions, privilégiez les actions réversibles ou exécutées en bac à sable, et n'élargissez l'autonomie qu'au fur et à mesure que l'agent gagne en confiance dans des contextes à moindre enjeu. Ajustez le niveau de supervision au coût d'une erreur."
+        }
+      },
+      {
+        "id": "agentic_architecture-trap-05",
+        "domain": "agentic_architecture",
+        "title": {
+          "en": "Reaching for a multi-agent system when a single agent suffices",
+          "fr": "Adopter un système multi-agents alors qu'un agent unique suffit"
+        },
+        "trap": {
+          "en": "The candidate models the problem as a team of specialized sub-agents (a planner, several workers, a critic) for a task that a single agent with the right tools could handle, assuming more agents means more capability.",
+          "fr": "Le candidat modélise le problème comme une équipe de sous-agents spécialisés (un planificateur, plusieurs exécutants, un critique) pour une tâche qu'un seul agent doté des bons outils pourrait traiter, en supposant que plus d'agents signifie plus de capacité."
+        },
+        "why_wrong": {
+          "en": "Anthropic's multi-agent research describes multi-agent systems as expensive: they can consume many times the tokens of a single-agent chat, and they add real coordination overhead, since work must be split cleanly, context shared, and results merged. Multi-agent pays off mainly for tasks that parallelize and exceed a single context window, such as broad open-ended research. Applying it to a task that does not parallelize multiplies cost and failure modes without a matching gain.",
+          "fr": "Les travaux d'Anthropic sur la recherche multi-agents décrivent les systèmes multi-agents comme coûteux : ils peuvent consommer plusieurs fois plus de jetons qu'une conversation à agent unique, et ils ajoutent une réelle charge de coordination, car le travail doit être réparti proprement, le contexte partagé et les résultats fusionnés. Le multi-agent est surtout rentable pour des tâches parallélisables qui dépassent une seule fenêtre de contexte, comme la recherche ouverte à large périmètre. L'appliquer à une tâche non parallélisable multiplie les coûts et les modes de défaillance sans gain équivalent."
+        },
+        "right_approach": {
+          "en": "Default to a single agent with a well-curated set of tools and good context engineering. Adopt a multi-agent (for example orchestrator-worker) architecture only when the task genuinely parallelizes, when subtasks need isolated context windows, or when separation of concerns demonstrably improves results, and accept the added token and coordination cost as a deliberate trade-off.",
+          "fr": "Optez par défaut pour un agent unique doté d'un ensemble d'outils bien choisi et d'une bonne ingénierie du contexte. N'adoptez une architecture multi-agents (par exemple orchestrateur-exécutants) que lorsque la tâche se parallélise réellement, lorsque les sous-tâches nécessitent des fenêtres de contexte isolées, ou lorsque la séparation des responsabilités améliore manifestement les résultats, et acceptez le surcoût en jetons et en coordination comme un compromis délibéré."
+        }
+      }
+    ],
+    "tool_design_mcp": [
+      {
+        "id": "tool_design_mcp-trap-01",
+        "domain": "tool_design_mcp",
+        "title": {
+          "en": "Terse tool descriptions assuming the model will 'figure it out'",
+          "fr": "Descriptions d'outils laconiques en supposant que le modèle « devinera »"
+        },
+        "trap": {
+          "en": "You name a tool get_data and give it a one-line description like 'Gets data', trusting Claude to infer when and how to call it from the name alone. It feels redundant to spell out behavior the name already implies.",
+          "fr": "Vous nommez un outil get_data avec une description d'une ligne du type « Récupère des données », en comptant sur Claude pour deviner quand et comment l'appeler à partir du seul nom. Détailler un comportement que le nom suggère déjà vous paraît redondant."
+        },
+        "why_wrong": {
+          "en": "The tool description is the primary interface the model reasons over: it is injected into the system prompt and is the model's only source of truth about purpose, scope, side effects, and edge cases. A vague description forces the model to guess, producing wrong tool selection, hallucinated arguments, and calls in inappropriate situations. Anthropic's guidance is explicit that extremely detailed descriptions are the single highest-impact factor in tool-use quality.",
+          "fr": "La description de l'outil est l'interface principale sur laquelle le modèle raisonne : elle est injectée dans le prompt système et constitue son unique source de vérité quant au but, à la portée, aux effets de bord et aux cas limites. Une description vague oblige le modèle à deviner, ce qui entraîne de mauvais choix d'outils, des arguments hallucinés et des appels dans des situations inappropriées. La recommandation d'Anthropic est explicite : des descriptions très détaillées sont le facteur le plus déterminant pour la qualité de l'usage des outils."
+        },
+        "right_approach": {
+          "en": "Write the description as if onboarding a new engineer who cannot see your code. State what the tool does, when to use it and when not to, what each parameter means, what it returns, and any limitations or side effects. Aim for several sentences of unambiguous prose rather than a fragment; this clarity outweighs almost every other prompt-level optimization.",
+          "fr": "Rédigez la description comme si vous formiez un nouvel ingénieur qui ne voit pas votre code. Précisez ce que fait l'outil, quand l'utiliser et quand l'éviter, la signification de chaque paramètre, ce qu'il renvoie, ainsi que les limites et effets de bord. Visez plusieurs phrases de prose sans ambiguïté plutôt qu'un fragment ; cette clarté l'emporte sur presque toutes les autres optimisations au niveau du prompt."
+        }
+      },
+      {
+        "id": "tool_design_mcp-trap-02",
+        "domain": "tool_design_mcp",
+        "title": {
+          "en": "Naming tools with spaces, dots, or slashes",
+          "fr": "Nommer les outils avec des espaces, des points ou des barres obliques"
+        },
+        "trap": {
+          "en": "You give tools human-friendly names like 'Get User Profile', 'search.documents', or 'api/fetch', assuming the API treats the name as a free-form label the way the description is free text.",
+          "fr": "Vous donnez aux outils des noms lisibles par un humain comme « Get User Profile », « search.documents » ou « api/fetch », en supposant que l'API traite le nom comme un libellé libre, à l'image de la description."
+        },
+        "why_wrong": {
+          "en": "Tool names are validated against the pattern ^[a-zA-Z0-9_-]{1,64}$: only letters, digits, underscores, and hyphens, between 1 and 64 characters. Spaces, dots, slashes, and other punctuation are rejected, and the request fails before the model ever sees the tool. Unlike the description, the name is a strict machine identifier, not prose.",
+          "fr": "Les noms d'outils sont validés contre le motif ^[a-zA-Z0-9_-]{1,64}$ : uniquement des lettres, des chiffres, des tirets bas et des traits d'union, de 1 à 64 caractères. Les espaces, points, barres obliques et autres signes de ponctuation sont rejetés, et la requête échoue avant même que le modèle ne voie l'outil. Contrairement à la description, le nom est un identifiant machine strict, pas de la prose."
+        },
+        "right_approach": {
+          "en": "Use snake_case or kebab-case names that match the pattern, such as get_user_profile or search_documents, while keeping them descriptive. Put the human-readable phrasing in the description field, which is free text. For MCP servers, remember that names may also be namespaced by the host, so keep them concise and within the 64-character limit.",
+          "fr": "Utilisez des noms en snake_case ou kebab-case conformes au motif, tels que get_user_profile ou search_documents, tout en les gardant descriptifs. Placez la formulation lisible par un humain dans le champ description, qui est du texte libre. Pour les serveurs MCP, rappelez-vous que les noms peuvent aussi être préfixés par l'hôte : restez concis et sous la limite de 64 caractères."
+        }
+      },
+      {
+        "id": "tool_design_mcp-trap-03",
+        "domain": "tool_design_mcp",
+        "title": {
+          "en": "Loose input schemas that accept free-form strings",
+          "fr": "Schémas d'entrée laxistes qui acceptent des chaînes libres"
+        },
+        "trap": {
+          "en": "You define a single parameter like query: string with no further constraints, expecting the model to pack date ranges, filters, and IDs into one string however it sees fit. A loose schema feels flexible and saves you from enumerating fields.",
+          "fr": "Vous définissez un seul paramètre comme query: string sans autre contrainte, en attendant que le modèle y empile plages de dates, filtres et identifiants à sa guise. Un schéma laxiste paraît flexible et vous évite d'énumérer les champs."
+        },
+        "why_wrong": {
+          "en": "The input_schema is a JSON Schema the model uses to structure its arguments; vague schemas yield malformed or ambiguous calls and shift parsing burden onto your tool. Typed fields, enums, required lists, formats, and per-property descriptions constrain the model toward valid calls and let it reason about each value. A poor schema is a leading cause of failed or nonsensical tool invocations even when the description is good.",
+          "fr": "Le input_schema est un JSON Schema que le modèle utilise pour structurer ses arguments ; des schémas vagues produisent des appels malformés ou ambigus et reportent la charge d'analyse sur votre outil. Des champs typés, des enums, des listes de champs requis, des formats et des descriptions par propriété contraignent le modèle vers des appels valides et lui permettent de raisonner sur chaque valeur. Un mauvais schéma est une cause majeure d'invocations échouées ou absurdes, même quand la description est bonne."
+        },
+        "right_approach": {
+          "en": "Decompose inputs into explicit typed properties with descriptions, mark genuinely required fields in required, constrain choices with enum, and use formats and ranges where they apply. Make valid calls easy and invalid calls hard to express. If the model keeps misusing a field, the fix is usually a clearer schema rather than more prompt text.",
+          "fr": "Décomposez les entrées en propriétés typées explicites avec descriptions, marquez les champs réellement requis dans required, contraignez les choix avec enum, et utilisez formats et plages de valeurs là où c'est pertinent. Rendez les appels valides faciles et les appels invalides difficiles à exprimer. Si le modèle persiste à mal utiliser un champ, le correctif est généralement un schéma plus clair plutôt que davantage de texte dans le prompt."
+        }
+      },
+      {
+        "id": "tool_design_mcp-trap-04",
+        "domain": "tool_design_mcp",
+        "title": {
+          "en": "Swallowing tool errors instead of returning them to the model",
+          "fr": "Avaler les erreurs d'outil au lieu de les renvoyer au modèle"
+        },
+        "trap": {
+          "en": "When your tool hits an error (bad input, not-found, rate limit), you catch it and return an empty result, a generic 'something went wrong', or you let the request throw, rather than reporting the actual failure back in the tool_result. Hiding the messy details feels cleaner.",
+          "fr": "Quand votre outil rencontre une erreur (entrée invalide, ressource introuvable, limite de débit), vous l'interceptez et renvoyez un résultat vide, un générique « une erreur est survenue », ou vous laissez la requête échouer, au lieu de signaler la vraie défaillance dans le tool_result. Masquer les détails désordonnés semble plus propre."
+        },
+        "why_wrong": {
+          "en": "Claude can recover from errors only if it can see them. The tool-use protocol provides for returning an error to the model: set is_error on the tool_result content block and put a descriptive message in the content. Given a clear error such as 'date must be YYYY-MM-DD', the model often corrects its arguments and retries. Returning empty or success-shaped output on failure makes the model proceed on false premises and hallucinate around the gap.",
+          "fr": "Claude ne peut se remettre d'une erreur que s'il peut la voir. Le protocole d'usage des outils prévoit de renvoyer une erreur au modèle : positionnez is_error sur le bloc de contenu tool_result et placez un message descriptif dans content. Face à une erreur claire comme « la date doit être au format YYYY-MM-DD », le modèle corrige souvent ses arguments et réessaie. Renvoyer une sortie vide ou en forme de succès en cas d'échec amène le modèle à poursuivre sur de fausses prémisses et à halluciner pour combler le vide."
+        },
+        "right_approach": {
+          "en": "Return errors in-band: set is_error: true on the tool_result and include a concise, actionable message explaining what failed and how to fix it. Treat the model as a peer that can re-plan. Reserve raising a hard exception for unrecoverable conditions; for anything the model could correct, give it the diagnostic it needs to self-heal.",
+          "fr": "Renvoyez les erreurs dans le flux : positionnez is_error: true sur le tool_result et incluez un message concis et actionnable expliquant ce qui a échoué et comment le corriger. Traitez le modèle comme un pair capable de replanifier. Réservez la levée d'une exception bloquante aux conditions irrécupérables ; pour tout ce que le modèle pourrait corriger, fournissez-lui le diagnostic dont il a besoin pour s'auto-réparer."
+        }
+      },
+      {
+        "id": "tool_design_mcp-trap-05",
+        "domain": "tool_design_mcp",
+        "title": {
+          "en": "Using MCP to wrap a static prompt instead of exposing real tools and data",
+          "fr": "Utiliser MCP pour emballer un prompt statique au lieu d'exposer de vrais outils et données"
+        },
+        "trap": {
+          "en": "You stand up an MCP server whose single 'tool' just returns a fixed block of instructions or a canned text answer, treating MCP as a way to ship a reusable prompt. It looks like integration because there is a server and a tool call.",
+          "fr": "Vous montez un serveur MCP dont l'unique « outil » se contente de renvoyer un bloc d'instructions figé ou une réponse textuelle toute faite, en traitant MCP comme un moyen de distribuer un prompt réutilisable. Cela ressemble à une intégration puisqu'il y a un serveur et un appel d'outil."
+        },
+        "why_wrong": {
+          "en": "MCP is a protocol for connecting models to live capabilities: tools that perform actions, resources that expose data, and prompts as a distinct primitive. Wrapping a static string in a tool gains none of MCP's value: there is no dynamic data, no action, no parameters that change behavior. The model cannot query or act; it just receives constant text it could have gotten from the system prompt, while paying the overhead of a tool round-trip.",
+          "fr": "MCP est un protocole pour connecter les modèles à des capacités vivantes : des outils qui réalisent des actions, des ressources qui exposent des données, et des prompts comme primitive distincte. Emballer une chaîne statique dans un outil n'apporte aucun des bénéfices de MCP : pas de données dynamiques, pas d'action, pas de paramètres modifiant le comportement. Le modèle ne peut ni interroger ni agir ; il reçoit seulement un texte constant qu'il aurait pu obtenir depuis le prompt système, tout en payant le coût d'un aller-retour d'outil."
+        },
+        "right_approach": {
+          "en": "Expose genuine capabilities over MCP: tools that take parameters and perform real operations or fetch live data, and resources for data the model should read. If your goal really is to share reusable instructions, use the MCP prompts primitive, which exists for that, rather than disguising a constant as a tool. Reach for MCP when there is dynamic state or action to mediate, not to ship a hard-coded answer.",
+          "fr": "Exposez de vraies capacités via MCP : des outils qui prennent des paramètres et réalisent des opérations réelles ou récupèrent des données vivantes, et des ressources pour les données que le modèle doit lire. Si votre objectif est réellement de partager des instructions réutilisables, utilisez la primitive prompts de MCP, prévue pour cela, plutôt que de déguiser une constante en outil. Recourez à MCP lorsqu'il y a un état dynamique ou une action à médiatiser, pas pour livrer une réponse codée en dur."
+        }
+      }
+    ],
+    "claude_code": [
+      {
+        "id": "claude_code-trap-01",
+        "domain": "claude_code",
+        "title": {
+          "en": "Treating CLAUDE.md as an enforcement mechanism",
+          "fr": "Considérer CLAUDE.md comme un mécanisme d'application"
+        },
+        "trap": {
+          "en": "You write a rule like 'NEVER run destructive commands' or 'always run the tests before committing' in CLAUDE.md and assume the model is now guaranteed to obey it.",
+          "fr": "Vous écrivez une règle telle que « NE JAMAIS exécuter de commandes destructrices » ou « toujours lancer les tests avant de committer » dans CLAUDE.md, en supposant que le modèle est désormais garanti d'y obéir."
+        },
+        "why_wrong": {
+          "en": "CLAUDE.md is memory injected into the prompt as guidance. It strongly steers behavior but it is probabilistic, not a hard control: the model can overlook, deprioritize, or be talked out of an instruction. Anything stated there is a suggestion, never a guarantee, so it cannot be relied on for safety-critical constraints.",
+          "fr": "CLAUDE.md est une mémoire injectée dans le prompt à titre indicatif. Elle oriente fortement le comportement mais reste probabiliste, et non un contrôle strict : le modèle peut négliger, déprioriser une instruction ou s'en laisser détourner. Tout ce qui y figure est une suggestion, jamais une garantie, et ne peut donc servir de contrainte critique pour la sûreté."
+        },
+        "right_approach": {
+          "en": "For hard guarantees, use deterministic controls outside the model's discretion: permission deny rules to block dangerous tools or commands, and hooks (for example a PreToolUse hook) that can inspect an action and block it before it runs. Keep CLAUDE.md for preferences and context, and enforce non-negotiable rules with deny rules and hooks.",
+          "fr": "Pour des garanties strictes, utilisez des contrôles déterministes hors du libre arbitre du modèle : des règles de refus de permissions pour bloquer les outils ou commandes dangereux, et des hooks (par exemple un hook PreToolUse) capables d'inspecter une action et de la bloquer avant son exécution. Réservez CLAUDE.md aux préférences et au contexte, et imposez les règles non négociables via les règles de refus et les hooks."
+        }
+      },
+      {
+        "id": "claude_code-trap-02",
+        "domain": "claude_code",
+        "title": {
+          "en": "Expecting sub-agents to share the main context",
+          "fr": "Attendre des sous-agents qu'ils partagent le contexte principal"
+        },
+        "trap": {
+          "en": "You spin up sub-agents to parallelize work and assume they share the main conversation's context, so each one can see everything the others and the orchestrator have already done.",
+          "fr": "Vous lancez des sous-agents pour paralléliser le travail en supposant qu'ils partagent le contexte de la conversation principale, de sorte que chacun voit tout ce que les autres et l'orchestrateur ont déjà fait."
+        },
+        "why_wrong": {
+          "en": "Sub-agents are designed for context isolation: each runs in its own separate context window with the prompt you hand it, not the full parent transcript. The value is keeping the main context clean and exploring in isolation, not shared-memory parallelism. Assuming shared state leads to sub-agents missing information they were never given.",
+          "fr": "Les sous-agents sont conçus pour l'isolation du contexte : chacun s'exécute dans sa propre fenêtre de contexte distincte avec le prompt que vous lui confiez, et non l'intégralité de l'historique parent. L'intérêt est de garder le contexte principal propre et d'explorer de façon isolée, pas un parallélisme à mémoire partagée. Supposer un état partagé conduit des sous-agents à ignorer des informations qu'on ne leur a jamais transmises."
+        },
+        "right_approach": {
+          "en": "Treat each sub-agent as a fresh worker: pass it everything it needs explicitly in its prompt, and rely on it returning a concise result to the orchestrator. Use sub-agents to offload self-contained research or tasks so the main context stays focused, rather than as threads sharing one memory.",
+          "fr": "Traitez chaque sous-agent comme un travailleur neuf : transmettez-lui explicitement dans son prompt tout ce dont il a besoin, et comptez sur le résultat concis qu'il renvoie à l'orchestrateur. Utilisez les sous-agents pour déléguer des recherches ou des tâches autonomes afin que le contexte principal reste concentré, plutôt que comme des fils partageant une seule mémoire."
+        }
+      },
+      {
+        "id": "claude_code-trap-03",
+        "domain": "claude_code",
+        "title": {
+          "en": "Stuffing long procedures into CLAUDE.md",
+          "fr": "Entasser de longues procédures dans CLAUDE.md"
+        },
+        "trap": {
+          "en": "You paste your full deployment runbook, multi-step refactoring procedure, and detailed coding standards directly into CLAUDE.md so they are 'always available'.",
+          "fr": "Vous collez tout votre manuel de déploiement, votre procédure de refactorisation en plusieurs étapes et vos normes de code détaillées directement dans CLAUDE.md pour qu'ils soient « toujours disponibles »."
+        },
+        "why_wrong": {
+          "en": "CLAUDE.md is loaded into context on every single turn, so long procedures permanently consume the context window and add noise even when the task is unrelated. Most of that detail is needed only occasionally, and carrying it everywhere dilutes attention and wastes tokens.",
+          "fr": "CLAUDE.md est chargé dans le contexte à chaque tour, si bien que de longues procédures occupent en permanence la fenêtre de contexte et ajoutent du bruit même lorsque la tâche n'a aucun rapport. La plupart de ces détails ne servent qu'occasionnellement, et les transporter partout dilue l'attention et gaspille des tokens."
+        },
+        "right_approach": {
+          "en": "Package long, occasional procedures as Skills: a Skill's instructions are loaded on demand only when its description matches the task, so the detail stays out of context until needed. Keep CLAUDE.md short with high-frequency context and a pointer to the relevant Skills.",
+          "fr": "Empaquetez les longues procédures occasionnelles sous forme de Skills : les instructions d'un Skill ne sont chargées à la demande que lorsque sa description correspond à la tâche, de sorte que le détail reste hors du contexte jusqu'à ce qu'il soit nécessaire. Gardez un CLAUDE.md court avec le contexte à forte fréquence et un renvoi vers les Skills pertinents."
+        }
+      },
+      {
+        "id": "claude_code-trap-04",
+        "domain": "claude_code",
+        "title": {
+          "en": "Using blanket bypassPermissions in CI",
+          "fr": "Utiliser un bypassPermissions global en CI"
+        },
+        "trap": {
+          "en": "To make the agent run unattended in your CI pipeline, you enable bypass-permissions mode so it never stops to ask, granting it free rein over every tool and command.",
+          "fr": "Pour que l'agent s'exécute sans surveillance dans votre pipeline CI, vous activez le mode de contournement des permissions afin qu'il ne s'arrête jamais pour demander, lui laissant libre cours sur chaque outil et commande."
+        },
+        "why_wrong": {
+          "en": "Bypassing permissions removes the safety boundary entirely: in a non-interactive environment, a misguided or prompt-injected step can delete files, push code, or call external services with nothing to stop it. The fact that no human is watching makes blanket bypass more dangerous, not safer.",
+          "fr": "Contourner les permissions supprime entièrement la barrière de sûreté : dans un environnement non interactif, une étape erronée ou victime d'une injection de prompt peut supprimer des fichiers, pousser du code ou appeler des services externes sans rien pour l'arrêter. L'absence d'humain pour surveiller rend le contournement global plus dangereux, et non plus sûr."
+        },
+        "right_approach": {
+          "en": "Define a scoped allowlist of exactly the tools and commands the job legitimately needs, and let everything else be denied by default. This keeps the run non-interactive while bounding what the agent can do, so an unexpected action fails closed instead of executing.",
+          "fr": "Définissez une liste d'autorisation restreinte aux seuls outils et commandes dont la tâche a légitimement besoin, et laissez tout le reste refusé par défaut. Cela maintient l'exécution non interactive tout en bornant ce que l'agent peut faire, de sorte qu'une action inattendue échoue de façon sûre au lieu de s'exécuter."
+        }
+      },
+      {
+        "id": "claude_code-trap-05",
+        "domain": "claude_code",
+        "title": {
+          "en": "Sharing a team MCP server via user scope",
+          "fr": "Partager un serveur MCP d'équipe via la portée utilisateur"
+        },
+        "trap": {
+          "en": "Your team all needs the same MCP server, so each developer adds it in user scope on their own machine, assuming that is the standard way to share a server across a project.",
+          "fr": "Toute votre équipe a besoin du même serveur MCP, alors chaque développeur l'ajoute en portée utilisateur sur sa propre machine, en supposant que c'est la façon standard de partager un serveur à travers un projet."
+        },
+        "why_wrong": {
+          "en": "User-scope MCP configuration is private to one machine and applies across all of that user's projects. It is never shared, so every teammate must configure it manually, versions drift, and a new contributor gets none of it. It is the wrong scope for something the whole project depends on.",
+          "fr": "La configuration MCP en portée utilisateur est privée à une seule machine et s'applique à tous les projets de cet utilisateur. Elle n'est jamais partagée, si bien que chaque coéquipier doit la configurer manuellement, les versions divergent, et un nouveau contributeur n'en hérite pas. C'est la mauvaise portée pour un élément dont dépend tout le projet."
+        },
+        "right_approach": {
+          "en": "Use project scope by committing a .mcp.json file at the project root. The server definition then lives in version control, so everyone who checks out the repo gets the same MCP configuration automatically. Reserve user scope for personal servers you want available everywhere only for yourself.",
+          "fr": "Utilisez la portée projet en committant un fichier .mcp.json à la racine du projet. La définition du serveur vit alors dans le contrôle de version, de sorte que quiconque récupère le dépôt obtient automatiquement la même configuration MCP. Réservez la portée utilisateur aux serveurs personnels que vous voulez disponibles partout pour vous seul."
+        }
+      }
+    ],
+    "prompt_engineering": [
+      {
+        "id": "prompt_engineering-trap-01",
+        "domain": "prompt_engineering",
+        "title": {
+          "en": "Trusting a vague instruction to convey your intent",
+          "fr": "Compter sur une consigne vague pour transmettre votre intention"
+        },
+        "trap": {
+          "en": "Writing something like 'summarize this nicely' or 'extract the important info', then assuming Claude shares your unstated definition of nicely, important, length, tone and format. When the output drifts, the instinct is to blame the model rather than the prompt.",
+          "fr": "Écrire quelque chose comme « résume ça correctement » ou « extrais les infos importantes », puis supposer que Claude partage votre définition implicite de correctement, d'important, de longueur, de ton et de format. Quand la sortie dérive, l'instinct est d'accuser le modèle plutôt que l'invite."
+        },
+        "why_wrong": {
+          "en": "Anthropic's prompt engineering guidance is explicit that clarity and directness matter: the model cannot read intent you never stated. Vague prompts leave gaps that Claude fills with its own reasonable but unpredictable assumptions, so results vary run to run. The golden-rule test is whether a competent colleague could follow your instructions with no extra context; if not, the prompt is underspecified.",
+          "fr": "Les recommandations d'Anthropic sur l'ingénierie des invites insistent sur la clarté et la précision : le modèle ne peut pas deviner une intention que vous n'avez jamais formulée. Une invite vague laisse des trous que Claude comble avec ses propres hypothèses, raisonnables mais imprévisibles, d'où des résultats qui varient d'une exécution à l'autre. La règle d'or consiste à se demander si un collègue compétent pourrait suivre vos instructions sans contexte supplémentaire ; sinon, l'invite est sous-spécifiée."
+        },
+        "right_approach": {
+          "en": "Be clear, direct and specific: state the exact task, the audience, the desired length, the tone and the output format, and give context for why the task matters. Spell out what to include and what to exclude rather than relying on adjectives like 'nicely'. Explicit, contextual instructions are the cheapest and most reliable lever for steering Claude.",
+          "fr": "Soyez clair, direct et précis : indiquez la tâche exacte, le public visé, la longueur souhaitée, le ton et le format de sortie, et donnez le contexte expliquant pourquoi la tâche compte. Précisez ce qu'il faut inclure et exclure au lieu de vous fier à des adjectifs comme « correctement ». Des instructions explicites et contextualisées sont le levier le moins coûteux et le plus fiable pour orienter Claude."
+        }
+      },
+      {
+        "id": "prompt_engineering-trap-02",
+        "domain": "prompt_engineering",
+        "title": {
+          "en": "Describing a format in words instead of showing examples",
+          "fr": "Décrire un format en mots au lieu de montrer des exemples"
+        },
+        "trap": {
+          "en": "When the output must follow a precise pattern (a classification label set, a specific phrasing, an edge-case handling rule), piling on more and more descriptive prose to explain the shape, while never actually showing Claude a single completed example of input and desired output.",
+          "fr": "Quand la sortie doit suivre un motif précis (un jeu d'étiquettes de classification, une formulation particulière, une règle de traitement des cas limites), empiler toujours plus de prose descriptive pour expliquer la forme, sans jamais montrer à Claude un seul exemple complet d'entrée et de sortie souhaitée."
+        },
+        "why_wrong": {
+          "en": "Anthropic's best practices identify multishot (few-shot) prompting as one of the highest-leverage techniques: well-chosen examples dramatically improve accuracy and consistency, especially for structured or nuanced tasks. Prose alone leaves the precise pattern ambiguous, while three to five relevant, diverse examples that also cover edge cases let Claude infer the pattern far more reliably than any description.",
+          "fr": "Les bonnes pratiques d'Anthropic présentent l'approche multishot (few-shot) comme l'une des techniques au meilleur rendement : des exemples bien choisis améliorent nettement la justesse et la cohérence, surtout pour les tâches structurées ou subtiles. La prose seule laisse le motif exact ambigu, alors que trois à cinq exemples pertinents et variés, couvrant aussi les cas limites, permettent à Claude de déduire le motif bien plus fidèlement que n'importe quelle description."
+        },
+        "right_approach": {
+          "en": "Add few-shot examples that demonstrate the exact input-to-output mapping you want, including tricky edge cases. Make them diverse enough to cover the variations Claude will face, and wrap them clearly (for instance in tags) so they are unambiguous. Examples teach the pattern directly instead of asking Claude to reconstruct it from a description.",
+          "fr": "Ajoutez des exemples few-shot qui démontrent exactement la correspondance entrée-sortie voulue, y compris les cas limites délicats. Rendez-les assez variés pour couvrir les variations que Claude rencontrera, et délimitez-les clairement (par exemple avec des balises) pour lever toute ambiguïté. Les exemples enseignent le motif directement au lieu de demander à Claude de le reconstituer à partir d'une description."
+        }
+      },
+      {
+        "id": "prompt_engineering-trap-03",
+        "domain": "prompt_engineering",
+        "title": {
+          "en": "Parsing JSON out of free-text instead of enforcing structure",
+          "fr": "Extraire du JSON depuis du texte libre au lieu d'imposer la structure"
+        },
+        "trap": {
+          "en": "Asking 'respond in JSON', then writing brittle code to scrape a JSON object out of a free-text reply, stripping markdown fences, cutting preambles like 'Sure, here is the JSON:' and hoping every field appears with the right type. The pipeline breaks intermittently when the model adds prose or drops a key.",
+          "fr": "Demander « réponds en JSON », puis écrire du code fragile pour extraire un objet JSON d'une réponse en texte libre, en retirant les balises markdown, en coupant les préambules du type « Bien sûr, voici le JSON : » et en espérant que chaque champ apparaisse avec le bon type. Le pipeline casse de façon intermittente dès que le modèle ajoute de la prose ou oublie une clé."
+        },
+        "why_wrong": {
+          "en": "Treating a free-text model as if it were a typed API ignores the tools built for exactly this. The Claude API supports tool use and structured outputs, where you define a JSON schema and the response is constrained to conform to it, removing the need to parse or repair text. Hand-rolled regex extraction is fragile precisely because nothing guarantees the shape; the platform can guarantee it for you.",
+          "fr": "Traiter un modèle de texte libre comme une API typée ignore les outils conçus exactement pour cela. L'API Claude prend en charge l'utilisation d'outils et les sorties structurées : vous définissez un schéma JSON et la réponse est contrainte de s'y conformer, ce qui supprime le besoin d'analyser ou de réparer du texte. L'extraction artisanale par expressions régulières est fragile précisément parce que rien ne garantit la forme ; la plateforme, elle, peut la garantir."
+        },
+        "right_approach": {
+          "en": "Use structured outputs or tool use to bind the response to a schema, so fields and types are enforced by the platform rather than reconstructed afterward. Define the schema for the data you need, and let Claude fill it. If you must stay in plain text, at minimum prefill the assistant turn and use clear delimiters, but schema-bound output is the reliable choice for machine consumption.",
+          "fr": "Utilisez les sorties structurées ou l'utilisation d'outils pour lier la réponse à un schéma, afin que les champs et les types soient imposés par la plateforme plutôt que reconstruits après coup. Définissez le schéma des données voulues et laissez Claude le remplir. Si vous devez rester en texte brut, préremplissez au minimum le tour de l'assistant et utilisez des délimiteurs clairs, mais une sortie liée à un schéma reste le choix fiable pour une consommation par machine."
+        }
+      },
+      {
+        "id": "prompt_engineering-trap-04",
+        "domain": "prompt_engineering",
+        "title": {
+          "en": "Cramming a whole workflow into one mega-prompt",
+          "fr": "Entasser tout un workflow dans une seule méga-invite"
+        },
+        "trap": {
+          "en": "Bundling research, analysis, drafting and formatting into a single sprawling prompt that asks Claude to do everything at once, on the theory that one big call is simpler and cheaper than several. When the result is uneven, the response is to add still more instructions to the same overloaded prompt.",
+          "fr": "Réunir recherche, analyse, rédaction et mise en forme dans une seule invite tentaculaire qui demande à Claude de tout faire d'un coup, sous prétexte qu'un gros appel serait plus simple et moins coûteux que plusieurs. Quand le résultat est inégal, la réaction est d'ajouter encore plus d'instructions à la même invite déjà surchargée."
+        },
+        "why_wrong": {
+          "en": "Distinct subtasks competing in one prompt dilute attention and make failures hard to localize: you cannot tell which part went wrong or fix it without risking the rest. Anthropic recommends prompt chaining, breaking a complex job into a sequence of focused steps where each step has a single clear objective and feeds the next. Decomposition raises accuracy and makes the system debuggable, testable and easier to maintain.",
+          "fr": "Des sous-tâches distinctes qui se concurrencent dans une seule invite diluent l'attention et rendent les échecs difficiles à localiser : on ne sait pas quelle partie a échoué ni comment la corriger sans risquer le reste. Anthropic recommande le chaînage d'invites, qui découpe une tâche complexe en une séquence d'étapes ciblées où chacune a un objectif unique et clair et alimente la suivante. La décomposition augmente la justesse et rend le système débogable, testable et plus facile à maintenir."
+        },
+        "right_approach": {
+          "en": "Decompose the workflow into chained prompts, one focused step at a time, passing each step's output as the next step's input. Keep each prompt's objective narrow so you can inspect and improve stages independently. This isolates errors, lets you optimize each stage, and produces more reliable end-to-end results than a single overloaded prompt.",
+          "fr": "Décomposez le workflow en invites chaînées, une étape ciblée à la fois, en transmettant la sortie de chaque étape comme entrée de la suivante. Gardez l'objectif de chaque invite restreint afin de pouvoir inspecter et améliorer les étapes indépendamment. Cela isole les erreurs, permet d'optimiser chaque étape et produit des résultats de bout en bout plus fiables qu'une unique invite surchargée."
+        }
+      },
+      {
+        "id": "prompt_engineering-trap-05",
+        "domain": "prompt_engineering",
+        "title": {
+          "en": "Tuning prompts by vibes instead of an evaluation set",
+          "fr": "Régler les invites au ressenti plutôt qu'avec un jeu d'évaluation"
+        },
+        "trap": {
+          "en": "Iterating on a prompt by eyeballing a handful of outputs that look good, then shipping it. A common variant is lowering temperature and assuming that makes answers 'more correct', or declaring the prompt improved after a few cherry-picked tries with no measurement.",
+          "fr": "Itérer sur une invite en jugeant à l'oeil quelques sorties qui semblent bonnes, puis la mettre en production. Une variante courante consiste à baisser la température en supposant que cela rend les réponses « plus justes », ou à déclarer l'invite améliorée après quelques essais triés sur le volet, sans aucune mesure."
+        },
+        "why_wrong": {
+          "en": "Anthropic's guidance is to define success criteria and develop empirical test cases before optimizing, then measure prompt changes against that evaluation set. A few good-looking samples are not evidence; a change that helps one case can silently regress others. Temperature only controls randomness and diversity, not factual accuracy: a confident wrong answer at temperature 0 is still wrong. Correctness comes from context, instructions and grounding, not from the sampling setting.",
+          "fr": "Les recommandations d'Anthropic consistent à définir des critères de succès et à élaborer des cas de test empiriques avant d'optimiser, puis à mesurer les changements d'invite par rapport à ce jeu d'évaluation. Quelques échantillons à l'air correct ne constituent pas une preuve ; un changement qui aide un cas peut en faire régresser d'autres en silence. La température ne contrôle que l'aléa et la diversité, pas la justesse factuelle : une réponse fausse mais assurée à température 0 reste fausse. La justesse vient du contexte, des instructions et de l'ancrage, pas du réglage d'échantillonnage."
+        },
+        "right_approach": {
+          "en": "Define clear, measurable success criteria up front, build a representative test set covering normal and edge cases, and score each prompt revision against it (with code-based checks or an LLM-as-judge where appropriate). Treat prompt engineering as an empirical loop driven by those evals. Use temperature to control how deterministic or varied outputs are, but rely on better context, instructions and grounding for correctness.",
+          "fr": "Définissez d'emblée des critères de succès clairs et mesurables, constituez un jeu de test représentatif couvrant les cas normaux et limites, et notez chaque révision d'invite par rapport à ce jeu (avec des vérifications par code ou un modèle juge quand c'est pertinent). Traitez l'ingénierie des invites comme une boucle empirique guidée par ces évaluations. Servez-vous de la température pour régler le caractère déterministe ou varié des sorties, mais comptez sur un meilleur contexte, de meilleures instructions et un meilleur ancrage pour la justesse."
+        }
+      }
+    ],
+    "context_management": [
+      {
+        "id": "context_management-trap-01",
+        "domain": "context_management",
+        "title": {
+          "en": "Stuffing the whole knowledge base into the context window",
+          "fr": "Entasser toute la base de connaissances dans la fenêtre de contexte"
+        },
+        "trap": {
+          "en": "Because the model has a large context window (200K tokens, and even 1M in some configurations), pasting every document, the full wiki, and all the logs directly into the prompt so the model 'has everything it needs' and never misses anything.",
+          "fr": "Parce que le modèle dispose d'une grande fenêtre de contexte (200K jetons, voire 1M dans certaines configurations), coller chaque document, le wiki complet et tous les journaux directement dans l'invite pour que le modèle « ait tout sous la main » et ne rate jamais rien."
+        },
+        "why_wrong": {
+          "en": "A bigger window is not free reasoning quality. Flooding the context dilutes the signal, raises cost and latency on every call, and degrades accuracy as relevant facts get buried among irrelevant ones (context rot). The window is a budget to spend deliberately, not a dumping ground.",
+          "fr": "Une fenêtre plus large n'offre pas une qualité de raisonnement gratuite. Inonder le contexte dilue le signal, augmente le coût et la latence à chaque appel, et dégrade la précision à mesure que les faits utiles se noient parmi ceux qui ne le sont pas (pourrissement du contexte). La fenêtre est un budget à dépenser avec discernement, pas un dépotoir."
+        },
+        "right_approach": {
+          "en": "Retrieve only what each task needs. Use retrieval (search, embeddings, or agentic tool calls) to pull in the few relevant passages just in time, and keep the working context lean. Curate the context like a precious resource rather than maximizing what you feed the model.",
+          "fr": "Ne récupérer que ce dont chaque tâche a besoin. Utiliser la récupération (recherche, plongements ou appels d'outils agentiques) pour faire entrer juste à temps les quelques passages pertinents, et garder le contexte de travail léger. Soigner le contexte comme une ressource précieuse plutôt que de maximiser ce que l'on transmet au modèle."
+        }
+      },
+      {
+        "id": "context_management-trap-02",
+        "domain": "context_management",
+        "title": {
+          "en": "Ignoring prompt caching for repeated context",
+          "fr": "Ignorer la mise en cache des invites pour un contexte répété"
+        },
+        "trap": {
+          "en": "Resending the same large system prompt, tool definitions, and reference documents on every API call as if each request were brand new, accepting the full token cost and latency each time because 'the model needs the context anyway'.",
+          "fr": "Renvoyer la même grande invite système, les mêmes définitions d'outils et les mêmes documents de référence à chaque appel d'API comme si chaque requête était toute neuve, en acceptant à chaque fois le coût plein en jetons et la latence parce que « le modèle a besoin du contexte de toute façon »."
+        },
+        "why_wrong": {
+          "en": "When a stable prefix is reused across calls, prompt caching lets you mark it with cache_control so it is stored and reused. Cache reads cost a fraction of normal input tokens and cut latency substantially. Skipping it means paying full price repeatedly for content that never changes.",
+          "fr": "Lorsqu'un préfixe stable est réutilisé d'un appel à l'autre, la mise en cache des invites permet de le marquer avec cache_control pour qu'il soit stocké et réutilisé. Les lectures de cache coûtent une fraction des jetons d'entrée normaux et réduisent nettement la latence. S'en passer revient à payer le prix fort de façon répétée pour un contenu qui ne change jamais."
+        },
+        "right_approach": {
+          "en": "Add cache_control breakpoints on the large, stable parts of the prompt (system instructions, tool schemas, long reference docs). Place these stable blocks at the start so the cached prefix stays valid, and let only the volatile, per-request content fall after the cache boundary.",
+          "fr": "Ajouter des points de césure cache_control sur les parties volumineuses et stables de l'invite (instructions système, schémas d'outils, longs documents de référence). Placer ces blocs stables au début pour que le préfixe mis en cache reste valide, et ne laisser que le contenu volatil, propre à chaque requête, tomber après la frontière du cache."
+        }
+      },
+      {
+        "id": "context_management-trap-03",
+        "domain": "context_management",
+        "title": {
+          "en": "Never compacting a long agent run",
+          "fr": "Ne jamais compacter une exécution d'agent prolongée"
+        },
+        "trap": {
+          "en": "Letting a long-running agent accumulate every tool result, observation, and intermediate message in the conversation history indefinitely, assuming it will simply keep going as long as there is window left.",
+          "fr": "Laisser un agent de longue durée accumuler indéfiniment chaque résultat d'outil, observation et message intermédiaire dans l'historique de la conversation, en supposant qu'il continuera tant qu'il reste de la fenêtre."
+        },
+        "why_wrong": {
+          "en": "Unbounded history eventually fills the window, after which the run fails or important early context is lost. Even before the hard limit, a bloated transcript of stale tool output slows the agent and degrades its decisions. Long horizon work needs active context maintenance, not passive accumulation.",
+          "fr": "Un historique sans limite finit par remplir la fenêtre, après quoi l'exécution échoue ou un contexte initial important est perdu. Même avant la limite stricte, une transcription gonflée de sorties d'outils périmées ralentit l'agent et dégrade ses décisions. Le travail sur un horizon long exige un entretien actif du contexte, pas une accumulation passive."
+        },
+        "right_approach": {
+          "en": "Compact the context periodically: summarize the conversation so far into a compact handoff, drop superseded tool results, and continue from the distilled state. Persist anything durable to external storage or files so it can be re-read on demand instead of living forever in the transcript.",
+          "fr": "Compacter le contexte régulièrement : résumer la conversation jusqu'ici en un relais condensé, écarter les résultats d'outils devenus obsolètes, et poursuivre à partir de l'état distillé. Conserver tout élément durable dans un stockage externe ou des fichiers afin de pouvoir le relire à la demande plutôt que de le laisser résider à jamais dans la transcription."
+        }
+      },
+      {
+        "id": "context_management-trap-04",
+        "domain": "context_management",
+        "title": {
+          "en": "Treating rate-limit and transient API errors as fatal",
+          "fr": "Traiter les erreurs de limite de débit et les erreurs transitoires comme fatales"
+        },
+        "trap": {
+          "en": "Wiring the application so that a 429 rate-limit response or a 529 overloaded error immediately aborts the task, surfaces an error to the user, or crashes the run, because the API call 'failed'.",
+          "fr": "Concevoir l'application de sorte qu'une réponse 429 de limite de débit ou une erreur 529 de surcharge interrompe immédiatement la tâche, remonte une erreur à l'utilisateur ou fasse planter l'exécution, parce que l'appel d'API « a échoué »."
+        },
+        "why_wrong": {
+          "en": "Rate-limit (429) and overloaded (529) responses are expected, transient conditions, not permanent failures. They signal 'try again shortly', and the response often includes a retry-after hint. Treating them as fatal throws away work that would have succeeded on a second attempt moments later.",
+          "fr": "Les réponses de limite de débit (429) et de surcharge (529) sont des conditions transitoires attendues, non des défaillances permanentes. Elles signifient « réessayez sous peu », et la réponse inclut souvent une indication retry-after. Les traiter comme fatales gâche un travail qui aurait réussi à une seconde tentative quelques instants plus tard."
+        },
+        "right_approach": {
+          "en": "Retry transient errors (429, 529, and 5xx) with exponential backoff and jitter, honoring any retry-after header. The official SDKs already retry these automatically with backoff; rely on that or implement equivalent logic, and reserve hard failures for genuinely unrecoverable errors like 400 or 401.",
+          "fr": "Réessayer les erreurs transitoires (429, 529 et 5xx) avec un recul exponentiel et une gigue, en respectant tout en-tête retry-after. Les SDK officiels réessaient déjà ces cas automatiquement avec recul ; s'appuyer dessus ou implémenter une logique équivalente, et réserver les échecs définitifs aux erreurs réellement irrécupérables comme 400 ou 401."
+        }
+      },
+      {
+        "id": "context_management-trap-05",
+        "domain": "context_management",
+        "title": {
+          "en": "Relying on the model to remember across turns",
+          "fr": "Compter sur le modèle pour se souvenir d'un tour à l'autre"
+        },
+        "trap": {
+          "en": "Assuming the model inherently retains facts, decisions, and user preferences between separate requests or sessions, and so not persisting any state, because earlier in the conversation 'it already knew this'.",
+          "fr": "Supposer que le modèle conserve intrinsèquement les faits, décisions et préférences de l'utilisateur entre des requêtes ou des sessions distinctes, et donc ne persister aucun état, parce que plus tôt dans la conversation « il le savait déjà »."
+        },
+        "why_wrong": {
+          "en": "The model is stateless between calls: it only knows what is in the current request's context. Anything not re-supplied, or anything dropped during compaction or a new session, is simply gone. State that must survive cannot live only in the model's head.",
+          "fr": "Le modèle est sans état entre les appels : il ne connaît que ce qui figure dans le contexte de la requête en cours. Tout ce qui n'est pas réinjecté, ou ce qui est écarté lors d'une compaction ou d'une nouvelle session, disparaît purement et simplement. Un état qui doit survivre ne peut pas résider uniquement dans la tête du modèle."
+        },
+        "right_approach": {
+          "en": "Persist durable state outside the context window: use the memory tool, a file, or a database that the agent can write to and read back. Re-load the relevant memory at the start of each turn or session so continuity comes from explicit storage, not from hoping the model retained it.",
+          "fr": "Persister l'état durable hors de la fenêtre de contexte : utiliser l'outil de mémoire, un fichier ou une base de données dans lesquels l'agent peut écrire puis relire. Recharger la mémoire pertinente au début de chaque tour ou session afin que la continuité provienne d'un stockage explicite, et non de l'espoir que le modèle l'ait retenu."
         }
       }
     ]
