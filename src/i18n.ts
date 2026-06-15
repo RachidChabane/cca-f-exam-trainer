@@ -6,12 +6,12 @@ import type { Lang } from '@/types'
  * language at render time. Parametrized strings are functions.
  *
  * `fr` is typed as `typeof en`, so the compiler guarantees the two languages
- * stay in lockstep — nothing can be left untranslated.
+ * stay in lockstep, so nothing can be left untranslated.
  */
 const en = {
   // Brand / nav
   appName: 'CCA-F Exam Trainer',
-  appFull: 'Claude Certified Architect — Foundations',
+  appFull: 'Claude Certified Architect (Foundations)',
   tagline: 'Practice trainer',
   navHome: 'Home',
   navExam: 'Exam',
@@ -23,9 +23,9 @@ const en = {
 
   // Home
   homeKicker: 'Local practice trainer',
-  homeTitle: 'Prepare for the Claude Certified Architect — Foundations exam',
+  homeTitle: 'Prepare for the Claude Certified Architect (Foundations) exam',
   homeSubtitle:
-    'Original, scenario-based questions and skimmable course summaries — grounded in Anthropic’s official documentation. Everything runs locally, in your language.',
+    'Original, scenario-based questions and skimmable course summaries, grounded in Anthropic’s official documentation. Everything runs locally, in your language.',
   examCardTitle: 'Exam mode',
   examCardDesc:
     'Sit a timed mock built like the real exam: 4 of 6 scenario sets, each framing ~15 linked questions under one dense production context. Full review after.',
@@ -84,7 +84,7 @@ const en = {
     `You still have ${n} unanswered question${n === 1 ? '' : 's'}. Unanswered questions are marked incorrect. Submit anyway?`,
   confirmSubmit: 'Submit',
   cancel: 'Cancel',
-  autoSubmitNote: 'Time expired — your exam was submitted automatically.',
+  autoSubmitNote: 'Time expired. Your exam was submitted automatically.',
 
   // Results
   resultsTitle: 'Your results',
@@ -92,7 +92,7 @@ const en = {
   outOf1000: '/ 1000',
   verdictPass: 'PASS',
   verdictFail: 'NOT YET',
-  passMessage: 'Above the 720 pass mark. Strong work — keep the weak domains sharp.',
+  passMessage: 'Above the 720 pass mark. Strong work; keep the weak domains sharp.',
   failMessage: 'Below the 720 pass mark. Focus on your weakest domains below and try again.',
   rawScore: (c: number, t: number) => `${c} of ${t} correct`,
   passLineLabel: 'Pass mark: 720',
@@ -140,14 +140,14 @@ const en = {
 
   // Practice / drills / history
   practiceHeading: 'Practice by domain',
-  practiceDesc: 'Untimed drills to grind a weak area — no countdown, full review after.',
+  practiceDesc: 'Untimed drills to grind a weak area: no countdown, full review after.',
   drillButton: 'Drill',
   untimed: 'Untimed',
   drillResultsTitle: 'Drill results',
   drillScoreLine: (c: number, t: number) => `${c} of ${t} correct`,
   retryWrongCount: (n: number) => `Retry ${n} wrong`,
   recentAttempts: 'Recent attempts',
-  recentNone: 'No attempts yet — finish a mock or a drill and your scores appear here.',
+  recentNone: 'No attempts yet. Finish a mock or a drill and your scores appear here.',
   clearHistoryAction: 'Clear',
   attemptFull: 'Mock',
   attemptDrill: 'Drill',
@@ -155,7 +155,7 @@ const en = {
   backToPractice: 'Back to practice',
   scenarioStart: 'Scenario mode (4 of 6)',
   scenarioDesc:
-    'The same scenario-set structure as the exam above — 4 of the 6 fixed themes, each framing its linked question set. A preserved entry point for your study plan.',
+    'The same scenario-set structure as the exam above: 4 of the 6 fixed themes, each framing its linked question set. A preserved entry point for your study plan.',
   scenarioTag: 'Scenario',
   scenarioLabel: 'Scenario',
   scenarioProgress: (n: number, total: number) => `Question ${n} of ${total} in this scenario`,
@@ -168,7 +168,7 @@ const en = {
 const fr: typeof en = {
   // Marque / navigation
   appName: 'Entraîneur d’examen CCA-F',
-  appFull: 'Architecte Certifié Claude — Fondations',
+  appFull: 'Architecte Certifié Claude (Fondations)',
   tagline: 'Entraînement',
   navHome: 'Accueil',
   navExam: 'Examen',
@@ -181,9 +181,9 @@ const fr: typeof en = {
   // Accueil
   homeKicker: 'Entraînement local',
   homeTitle:
-    'Préparez l’examen Architecte Certifié Claude — Fondations',
+    'Préparez l’examen Architecte Certifié Claude (Fondations)',
   homeSubtitle:
-    'Des questions originales fondées sur des scénarios et des résumés de cours faciles à parcourir — ancrés dans la documentation officielle d’Anthropic. Tout fonctionne en local, dans votre langue.',
+    'Des questions originales fondées sur des scénarios et des résumés de cours faciles à parcourir, ancrés dans la documentation officielle d’Anthropic. Tout fonctionne en local, dans votre langue.',
   examCardTitle: 'Mode examen',
   examCardDesc:
     'Passez un examen blanc bâti comme le vrai : 4 jeux de scénarios sur 6, chacun encadrant ~15 questions liées sous un même contexte de production dense. Revue complète ensuite.',
@@ -242,7 +242,7 @@ const fr: typeof en = {
     `Il vous reste ${n} question${n === 1 ? '' : 's'} sans réponse. Les questions sans réponse sont comptées comme fausses. Soumettre quand même ?`,
   confirmSubmit: 'Soumettre',
   cancel: 'Annuler',
-  autoSubmitNote: 'Temps écoulé — votre examen a été soumis automatiquement.',
+  autoSubmitNote: 'Temps écoulé. Votre examen a été soumis automatiquement.',
 
   // Résultats
   resultsTitle: 'Vos résultats',
@@ -251,7 +251,7 @@ const fr: typeof en = {
   verdictPass: 'RÉUSSITE',
   verdictFail: 'PAS ENCORE',
   passMessage:
-    'Au-dessus du seuil de 720. Beau travail — gardez vos domaines faibles bien affûtés.',
+    'Au-dessus du seuil de 720. Beau travail ; gardez vos domaines faibles bien affûtés.',
   failMessage:
     'En dessous du seuil de 720. Concentrez-vous sur vos domaines les plus faibles ci-dessous et retentez.',
   rawScore: (c: number, t: number) => `${c} bonnes réponses sur ${t}`,
@@ -301,7 +301,7 @@ const fr: typeof en = {
   // Exercices / révisions ciblées / historique
   practiceHeading: 'Réviser par domaine',
   practiceDesc:
-    'Exercices sans chronomètre pour travailler un point faible — pas de compte à rebours, revue complète ensuite.',
+    'Exercices sans chronomètre pour travailler un point faible : pas de compte à rebours, revue complète ensuite.',
   drillButton: 'S’exercer',
   untimed: 'Sans chronomètre',
   drillResultsTitle: 'Résultats de l’exercice',
@@ -309,7 +309,7 @@ const fr: typeof en = {
   retryWrongCount: (n: number) => `Reprendre ${n} fausse${n === 1 ? '' : 's'}`,
   recentAttempts: 'Tentatives récentes',
   recentNone:
-    'Aucune tentative pour l’instant — terminez un examen ou un exercice et vos scores apparaîtront ici.',
+    'Aucune tentative pour l’instant. Terminez un examen ou un exercice et vos scores apparaîtront ici.',
   clearHistoryAction: 'Effacer',
   attemptFull: 'Examen',
   attemptDrill: 'Exercice',
@@ -317,7 +317,7 @@ const fr: typeof en = {
   backToPractice: 'Retour aux exercices',
   scenarioStart: 'Mode scénarios (4 sur 6)',
   scenarioDesc:
-    'La même structure en jeux de scénarios que l’examen ci-dessus — 4 des 6 thèmes fixes, chacun encadrant son jeu de questions liées. Un point d’entrée conservé pour votre plan de révision.',
+    'La même structure en jeux de scénarios que l’examen ci-dessus : 4 des 6 thèmes fixes, chacun encadrant son jeu de questions liées. Un point d’entrée conservé pour votre plan de révision.',
   scenarioTag: 'Scénario',
   scenarioLabel: 'Scénario',
   scenarioProgress: (n: number, total: number) => `Question ${n} sur ${total} de ce scénario`,

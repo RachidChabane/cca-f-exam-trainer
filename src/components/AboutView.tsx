@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/Card'
 import { Markdown } from '@/components/ui/Markdown'
 import { useLang } from '@/lib/useT'
 
-/** In-page anchor list. Plain hash links — the app keeps no route, so these only
+/** In-page anchor list. Plain hash links; the app keeps no route, so these only
  * scroll within the page; section headings carry scroll-margin for the header. */
 function TableOfContents({
   label,
@@ -82,7 +82,7 @@ export function AboutView() {
 
         {/* Body */}
         <div className="min-w-0 space-y-14">
-          {/* 1 — How the real exam is built */}
+          {/* 1. How the real exam is built */}
           <section className="space-y-4">
             <SectionHeading id="how-real" n={1} title={a.sections[0].title} />
             <Markdown className="max-w-none text-[15px]">
@@ -126,7 +126,7 @@ export function AboutView() {
             </Card>
           </section>
 
-          {/* 2 — How a scenario connects to its questions */}
+          {/* 2. How a scenario connects to its questions */}
           <section className="space-y-4">
             <SectionHeading id="scenario-questions" n={2} title={a.sections[1].title} />
             <Markdown className="max-w-none text-[15px]">
@@ -134,7 +134,7 @@ export function AboutView() {
             </Markdown>
           </section>
 
-          {/* 3 — How this trainer mirrors it */}
+          {/* 3. How this trainer mirrors it */}
           <section className="space-y-4">
             <SectionHeading id="how-we-mirror" n={3} title={a.sections[2].title} />
             <Markdown className="max-w-none text-[15px]">
@@ -164,7 +164,7 @@ export function AboutView() {
             </Card>
           </section>
 
-          {/* 4 — Confirmed vs. inferred */}
+          {/* 4. Confirmed vs. inferred */}
           <section className="space-y-4">
             <SectionHeading id="confirmed-inferred" n={4} title={a.sections[3].title} />
             <Markdown className="max-w-none text-[15px]">
