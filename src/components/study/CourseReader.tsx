@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight, ExternalLink, Eye, EyeOff, Sparkles } from 'lucide-react'
-import { DOMAIN_BY_KEY, QUIZZES } from '@/data'
+import { DOMAIN_BY_KEY } from '@/data/blueprint'
+import { QUIZZES } from '@/data/study'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Markdown } from '@/components/ui/Markdown'

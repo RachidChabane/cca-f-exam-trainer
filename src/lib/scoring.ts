@@ -1,4 +1,4 @@
-import { BLUEPRINT, DOMAIN_ORDER } from '@/data'
+import { BLUEPRINT, DOMAIN_ORDER } from '@/data/blueprint'
 import { SCENARIOS_PRESENTED } from '@/scenarios'
 import type { Bi, DomainKey, Question, ScenarioSet } from '@/types'
 

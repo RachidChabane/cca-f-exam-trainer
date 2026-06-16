@@ -1,6 +1,5 @@
-import { QUESTIONS } from '@/data'
 import type { ExamSession, SessionMode } from '@/lib/scoring'
-import type { Bi, DomainKey, Lang, Theme } from '@/types'
+import type { Bi, DomainKey, Lang, Question, Theme } from '@/types'
 
 /**
  * Local persistence (localStorage only — nothing leaves the browser).
@@ -18,8 +17,6 @@ const UI_KEY = 'ccaf:ui:v1'
 const HISTORY_MAX = 50
 
 type ExamPhase = 'intro' | 'active' | 'results' | 'review'
-
-const QBY_ID = new Map(QUESTIONS.map((q) => [q.id, q]))
 
 function read(key: string): string | null {
   try {
@@ -62,9 +59,12 @@ interface SerializedSession {
   label?: Bi
 }
 
-export interface PersistedActive {
+/** The stored active session, still serialized (question *ids*, not full text).
+ * Resolving it into a live `ExamSession` needs the question pool, so that step is
+ * deferred to the exam store — keeping the scenario data out of the app shell. */
+export interface PersistedActiveRaw {
   phase: ExamPhase
-  session: ExamSession
+  session: SerializedSession
 }
 
 export function saveActive(phase: ExamPhase, session: ExamSession | null): void {
@@ -94,35 +94,53 @@ export function saveActive(phase: ExamPhase, session: ExamSession | null): void 
   write(ACTIVE_KEY, JSON.stringify(payload))
 }
 
-export function loadActive(): PersistedActive | null {
+/** Read the stored active session without resolving its questions (cheap — needs
+ * no scenario data). */
+export function loadActiveRaw(): PersistedActiveRaw | null {
   const raw = read(ACTIVE_KEY)
   if (!raw) return null
   try {
     const p = JSON.parse(raw) as { phase: ExamPhase; session: SerializedSession }
     const s = p?.session
     if (!s || !Array.isArray(s.questionIds)) return null
-    const questions = s.questionIds.map((id) => QBY_ID.get(id))
-    if (questions.some((q) => q == null)) return null // pool changed — discard
-    const session: ExamSession = {
-      questions: questions as NonNullable<(typeof questions)[number]>[],
-      answers: s.answers,
-      flagged: s.flagged,
-      current: s.current,
-      startedAt: s.startedAt,
-      endsAt: s.endsAt,
-      durationMs: s.durationMs,
-      status: s.status,
-      autoSubmitted: s.autoSubmitted,
-      submittedAt: s.submittedAt,
-      mode: s.mode,
-      timed: s.timed,
-      domain: s.domain,
-      label: s.label,
-    }
-    return { phase: p.phase, session }
+    return { phase: p.phase, session: s }
   } catch {
     return null
   }
+}
+
+/** Rebuild a live session from its stored ids using the current question pool.
+ * Returns null if the pool changed underneath it (any id no longer resolves), so
+ * a stale saved session self-heals into a fresh start. */
+export function resolveSession(
+  s: SerializedSession,
+  byId: Map<string, Question>,
+): ExamSession | null {
+  const questions = s.questionIds.map((id) => byId.get(id))
+  if (questions.some((q) => q == null)) return null
+  return {
+    questions: questions as Question[],
+    answers: s.answers,
+    flagged: s.flagged,
+    current: s.current,
+    startedAt: s.startedAt,
+    endsAt: s.endsAt,
+    durationMs: s.durationMs,
+    status: s.status,
+    autoSubmitted: s.autoSubmitted,
+    submittedAt: s.submittedAt,
+    mode: s.mode,
+    timed: s.timed,
+    domain: s.domain,
+    label: s.label,
+  }
+}
+
+/** Whether a timed mock is mid-flight. Cheap (no scenario data), so the home
+ * resume banner can decide without pulling the exam store + pool into its chunk. */
+export function hasActiveExam(): boolean {
+  const r = loadActiveRaw()
+  return r?.session.status === 'active' && r.session.mode === 'exam'
 }
 
 export function clearActive(): void {

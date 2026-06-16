@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import { ArrowRight, BookOpen, GraduationCap, PlayCircle } from 'lucide-react'
-import { BLUEPRINT, COURSES, DOMAINS, QUESTIONS } from '@/data'
+import { COURSE_COUNT, QUESTION_COUNT } from 'virtual:content-stats'
+import { BLUEPRINT, DOMAINS } from '@/data/blueprint'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { useLang, useT } from '@/lib/useT'
-import { useExamStore } from '@/store/examStore'
+import { hasActiveExam } from '@/lib/persist'
 import { useUiStore } from '@/store/uiStore'
 
 function ModeCard({
@@ -53,9 +55,10 @@ export function HomeView() {
   const t = useT()
   const lang = useLang()
   const setView = useUiStore((s) => s.setView)
-  const session = useExamStore((s) => s.session)
   const mech = BLUEPRINT.exam.mechanics
-  const examInProgress = session?.status === 'active' && session.mode === 'exam'
+  // Read once at mount from localStorage — switching views remounts Home, so this
+  // stays in sync without subscribing to (and thus loading) the exam store/data.
+  const [examInProgress] = useState(hasActiveExam)
 
   return (
     <div className="mx-auto max-w-5xl animate-fade-in px-4 py-12 sm:px-6 sm:py-16">
@@ -108,7 +111,7 @@ export function HomeView() {
         <div className="mb-4 flex items-baseline justify-between">
           <h2 className="font-serif text-lg font-semibold">{t.blueprintTitle}</h2>
           <span className="text-[12px] text-muted-foreground">
-            {t.poolStatus(QUESTIONS.length)} · {t.coursesStatus(COURSES.length)}
+            {t.poolStatus(QUESTION_COUNT)} · {t.coursesStatus(COURSE_COUNT)}
           </span>
         </div>
 

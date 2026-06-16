@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { AlertTriangle, ChevronLeft, ChevronRight, Flag, LayoutGrid, Timer } from 'lucide-react'
-import { BLUEPRINT, DOMAIN_BY_KEY } from '@/data'
+import { BLUEPRINT, DOMAIN_BY_KEY } from '@/data/blueprint'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'

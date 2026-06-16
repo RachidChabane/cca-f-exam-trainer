@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import { DOMAIN_BY_KEY, QUESTIONS, SCENARIO_SETS } from '@/data'
+import { DOMAIN_BY_KEY } from '@/data/blueprint'
+import { QUESTIONS, SCENARIO_SETS } from '@/data/scenarioSets'
 import {
   buildSession,
   gradeSession,
@@ -11,12 +12,13 @@ import {
   appendHistory,
   clearActive,
   clearHistory,
-  loadActive,
+  loadActiveRaw,
   loadHistory,
+  resolveSession,
   saveActive,
   type HistoryEntry,
 } from '@/lib/persist'
-import type { DomainKey } from '@/types'
+import type { DomainKey, Question } from '@/types'
 
 export type ExamPhase = 'intro' | 'active' | 'results' | 'review'
 
@@ -59,7 +61,13 @@ function recordHistory(session: ExamSession): HistoryEntry[] {
   })
 }
 
-const restored = loadActive()
+// Resolve any stored in-progress session against the live pool. This lives here
+// (the exam chunk) rather than in persist so the question data stays out of the
+// always-loaded shell.
+const QBY_ID = new Map<string, Question>(QUESTIONS.map((q) => [q.id, q]))
+const restoredRaw = loadActiveRaw()
+const restoredSession = restoredRaw ? resolveSession(restoredRaw.session, QBY_ID) : null
+const restored = restoredSession ? { phase: restoredRaw!.phase, session: restoredSession } : null
 
 export const useExamStore = create<ExamState>((set, get) => ({
   session: restored?.session ?? null,

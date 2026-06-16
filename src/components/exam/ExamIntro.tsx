@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { Clock, Dumbbell, History, Layers, ListChecks, Target, Trash2 } from 'lucide-react'
-import { BLUEPRINT, DOMAINS, DOMAIN_BY_KEY, QUESTIONS } from '@/data'
+import { BLUEPRINT, DOMAINS, DOMAIN_BY_KEY } from '@/data/blueprint'
+import { QUESTIONS } from '@/data/scenarioSets'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'

@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { ArrowUpRight, CheckCircle2, CircleHelp } from 'lucide-react'
 import { ABOUT } from '@/content/about'
-import { DOMAINS } from '@/data'
+import { DOMAINS } from '@/data/blueprint'
 import { SCENARIOS } from '@/scenarios'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
