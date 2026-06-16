@@ -124,10 +124,16 @@ function QuizItem({
 /** A set of quiz cards with a live score header. */
 export function QuizList({ items, intro }: { items: QuizQuestion[]; intro?: string }) {
   const t = useT()
+  const signature = items.map((q) => q.id).join('|')
   const [answers, setAnswers] = useState<(number | null)[]>(() => items.map(() => null))
+  const [prevSignature, setPrevSignature] = useState(signature)
 
-  // Keep the answers array in sync if the item set changes (theme/course switch).
-  if (answers.length !== items.length) {
+  // Reset the answers whenever the question set changes (theme/course switch).
+  // We key off the question ids, not just the count, because most courses ship
+  // the same number of questions, so a length check alone would let one course's
+  // selections bleed into the next.
+  if (signature !== prevSignature) {
+    setPrevSignature(signature)
     setAnswers(items.map(() => null))
     return null
   }
