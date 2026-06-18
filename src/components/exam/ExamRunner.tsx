@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { AlertTriangle, ChevronLeft, ChevronRight, Flag, LayoutGrid, Timer } from 'lucide-react'
+import { AlertTriangle, Check, ChevronLeft, ChevronRight, Flag, LayoutGrid, Timer, X } from 'lucide-react'
 import { BLUEPRINT, DOMAIN_BY_KEY } from '@/data/blueprint'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -44,6 +44,8 @@ export function ExamRunner() {
   const q = session.questions[i]
   const total = session.questions.length
   const selected = session.answers[i]
+  const revealed = selected !== null
+  const correctIdx = q.correct_index
   const isFlagged = session.flagged[i]
   const answeredCount = session.answers.filter((a) => a !== null).length
   const unanswered = total - answeredCount
@@ -151,35 +153,106 @@ export function ExamRunner() {
             <div className="mt-5 space-y-2.5" role="radiogroup" aria-label={q.stem[lang]}>
               {q.options[lang].map((opt, idx) => {
                 const isSel = selected === idx
+                const isCorrectOpt = idx === correctIdx
+                const rationale = isCorrectOpt
+                  ? q.explanation[lang]
+                  : q.distractor_explanations[lang][idx]
                 return (
-                  <button
-                    key={idx}
-                    role="radio"
-                    aria-checked={isSel}
-                    onClick={() => answer(idx)}
-                    data-testid={`option-${idx}`}
-                    className={cn(
-                      'flex w-full items-start gap-3 rounded-lg border p-3.5 text-left transition-colors duration-100',
-                      isSel
-                        ? 'border-primary bg-primary/10'
-                        : 'border-border bg-card hover:border-border-strong hover:bg-surface-hover',
-                    )}
-                  >
-                    <span
+                  <div key={idx}>
+                    <button
+                      role="radio"
+                      aria-checked={isSel}
+                      disabled={revealed}
+                      onClick={() => answer(idx)}
+                      data-testid={`option-${idx}`}
                       className={cn(
-                        'mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md border text-[12px] font-semibold',
-                        isSel
-                          ? 'border-primary bg-primary text-primary-foreground'
-                          : 'border-border-strong text-muted-foreground',
+                        'flex w-full items-start gap-3 rounded-lg border p-3.5 text-left transition-colors duration-100',
+                        revealed
+                          ? isCorrectOpt
+                            ? 'border-success/60 bg-success/10'
+                            : isSel
+                              ? 'border-destructive/60 bg-destructive/10'
+                              : 'border-border opacity-70'
+                          : isSel
+                            ? 'border-primary bg-primary/10'
+                            : 'border-border bg-card hover:border-border-strong hover:bg-surface-hover',
+                        revealed && 'cursor-default',
                       )}
                     >
-                      {LETTERS[idx]}
-                    </span>
-                    <span className="text-[14.5px] leading-relaxed text-foreground">{opt}</span>
-                  </button>
+                      <span
+                        className={cn(
+                          'mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md border text-[12px] font-semibold',
+                          revealed && isCorrectOpt
+                            ? 'border-success bg-success text-success-foreground'
+                            : revealed && isSel
+                              ? 'border-destructive bg-destructive text-destructive-foreground'
+                              : isSel
+                                ? 'border-primary bg-primary text-primary-foreground'
+                                : 'border-border-strong text-muted-foreground',
+                        )}
+                      >
+                        {revealed && isCorrectOpt ? (
+                          <Check className="h-3.5 w-3.5" />
+                        ) : revealed && isSel ? (
+                          <X className="h-3.5 w-3.5" />
+                        ) : (
+                          LETTERS[idx]
+                        )}
+                      </span>
+                      <span className="flex-1 text-[14.5px] leading-relaxed text-foreground">{opt}</span>
+                      {revealed && (isCorrectOpt || isSel) && (
+                        <span
+                          className={cn(
+                            'ml-1 mt-0.5 shrink-0 text-[11px] font-medium',
+                            isCorrectOpt ? 'text-success' : 'text-destructive',
+                          )}
+                        >
+                          {isCorrectOpt ? t.correctAnswer : t.yourAnswer}
+                        </span>
+                      )}
+                    </button>
+                    {revealed && (
+                      <p
+                        data-testid={`rationale-${idx}`}
+                        className={cn(
+                          'mt-1.5 pl-9 pr-1 text-[13px] leading-relaxed',
+                          isCorrectOpt ? 'text-foreground' : 'text-muted-foreground',
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            'font-semibold uppercase tracking-wide text-[11px]',
+                            isCorrectOpt ? 'text-success' : 'text-destructive/80',
+                          )}
+                        >
+                          {isCorrectOpt ? t.whyCorrect : t.whyIncorrect}
+                          {' · '}
+                        </span>
+                        {rationale}
+                      </p>
+                    )}
+                  </div>
                 )
               })}
             </div>
+            {revealed && (
+              <div
+                data-testid="answer-feedback"
+                className={cn(
+                  'mt-4 inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-[13px] font-semibold',
+                  selected === correctIdx
+                    ? 'border-success/40 bg-success/10 text-success'
+                    : 'border-destructive/40 bg-destructive/10 text-destructive',
+                )}
+              >
+                {selected === correctIdx ? (
+                  <Check className="h-4 w-4" />
+                ) : (
+                  <X className="h-4 w-4" />
+                )}
+                {selected === correctIdx ? t.tagCorrect : t.tagIncorrect}
+              </div>
+            )}
           </Card>
 
           {/* Footer nav */}

@@ -117,6 +117,11 @@ export const useExamStore = create<ExamState>((set, get) => ({
   answer: (optionIndex) => {
     const s = get().session
     if (!s || s.status !== 'active') return
+    // Instant-feedback mode: selecting an option commits it and reveals the
+    // answer immediately, so a question locks on first pick. Ignoring re-answers
+    // keeps the score honest (you can't switch to the right option after seeing
+    // it) and mirrors the reveal lock in Study-mode quizzes.
+    if (s.answers[s.current] !== null) return
     const answers = s.answers.slice()
     answers[s.current] = optionIndex
     set({ session: { ...s, answers } })
