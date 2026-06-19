@@ -110,6 +110,12 @@ export function sampleScenarioExam(
   return { questions }
 }
 
+/** Flatten every question of every set with its parent scenario's context. Used
+ * to register the question-bank sittings in the session-restore lookup. */
+export function flattenScenarioSets(sets: ScenarioSet[]): Question[] {
+  return sets.flatMap((s) => s.questions.map((q) => flatten(s, q)))
+}
+
 /** Group a question list into contiguous per-scenario blocks (for the navigator). */
 export function computeBlocks(questions: Question[]): ScenarioBlock[] {
   const blocks: ScenarioBlock[] = []

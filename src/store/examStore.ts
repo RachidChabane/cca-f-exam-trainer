@@ -1,8 +1,11 @@
 import { create } from 'zustand'
 import { DOMAIN_BY_KEY } from '@/data/blueprint'
 import { QUESTIONS, SCENARIO_SETS } from '@/data/scenarioSets'
+import { GENERATED_BANK_SETS, OFFICIAL_BANK_SETS, type BankSource } from '@/data/questionBank'
+import { SCENARIOS_PRESENTED } from '@/scenarios'
 import {
   buildSession,
+  flattenScenarioSets,
   gradeSession,
   sampleDrill,
   sampleScenarioExam,
@@ -31,6 +34,7 @@ interface ExamState {
   history: HistoryEntry[]
   start: () => void
   startScenario: () => void
+  startBank: (source: BankSource) => void
   startDrill: (domain: DomainKey, count?: number) => void
   retryWrong: () => void
   answer: (optionIndex: number) => void
@@ -64,7 +68,15 @@ function recordHistory(session: ExamSession): HistoryEntry[] {
 // Resolve any stored in-progress session against the live pool. This lives here
 // (the exam chunk) rather than in persist so the question data stays out of the
 // always-loaded shell.
-const QBY_ID = new Map<string, Question>(QUESTIONS.map((q) => [q.id, q]))
+// Restore lookup spans the authored scenario pool AND both question-bank sittings,
+// so an in-progress bank exam survives a refresh too.
+const BANK_QUESTIONS = [
+  ...flattenScenarioSets(OFFICIAL_BANK_SETS),
+  ...flattenScenarioSets(GENERATED_BANK_SETS),
+]
+const QBY_ID = new Map<string, Question>(
+  [...QUESTIONS, ...BANK_QUESTIONS].map((q) => [q.id, q]),
+)
 const restoredRaw = loadActiveRaw()
 const restoredSession = restoredRaw ? resolveSession(restoredRaw.session, QBY_ID) : null
 const restored = restoredSession ? { phase: restoredRaw!.phase, session: restoredSession } : null
@@ -85,6 +97,21 @@ export const useExamStore = create<ExamState>((set, get) => ({
 
   startScenario: () => {
     const { questions } = sampleScenarioExam(SCENARIO_SETS)
+    if (questions.length === 0) return
+    set({ session: buildSession(questions, { mode: 'exam', timed: true }), phase: 'active' })
+  },
+
+  // A timed sitting drawn from one provenance of the imported question bank: all
+  // four bank scenarios, questions shuffled within each scenario block. Source
+  // ('official' = imported verbatim) vs ('ai_generated' = original siblings) is
+  // never mixed, so the candidate always knows which bank they are practising.
+  startBank: (source) => {
+    const sets = source === 'official' ? OFFICIAL_BANK_SETS : GENERATED_BANK_SETS
+    // Draw a real-exam-shaped sitting: up to 4 of the available themes (one
+    // instance each). The source bank has exactly 4 themes (all shown); the
+    // AI-generated pool spans all 6, so it samples 4-of-6 like the real exam.
+    const present = Math.min(SCENARIOS_PRESENTED, sets.length)
+    const { questions } = sampleScenarioExam(sets, present)
     if (questions.length === 0) return
     set({ session: buildSession(questions, { mode: 'exam', timed: true }), phase: 'active' })
   },

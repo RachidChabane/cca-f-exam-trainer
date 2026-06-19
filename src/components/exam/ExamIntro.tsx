@@ -1,7 +1,18 @@
 import { useMemo } from 'react'
-import { Clock, Dumbbell, History, Layers, ListChecks, Target, Trash2 } from 'lucide-react'
+import {
+  Clock,
+  Dumbbell,
+  FileCheck2,
+  History,
+  Layers,
+  ListChecks,
+  Sparkles,
+  Target,
+  Trash2,
+} from 'lucide-react'
 import { BLUEPRINT, DOMAINS, DOMAIN_BY_KEY } from '@/data/blueprint'
 import { QUESTIONS } from '@/data/scenarioSets'
+import { BANK_COUNTS } from '@/data/questionBank'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -14,6 +25,7 @@ export function ExamIntro() {
   const lang = useLang()
   const start = useExamStore((s) => s.start)
   const startScenario = useExamStore((s) => s.startScenario)
+  const startBank = useExamStore((s) => s.startBank)
   const startDrill = useExamStore((s) => s.startDrill)
   const history = useExamStore((s) => s.history)
   const clearPastResults = useExamStore((s) => s.clearPastResults)
@@ -81,6 +93,45 @@ export function ExamIntro() {
           {t.scenarioDesc}
         </p>
       </div>
+
+      {/* Imported question bank — official (verbatim) vs AI-generated siblings */}
+      <Card className="mt-8 p-6">
+        <div className="mb-1 flex items-center gap-2">
+          <FileCheck2 className="h-4 w-4 text-primary" />
+          <h2 className="text-[12px] font-semibold uppercase tracking-wide text-muted-foreground">
+            {t.bankHeading}
+          </h2>
+        </div>
+        <p className="mb-4 text-[13px] leading-relaxed text-muted-foreground">{t.bankDesc}</p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <BankOption
+            icon={<FileCheck2 className="h-4 w-4" />}
+            title={t.bankOfficial}
+            desc={t.bankOfficialDesc}
+            badge={t.bankBadgeOfficial}
+            badgeVariant="primary"
+            count={BANK_COUNTS.official.questions}
+            countLabel={t.bankPool(BANK_COUNTS.official.questions, BANK_COUNTS.official.themes)}
+            startLabel={t.bankStart}
+            emptyLabel={t.bankGeneratedEmpty}
+            onStart={() => startBank('official')}
+            testid="start-bank-official"
+          />
+          <BankOption
+            icon={<Sparkles className="h-4 w-4" />}
+            title={t.bankGenerated}
+            desc={t.bankGeneratedDesc}
+            badge={t.bankBadgeGenerated}
+            badgeVariant="secondary"
+            count={BANK_COUNTS.ai_generated.questions}
+            countLabel={t.bankPool(BANK_COUNTS.ai_generated.questions, BANK_COUNTS.ai_generated.themes)}
+            startLabel={t.bankStart}
+            emptyLabel={t.bankGeneratedEmpty}
+            onStart={() => startBank('ai_generated')}
+            testid="start-bank-generated"
+          />
+        </div>
+      </Card>
 
       {/* Practice by domain (untimed drills) */}
       <Card className="mt-8 p-6">
@@ -189,6 +240,60 @@ export function ExamIntro() {
           </ul>
         )}
       </Card>
+    </div>
+  )
+}
+
+function BankOption({
+  icon,
+  title,
+  desc,
+  badge,
+  badgeVariant,
+  count,
+  countLabel,
+  startLabel,
+  emptyLabel,
+  onStart,
+  testid,
+}: {
+  icon: React.ReactNode
+  title: string
+  desc: string
+  badge: string
+  badgeVariant: 'primary' | 'secondary'
+  count: number
+  countLabel: string
+  startLabel: string
+  emptyLabel: string
+  onStart: () => void
+  testid: string
+}) {
+  const available = count > 0
+  return (
+    <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
+      <div className="flex items-center gap-2">
+        <span className="text-primary">{icon}</span>
+        <span className="text-sm font-semibold text-foreground">{title}</span>
+        <Badge variant={badgeVariant} className="ml-auto shrink-0">
+          {badge}
+        </Badge>
+      </div>
+      <p className="text-[12.5px] leading-relaxed text-muted-foreground">{desc}</p>
+      <div className="mt-auto flex items-center justify-between gap-3 pt-1">
+        <span className="text-[12px] tabular-nums text-muted-foreground">
+          {available ? countLabel : emptyLabel}
+        </span>
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={onStart}
+          disabled={!available}
+          data-testid={testid}
+        >
+          {startLabel}
+        </Button>
+      </div>
     </div>
   )
 }

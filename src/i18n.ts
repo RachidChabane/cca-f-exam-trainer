@@ -186,6 +186,22 @@ const en = {
   scenarioProgress: (n: number, total: number) => `Question ${n} of ${total} in this scenario`,
   scenarioContextToggle: 'Scenario context',
 
+  // Imported question bank (official + AI-generated)
+  bankHeading: 'Imported question bank',
+  bankDesc:
+    'Timed 60-question sittings built from a separate imported bank. Pick the verbatim source bank, or the original AI-written siblings that mimic the same concepts and traps.',
+  bankOfficial: 'Source bank',
+  bankOfficialDesc: 'Imported verbatim from the source exam bank, unaltered.',
+  bankGenerated: 'AI-generated bank',
+  bankGeneratedDesc:
+    'Original questions on the source patterns, spanning all six themes — 4 drawn per sitting, like the real exam.',
+  bankBadgeOfficial: 'Verbatim source',
+  bankBadgeGenerated: 'AI-generated',
+  bankStart: 'Start',
+  bankCount: (n: number) => `${n} question${n === 1 ? '' : 's'}`,
+  bankPool: (q: number, themes: number) => `${q} questions · ${themes} themes`,
+  bankGeneratedEmpty: 'Not generated yet',
+
   // Misc
   domainColon: 'Domain',
 }
@@ -372,6 +388,22 @@ const fr: typeof en = {
   scenarioLabel: 'Scénario',
   scenarioProgress: (n: number, total: number) => `Question ${n} sur ${total} de ce scénario`,
   scenarioContextToggle: 'Contexte du scénario',
+
+  // Banque de questions importée (officielle + générée par IA)
+  bankHeading: 'Banque de questions importée',
+  bankDesc:
+    'Sessions chronométrées de 60 questions issues d’une banque importée distincte. Choisissez la banque source intégrale, ou les questions originales écrites par IA qui reprennent les mêmes concepts et pièges.',
+  bankOfficial: 'Banque source',
+  bankOfficialDesc: 'Importée telle quelle depuis la banque d’examen source, sans modification.',
+  bankGenerated: 'Banque générée par IA',
+  bankGeneratedDesc:
+    'Questions originales sur les schémas de la source, couvrant les six thèmes — 4 tirés par session, comme à l’examen réel.',
+  bankBadgeOfficial: 'Source intégrale',
+  bankBadgeGenerated: 'Générée par IA',
+  bankStart: 'Commencer',
+  bankCount: (n: number) => `${n} question${n === 1 ? '' : 's'}`,
+  bankPool: (q: number, themes: number) => `${q} questions · ${themes} thèmes`,
+  bankGeneratedEmpty: 'Pas encore générée',
 
   // Divers
   domainColon: 'Domaine',
