@@ -27,8 +27,18 @@ they read as authentic exam items rather than obvious copies.
 
 ## The recurring distractor strategies
 
-Each generated question should build its three wrong options from this menu (pick
-the 2–3 that fit the concept; don't reuse the same three every time):
+This menu is the *reason* a distractor is ultimately wrong — NOT a template for how
+it should read. The cardinal sin is a **strawman**: an option a competent engineer
+would never propose ("continue as if it succeeded", "stand up a whole new vector
+DB", "agentify everything"), or one stuffed with self-incriminating words. Those
+make the answer guessable with zero domain knowledge.
+
+Instead, dress every distractor as a **plausible, specific approach a competent
+engineer would actually propose in this scenario** — and let it be wrong only for a
+subtle, scenario-specific reason drawn from the menu below. If you cannot write a
+convincing one-sentence "why a smart person would pick this", it is still a
+strawman: rewrite it. Pick the 2–3 menu reasons that fit; don't reuse the same
+three every time.
 
 1. **Prompt-when-you-need-a-guarantee.** Offer a system-prompt tweak, "stronger
    instructions", or few-shot examples as the fix for something that needs a
@@ -79,7 +89,25 @@ the 2–3 that fit the concept; don't reuse the same three every time):
 
 ## Generation rules (quality bar — inherited from the rebalanced site standard)
 
-- **Exactly one defensible answer.** No second option arguable as "also correct".
+- **One BEST answer among plausible competitors — NOT one defensible answer.** The
+  goal is a question where 2–3 options sound reasonable and a knowledgeable reader
+  must reason about *this* scenario to pick the best. "Only one option is even
+  defensible" is the definition of an obvious question — avoid it. There is still
+  exactly one *best* answer; the others are good-but-beaten, not absurd.
+- **Must pass the two-solver test.** (a) an expert reasoning fully, blind to the
+  key, must still pick the keyed answer (correctness). (b) a *test-wise reader with
+  no domain knowledge*, guessing only from surface cues (which sounds most
+  "best-practice", which avoids absolutist words, which isn't over-engineered),
+  must NOT reliably land on the key. If a cue-reader can guess it, it is too
+  obvious — for `medium`/`hard` items especially. (`easy` items may be more
+  surface-readable.)
+- **No tells.** Ban self-incriminating phrasing in distractors ("as if it
+  succeeded", "always/never", "silently", "regardless", "hard-code/ignore"). The
+  correct option must NOT recite the rubric or name the principle ("reserving agent
+  autonomy for open-ended tasks") — make the reader infer it. Don't telegraph in
+  the stem ("Following Anthropic's guidance on X…"). No cartoonish over-engineering
+  as a throwaway distractor; if you use the over-engineering reason, make the heavy
+  option genuinely tempting for the scenario.
 - **Balanced option lengths.** The correct answer must not be the longest or most
   hedged. Vary which option is longest.
 - **Balanced correct position.** The orchestrator assigns each sibling a target
