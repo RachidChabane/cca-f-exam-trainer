@@ -24,6 +24,11 @@ export interface ExamSession {
   domain?: DomainKey
   /** Optional bilingual label shown in the runner/results (e.g. drill name). */
   label?: Bi
+  /** Whether the countdown is paused. Only meaningful for timed sessions. */
+  paused: boolean
+  /** Remaining ms captured at the moment of pausing — freezes the display and is
+   * used to recompute `endsAt` on resume so paused time isn't counted. */
+  pausedRemainingMs?: number
 }
 
 /** A contiguous run of questions belonging to one scenario, for the grouped navigator. */
@@ -161,6 +166,7 @@ export function buildSession(
     timed: opts.timed,
     domain: opts.domain,
     label: opts.label,
+    paused: false,
   }
 }
 

@@ -57,6 +57,8 @@ interface SerializedSession {
   timed: boolean
   domain?: DomainKey
   label?: Bi
+  paused?: boolean
+  pausedRemainingMs?: number
 }
 
 /** The stored active session, still serialized (question *ids*, not full text).
@@ -89,6 +91,8 @@ export function saveActive(phase: ExamPhase, session: ExamSession | null): void 
       timed: session.timed,
       domain: session.domain,
       label: session.label,
+      paused: session.paused,
+      pausedRemainingMs: session.pausedRemainingMs,
     },
   }
   write(ACTIVE_KEY, JSON.stringify(payload))
@@ -133,6 +137,8 @@ export function resolveSession(
     timed: s.timed,
     domain: s.domain,
     label: s.label,
+    paused: s.paused ?? false,
+    pausedRemainingMs: s.pausedRemainingMs,
   }
 }
 

@@ -38,6 +38,7 @@ interface ExamState {
   startDrill: (domain: DomainKey, count?: number) => void
   retryWrong: () => void
   answer: (optionIndex: number) => void
+  togglePause: () => void
   toggleFlag: () => void
   goto: (index: number) => void
   next: () => void
@@ -149,9 +150,28 @@ export const useExamStore = create<ExamState>((set, get) => ({
     // keeps the score honest (you can't switch to the right option after seeing
     // it) and mirrors the reveal lock in Study-mode quizzes.
     if (s.answers[s.current] !== null) return
+    if (s.paused) return // can't answer while the exam is paused
     const answers = s.answers.slice()
     answers[s.current] = optionIndex
     set({ session: { ...s, answers } })
+  },
+
+  // Pause/resume the countdown (timed sessions only). Pausing freezes the clock
+  // by capturing the remaining ms; resuming pushes `endsAt` out by that amount so
+  // paused time is never counted against the candidate. The runner also hides the
+  // question while paused, so it's a genuine break, not free thinking time.
+  togglePause: () => {
+    const s = get().session
+    if (!s || !s.timed || s.status !== 'active') return
+    if (!s.paused) {
+      const remaining = Math.max(0, s.endsAt - Date.now())
+      set({ session: { ...s, paused: true, pausedRemainingMs: remaining } })
+    } else {
+      const remaining = s.pausedRemainingMs ?? Math.max(0, s.endsAt - Date.now())
+      set({
+        session: { ...s, paused: false, pausedRemainingMs: undefined, endsAt: Date.now() + remaining },
+      })
+    }
   },
 
   toggleFlag: () => {

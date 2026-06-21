@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { AlertTriangle, Check, ChevronLeft, ChevronRight, Flag, LayoutGrid, Timer, X } from 'lucide-react'
+import { AlertTriangle, Check, ChevronLeft, ChevronRight, Flag, LayoutGrid, Pause, Play, Timer, X } from 'lucide-react'
 import { BLUEPRINT, DOMAIN_BY_KEY } from '@/data/blueprint'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -32,13 +32,19 @@ export function ExamRunner() {
 
   const blocks = useMemo(() => (session ? computeBlocks(session.questions) : []), [session])
 
-  const remaining = useCountdown(
+  const togglePause = useExamStore((s) => s.togglePause)
+
+  const liveRemaining = useCountdown(
     session?.endsAt ?? 0,
-    (session?.timed ?? false) && session?.status === 'active',
+    (session?.timed ?? false) && session?.status === 'active' && !session?.paused,
     () => submit(true),
   )
 
   if (!session) return null
+
+  const paused = session.timed && session.paused
+  // While paused the countdown is stopped; show the ms captured at pause.
+  const remaining = paused ? session.pausedRemainingMs ?? liveRemaining : liveRemaining
 
   const i = session.current
   const q = session.questions[i]
@@ -96,6 +102,18 @@ export function ExamRunner() {
               {t.untimed}
             </Badge>
           )}
+          {session.timed && (
+            <Button
+              variant="secondary"
+              size="iconSm"
+              aria-label={paused ? t.resumeExam : t.pauseExam}
+              title={paused ? t.resumeExam : t.pauseExam}
+              onClick={togglePause}
+              data-testid="pause-exam"
+            >
+              {paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+            </Button>
+          )}
           <Button
             variant="secondary"
             size="iconSm"
@@ -119,6 +137,23 @@ export function ExamRunner() {
         </div>
       )}
 
+      {paused ? (
+        <Card className="mx-auto flex max-w-xl flex-col items-center gap-4 p-10 text-center animate-fade-in" data-testid="paused-overlay">
+          <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-surface text-primary">
+            <Pause className="h-6 w-6" />
+          </span>
+          <h2 className="font-serif text-2xl font-semibold">{t.pausedTitle}</h2>
+          <p className="max-w-sm text-[14px] leading-relaxed text-muted-foreground">{t.pausedBody}</p>
+          <div className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-3 py-1.5 text-[13px] font-semibold tabular-nums">
+            <Timer className="h-3.5 w-3.5" />
+            {formatDuration(remaining)} {t.timeRemaining}
+          </div>
+          <Button size="lg" onClick={togglePause} data-testid="resume-paused" className="mt-1">
+            <Play className="h-4 w-4" />
+            {t.resumeExam}
+          </Button>
+        </Card>
+      ) : (
       <div className="grid gap-6 lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)] lg:items-start">
         {/* Scenario context — sticky, stays visible across this scenario's whole set */}
         <aside className="lg:sticky lg:top-20" data-testid="scenario-context">
@@ -295,6 +330,7 @@ export function ExamRunner() {
           </div>
         </div>
       </div>
+      )}
 
       {/* Navigator modal */}
       <Modal open={gridOpen} onClose={() => setGridOpen(false)} className="max-h-[80vh] overflow-y-auto">
