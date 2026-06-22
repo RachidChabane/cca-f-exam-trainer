@@ -50,6 +50,28 @@ interface ExamState {
   clearPastResults: () => void
 }
 
+/**
+ * Keep the countdown consistent with whether it should be running. The timer is
+ * frozen whenever the candidate is (a) on a manual break (`paused`), or (b) on a
+ * question they've already answered — so reading the revealed explanations is not
+ * timed. While frozen we stash the remaining ms in `pausedRemainingMs` and stop
+ * the clock; when it should run again we push `endsAt` out by that remaining, so
+ * frozen time is never counted. Call this after any change to paused / current /
+ * answers / status.
+ */
+function reconcileTimer(s: ExamSession): ExamSession {
+  if (!s.timed || s.status !== 'active') return s
+  const frozen = s.pausedRemainingMs != null
+  const shouldFreeze = s.paused || s.answers[s.current] !== null
+  if (shouldFreeze && !frozen) {
+    return { ...s, pausedRemainingMs: Math.max(0, s.endsAt - Date.now()) }
+  }
+  if (!shouldFreeze && frozen) {
+    return { ...s, endsAt: Date.now() + (s.pausedRemainingMs as number), pausedRemainingMs: undefined }
+  }
+  return s
+}
+
 /** Record a finished session into the cross-session history. */
 function recordHistory(session: ExamSession): HistoryEntry[] {
   const r = gradeSession(session)
@@ -150,28 +172,21 @@ export const useExamStore = create<ExamState>((set, get) => ({
     // keeps the score honest (you can't switch to the right option after seeing
     // it) and mirrors the reveal lock in Study-mode quizzes.
     if (s.answers[s.current] !== null) return
-    if (s.paused) return // can't answer while the exam is paused
+    if (s.paused) return // can't answer while on a manual break
     const answers = s.answers.slice()
     answers[s.current] = optionIndex
-    set({ session: { ...s, answers } })
+    // Answering reveals the explanations; freeze the clock so reading them is
+    // untimed (reconcileTimer sees the now-answered current question).
+    set({ session: reconcileTimer({ ...s, answers }) })
   },
 
-  // Pause/resume the countdown (timed sessions only). Pausing freezes the clock
-  // by capturing the remaining ms; resuming pushes `endsAt` out by that amount so
-  // paused time is never counted against the candidate. The runner also hides the
-  // question while paused, so it's a genuine break, not free thinking time.
+  // Manual break: flip `paused` and let reconcileTimer freeze/resume the clock.
+  // Unlike the auto reading-pause, a manual pause also hides the question (the
+  // runner shows a Paused panel), so it's a genuine break, not free thinking time.
   togglePause: () => {
     const s = get().session
     if (!s || !s.timed || s.status !== 'active') return
-    if (!s.paused) {
-      const remaining = Math.max(0, s.endsAt - Date.now())
-      set({ session: { ...s, paused: true, pausedRemainingMs: remaining } })
-    } else {
-      const remaining = s.pausedRemainingMs ?? Math.max(0, s.endsAt - Date.now())
-      set({
-        session: { ...s, paused: false, pausedRemainingMs: undefined, endsAt: Date.now() + remaining },
-      })
-    }
+    set({ session: reconcileTimer({ ...s, paused: !s.paused }) })
   },
 
   toggleFlag: () => {
@@ -182,23 +197,26 @@ export const useExamStore = create<ExamState>((set, get) => ({
     set({ session: { ...s, flagged } })
   },
 
+  // Navigation reconciles the timer: moving onto an unanswered question resumes
+  // the clock; landing on an already-answered one keeps it frozen.
   goto: (index) => {
     const s = get().session
     if (!s) return
     const clamped = Math.max(0, Math.min(index, s.questions.length - 1))
-    set({ session: { ...s, current: clamped } })
+    set({ session: reconcileTimer({ ...s, current: clamped }) })
   },
 
   next: () => {
     const s = get().session
     if (!s) return
-    if (s.current < s.questions.length - 1) set({ session: { ...s, current: s.current + 1 } })
+    if (s.current < s.questions.length - 1)
+      set({ session: reconcileTimer({ ...s, current: s.current + 1 }) })
   },
 
   prev: () => {
     const s = get().session
     if (!s) return
-    if (s.current > 0) set({ session: { ...s, current: s.current - 1 } })
+    if (s.current > 0) set({ session: reconcileTimer({ ...s, current: s.current - 1 }) })
   },
 
   submit: (auto = false) => {

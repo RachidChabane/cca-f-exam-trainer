@@ -47,6 +47,33 @@ test('question-bank sitting can also be paused', async ({ page }) => {
   await expect(page.getByTestId('option-0')).toBeVisible()
 })
 
+test('selecting an answer auto-pauses the timer for reading, resumes on next', async ({ page }) => {
+  await page.goto('/')
+  await page.getByTestId('nav-exam').click()
+  await page.getByTestId('start-exam').click()
+
+  const timer = page.getByTestId('exam-timer')
+  await expect(timer).toBeVisible()
+
+  // Answer → explanations reveal, question stays visible (no overlay), timer freezes.
+  await page.getByTestId('option-0').click()
+  await expect(page.getByTestId('answer-feedback')).toBeVisible()
+  await expect(page.getByTestId('paused-overlay')).toHaveCount(0)
+  await expect(page.getByTestId('reading-paused-hint')).toBeVisible()
+
+  // The countdown is genuinely frozen: value unchanged after 2s.
+  const frozen = await timer.textContent()
+  await page.waitForTimeout(2000)
+  expect(await timer.textContent()).toBe(frozen)
+
+  // Moving to the next (unanswered) question resumes the clock.
+  await page.getByTestId('next-question').click()
+  await expect(page.getByTestId('reading-paused-hint')).toHaveCount(0)
+  const resumed = await timer.textContent()
+  await page.waitForTimeout(1500)
+  expect(await timer.textContent()).not.toBe(resumed)
+})
+
 test('untimed drills have no pause control', async ({ page }) => {
   await page.goto('/')
   await page.getByTestId('nav-exam').click()

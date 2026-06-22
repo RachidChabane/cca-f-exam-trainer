@@ -36,15 +36,19 @@ export function ExamRunner() {
 
   const liveRemaining = useCountdown(
     session?.endsAt ?? 0,
-    (session?.timed ?? false) && session?.status === 'active' && !session?.paused,
+    (session?.timed ?? false) && session?.status === 'active' && session?.pausedRemainingMs == null,
     () => submit(true),
   )
 
   if (!session) return null
 
-  const paused = session.timed && session.paused
-  // While paused the countdown is stopped; show the ms captured at pause.
-  const remaining = paused ? session.pausedRemainingMs ?? liveRemaining : liveRemaining
+  // The clock is frozen either for a manual break (`paused`, hides the question)
+  // or automatically while reading the revealed explanations of an answered
+  // question. Both stash the remaining ms in `pausedRemainingMs`.
+  const manualPaused = session.timed && session.paused
+  const timerFrozen = session.timed && session.pausedRemainingMs != null
+  const readingPaused = timerFrozen && !manualPaused
+  const remaining = timerFrozen ? (session.pausedRemainingMs as number) : liveRemaining
 
   const i = session.current
   const q = session.questions[i]
@@ -86,15 +90,17 @@ export function ExamRunner() {
             <div
               className={cn(
                 'inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[13px] font-semibold tabular-nums',
-                warning
-                  ? 'border-warning/50 bg-warning/10 text-warning'
-                  : 'border-border bg-card text-foreground',
+                timerFrozen
+                  ? 'border-primary/40 bg-primary/10 text-primary'
+                  : warning
+                    ? 'border-warning/50 bg-warning/10 text-warning'
+                    : 'border-border bg-card text-foreground',
               )}
-              aria-label={t.timeRemaining}
-              title={t.timeRemaining}
+              aria-label={timerFrozen ? t.timerPaused : t.timeRemaining}
+              title={timerFrozen ? t.timerPaused : t.timeRemaining}
               data-testid="exam-timer"
             >
-              <Timer className="h-3.5 w-3.5" />
+              {timerFrozen ? <Pause className="h-3.5 w-3.5" /> : <Timer className="h-3.5 w-3.5" />}
               {formatDuration(remaining)}
             </div>
           ) : (
@@ -106,12 +112,12 @@ export function ExamRunner() {
             <Button
               variant="secondary"
               size="iconSm"
-              aria-label={paused ? t.resumeExam : t.pauseExam}
-              title={paused ? t.resumeExam : t.pauseExam}
+              aria-label={manualPaused ? t.resumeExam : t.pauseExam}
+              title={manualPaused ? t.resumeExam : t.pauseExam}
               onClick={togglePause}
               data-testid="pause-exam"
             >
-              {paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+              {manualPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
             </Button>
           )}
           <Button
@@ -137,7 +143,7 @@ export function ExamRunner() {
         </div>
       )}
 
-      {paused ? (
+      {manualPaused ? (
         <Card className="mx-auto flex max-w-xl flex-col items-center gap-4 p-10 text-center animate-fade-in" data-testid="paused-overlay">
           <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-surface text-primary">
             <Pause className="h-6 w-6" />
@@ -287,6 +293,15 @@ export function ExamRunner() {
                 )}
                 {selected === correctIdx ? t.tagCorrect : t.tagIncorrect}
               </div>
+            )}
+            {revealed && readingPaused && (
+              <p
+                data-testid="reading-paused-hint"
+                className="mt-3 inline-flex items-center gap-1.5 text-[12.5px] text-primary"
+              >
+                <Pause className="h-3.5 w-3.5" />
+                {t.timerPausedReading}
+              </p>
             )}
           </Card>
 
