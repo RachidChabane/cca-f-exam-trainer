@@ -1,14 +1,48 @@
-/** Shared domain types for the CCA-F Exam Trainer. */
+/** Shared domain types for the Claude certification Exam Trainer. */
 
 export type Lang = 'en' | 'fr'
 export type Theme = 'dark' | 'light'
 
-export type DomainKey =
+/** The trainer hosts two certifications. They share the runner, timer, scoring,
+ * navigator and review; they differ in their domains, item formats and shape:
+ *  - `ccaf`  — Claude Certified Architect – Foundations. Scenario-framed: 4 shared
+ *              contexts x 15 linked single-answer questions.
+ *  - `ccarp` — Claude Certified Architect – Professional. 63 standalone items over
+ *              7 domains, mixing single-answer, multiple-response and matching. */
+export type ExamKey = 'ccaf' | 'ccarp'
+
+/** CCA-F domains (5). */
+export type CcafDomainKey =
   | 'agentic_architecture'
   | 'claude_code'
   | 'prompt_engineering'
   | 'tool_design_mcp'
   | 'context_management'
+
+/** CCA-P domains (7) — from the CCAR-P exam guide v1.0 blueprint. */
+export type CcarpDomainKey =
+  | 'solution_design'
+  | 'models_prompting_context'
+  | 'integration'
+  | 'evaluation_testing'
+  | 'governance_safety'
+  | 'stakeholder_lifecycle'
+  | 'developer_productivity'
+
+/** Any domain across either exam. A given session only ever mixes domains from
+ * its own exam; `session.exam` says which set applies. */
+export type DomainKey = CcafDomainKey | CcarpDomainKey
+
+/**
+ * How an item is answered.
+ *  - `mc`       — pick exactly one option.
+ *  - `mr`       — pick exactly `select_count` options (the stem states how many).
+ *                 Graded all-or-nothing: the selected set must equal the key.
+ *  - `matching` — several short scenarios ("rows"), each classified against ONE
+ *                 shared option set. Options may repeat across rows, so this is
+ *                 not a permutation. Graded all-or-nothing across every row.
+ */
+export type QuestionFormat = 'mc' | 'mr' | 'matching'
 
 export interface Bi {
   en: string
@@ -53,21 +87,40 @@ export interface ScenarioSet {
   questions: ScenarioQuestion[]
 }
 
-/** A scenario question flattened with its parent scenario's context, used by the
- * runner, the per-domain drills, scoring, and the answer review. */
+/**
+ * The runtime question shape used by the runner, drills, scoring and review —
+ * the single currency both exams are flattened into.
+ *
+ * `correct` is an index list rather than a single index so that one code path
+ * serves every format. Its meaning depends on `format`:
+ *  - `mc`       — one index.        Graded as a set (trivially).
+ *  - `mr`       — several indices.  Graded as a SET: order never matters.
+ *  - `matching` — one index PER ROW, positionally aligned with `rows`, so
+ *                 `correct[i]` is the chosen option for `rows[i]`. Graded as an
+ *                 ORDERED list, and repeats are legal (two rows may share an
+ *                 option).
+ * A CCA-F question is just the `mc` case with a one-element `correct`.
+ */
 export interface Question {
   id: string
+  exam: ExamKey
   domain: DomainKey
-  /** Parent scenario identity (for navigator grouping + the scenario tag). */
-  scenarioId: string
-  theme: string
-  scenarioTitle: Bi
-  scenarioContext: Bi
+  format: QuestionFormat
   stem: Bi
   options: BiList
-  correct_index: number
+  correct: number[]
   explanation: Bi
   distractor_explanations: BiList
+  /** `mr` only: how many options to select. The stem states it; the UI enforces it. */
+  select_count?: number
+  /** `matching` only: the row prompts, positionally aligned with `correct`. */
+  rows?: BiList
+  /** Scenario-framed exams (CCA-F) only — absent for CCA-P's standalone items.
+   * When absent the navigator groups by domain instead of by scenario. */
+  scenarioId?: string
+  theme?: string
+  scenarioTitle?: Bi
+  scenarioContext?: Bi
 }
 
 export interface CheckQuestion {
@@ -132,7 +185,7 @@ export interface Course {
 }
 
 export interface DomainBlueprint {
-  key: DomainKey
+  key: CcafDomainKey
   name: Bi
   weight: number
   pool_target: number
@@ -162,7 +215,7 @@ export interface Blueprint {
       pool: number
       instances_per_theme: number
       questions_per_scenario: number
-      per_scenario_domain_split: Record<DomainKey, number>
+      per_scenario_domain_split: Record<CcafDomainKey, number>
       note: string
       themes: string[]
     }
@@ -179,7 +232,7 @@ export interface Blueprint {
     time_limit_minutes: number
     soft_warning_remaining_minutes: number
     sampling: string
-    domain_session_counts: Record<DomainKey, number>
+    domain_session_counts: Record<CcafDomainKey, number>
   }
   pool: { total_target: number; rounding_rule: string }
   sources_note: string

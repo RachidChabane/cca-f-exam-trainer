@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { AlertTriangle, Check, ChevronLeft, ChevronRight, Flag, LayoutGrid, Pause, Play, Timer, X } from 'lucide-react'
-import { BLUEPRINT, DOMAIN_BY_KEY } from '@/data/blueprint'
+import { BLUEPRINT } from '@/data/blueprint'
+import { domainName } from '@/data/domains'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -8,20 +9,124 @@ import { Markdown } from '@/components/ui/Markdown'
 import { Modal } from '@/components/ui/Modal'
 import { QuestionGrid } from '@/components/exam/QuestionGrid'
 import { SCENARIO_BY_ID } from '@/scenarios'
-import { computeBlocks } from '@/lib/scoring'
+import { computeBlocks, isAnswerComplete, isCorrect } from '@/lib/scoring'
 import { cn } from '@/lib/cn'
 import { formatDuration, useCountdown } from '@/lib/useCountdown'
 import { useLang, useT } from '@/lib/useT'
 import { useExamStore } from '@/store/examStore'
+import type { Lang, Question } from '@/types'
 
-const LETTERS = ['A', 'B', 'C', 'D']
+const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F']
 const WARN_MS = BLUEPRINT.session.soft_warning_remaining_minutes * 60 * 1000
+
+/**
+ * A scenario-matching item: several short scenarios ("rows"), each classified
+ * against ONE shared option set. Options may key more than one row, so this is a
+ * per-row choice rather than a permutation — the UI must not remove an option
+ * once it has been used elsewhere.
+ *
+ * `answer[r]` is the option index picked for row r (-1 = not yet classified), and
+ * `q.correct[r]` is the keyed one. The item locks only when every row is filled.
+ */
+function MatchingGrid({
+  q,
+  lang,
+  answer,
+  revealed,
+  onPick,
+  t,
+}: {
+  q: Question
+  lang: Lang
+  answer: number[]
+  revealed: boolean
+  onPick: (row: number, option: number) => void
+  t: ReturnType<typeof useT>
+}) {
+  const rows = q.rows?.[lang] ?? []
+  const options = q.options[lang]
+  return (
+    <div className="mt-5 space-y-3" data-testid="matching-grid">
+      {rows.map((row, r) => {
+        const picked = answer[r] ?? -1
+        const keyed = q.correct[r]
+        const rowRight = picked === keyed
+        return (
+          <div
+            key={r}
+            className={cn(
+              'rounded-lg border p-3.5',
+              revealed
+                ? rowRight
+                  ? 'border-success/60 bg-success/10'
+                  : 'border-destructive/60 bg-destructive/10'
+                : 'border-border bg-card',
+            )}
+            data-testid={`matching-row-${r}`}
+          >
+            <div className="flex items-start gap-3">
+              <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-border-strong text-[12px] font-semibold text-muted-foreground">
+                {revealed ? (
+                  rowRight ? (
+                    <Check className="h-3.5 w-3.5 text-success" />
+                  ) : (
+                    <X className="h-3.5 w-3.5 text-destructive" />
+                  )
+                ) : (
+                  r + 1
+                )}
+              </span>
+              <p className="flex-1 text-[14.5px] leading-relaxed text-foreground">{row}</p>
+            </div>
+            <div className="mt-2.5 flex flex-wrap gap-2 pl-9">
+              {options.map((opt, o) => {
+                const isPicked = picked === o
+                const isKeyed = keyed === o
+                return (
+                  <button
+                    key={o}
+                    role="radio"
+                    aria-checked={isPicked}
+                    aria-label={`${row}: ${opt}`}
+                    disabled={revealed}
+                    onClick={() => onPick(r, o)}
+                    data-testid={`matching-${r}-${o}`}
+                    className={cn(
+                      'rounded-md border px-2.5 py-1 text-[12.5px] transition-colors duration-100',
+                      revealed
+                        ? isKeyed
+                          ? 'border-success bg-success/20 font-semibold text-success'
+                          : isPicked
+                            ? 'border-destructive bg-destructive/20 text-destructive line-through'
+                            : 'border-border text-muted-foreground opacity-60'
+                        : isPicked
+                          ? 'border-primary bg-primary/10 font-medium text-primary'
+                          : 'border-border bg-card text-foreground hover:border-border-strong hover:bg-surface-hover',
+                    )}
+                  >
+                    {opt}
+                  </button>
+                )
+              })}
+            </div>
+            {revealed && !rowRight && (
+              <p className="mt-2 pl-9 text-[12.5px] text-muted-foreground">
+                {t.correctAnswer}: <span className="font-medium text-success">{options[keyed]}</span>
+              </p>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
 
 export function ExamRunner() {
   const t = useT()
   const lang = useLang()
   const session = useExamStore((s) => s.session)
   const answer = useExamStore((s) => s.answer)
+  const answerRow = useExamStore((s) => s.answerRow)
   const toggleFlag = useExamStore((s) => s.toggleFlag)
   const next = useExamStore((s) => s.next)
   const prev = useExamStore((s) => s.prev)
@@ -30,7 +135,10 @@ export function ExamRunner() {
   const [gridOpen, setGridOpen] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
 
-  const blocks = useMemo(() => (session ? computeBlocks(session.questions) : []), [session])
+  const blocks = useMemo(
+    () => (session ? computeBlocks(session.questions, domainName) : []),
+    [session],
+  )
 
   const togglePause = useExamStore((s) => s.togglePause)
 
@@ -53,15 +161,26 @@ export function ExamRunner() {
   const i = session.current
   const q = session.questions[i]
   const total = session.questions.length
-  const selected = session.answers[i]
-  const revealed = selected !== null
-  const correctIdx = q.correct_index
+  const selected = session.answers[i] ?? []
+  // Revealed only once the answer is COMPLETE — a half-picked multiple-response
+  // shows nothing yet, so the candidate can still change their mind.
+  const revealed = isAnswerComplete(q, session.answers[i])
+  const isSelected = (idx: number) => selected.includes(idx)
+  const isKey = (idx: number) => q.correct.includes(idx)
   const isFlagged = session.flagged[i]
-  const answeredCount = session.answers.filter((a) => a !== null).length
+  // A question counts as answered only when complete, matching the reveal/lock
+  // rule — so the progress count never claims a half-filled item is done.
+  const answeredCount = session.questions.filter((qq, idx) =>
+    isAnswerComplete(qq, session.answers[idx]),
+  ).length
   const unanswered = total - answeredCount
   const warning = session.timed && remaining <= WARN_MS
-  const domain = DOMAIN_BY_KEY[q.domain]
-  const theme = SCENARIO_BY_ID[q.theme]
+  const domain = { name: domainName(q.domain) }
+  const theme = q.theme ? SCENARIO_BY_ID[q.theme] : undefined
+  const selectCount = q.select_count ?? q.correct.length
+  const needed = q.format === 'mr' ? selectCount - selected.length : 0
+  const hasContext = Boolean(q.scenarioContext)
+  const answerCorrect = isCorrect(q, session.answers[i])
 
   const block = blocks.find((b) => i >= b.start && i < b.start + b.count)
   const posInScenario = block ? i - block.start + 1 : 1
@@ -79,7 +198,7 @@ export function ExamRunner() {
         <Badge variant="secondary" className="font-medium">
           {domain.name[lang]}
         </Badge>
-        <span className="text-[13px] text-muted-foreground tabular-nums">
+        <span className="text-[13px] text-muted-foreground tabular-nums" data-testid="question-counter">
           {t.questionOf(i + 1, total)}
         </span>
         <div className="ml-auto flex items-center gap-2">
@@ -160,8 +279,17 @@ export function ExamRunner() {
           </Button>
         </Card>
       ) : (
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)] lg:items-start">
-        {/* Scenario context — sticky, stays visible across this scenario's whole set */}
+      <div
+        className={cn(
+          'grid gap-6 lg:items-start',
+          // CCA-P items are standalone: with no shared context there is no left
+          // panel, so the question takes the full width instead of leaving a hole.
+          hasContext && 'lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)]',
+        )}
+      >
+        {/* Scenario context — sticky, stays visible across this scenario's whole set.
+            Scenario-framed exams (CCA-F) only. */}
+        {hasContext && (
         <aside className="lg:sticky lg:top-20" data-testid="scenario-context">
           <Card className="p-5">
             <div className="mb-2 flex flex-wrap items-center gap-2">
@@ -171,7 +299,7 @@ export function ExamRunner() {
               {theme && <Badge variant="outline">{theme.name[lang]}</Badge>}
             </div>
             <h2 className="font-serif text-lg font-semibold leading-snug text-foreground">
-              {q.scenarioTitle[lang]}
+              {q.scenarioTitle?.[lang]}
             </h2>
             {session.mode === 'exam' && (
               <p className="mt-1 text-[12px] text-muted-foreground tabular-nums">
@@ -179,10 +307,11 @@ export function ExamRunner() {
               </p>
             )}
             <div className="mt-3 max-h-[42vh] overflow-auto rounded-md border border-border bg-surface px-4 py-3 text-[13.5px] leading-relaxed lg:max-h-[calc(100vh-12rem)]">
-              <Markdown>{q.scenarioContext[lang]}</Markdown>
+              <Markdown>{q.scenarioContext?.[lang] ?? ''}</Markdown>
             </div>
           </Card>
         </aside>
+        )}
 
         {/* Question */}
         <div className="min-w-0">
@@ -191,17 +320,47 @@ export function ExamRunner() {
               {q.stem[lang]}
             </h2>
 
-            <div className="mt-5 space-y-2.5" role="radiogroup" aria-label={q.stem[lang]}>
+            {/* Multiple-response: the real exam states how many to select, and the
+                item only locks once that many are chosen. Show the running count so
+                the rule is visible rather than discovered. */}
+            {q.format === 'mr' && (
+              <p
+                className={cn(
+                  'mt-2 text-[13px] font-medium',
+                  revealed ? 'text-muted-foreground' : 'text-primary',
+                )}
+                data-testid="mr-hint"
+              >
+                {t.selectExactly(selectCount)}
+                {!revealed && needed > 0 && ` — ${t.selectRemaining(needed)}`}
+              </p>
+            )}
+
+            {q.format === 'matching' ? (
+              <MatchingGrid
+                q={q}
+                lang={lang}
+                answer={selected}
+                revealed={revealed}
+                onPick={answerRow}
+                t={t}
+              />
+            ) : (
+            <div
+              className="mt-5 space-y-2.5"
+              role={q.format === 'mr' ? 'group' : 'radiogroup'}
+              aria-label={q.stem[lang]}
+            >
               {q.options[lang].map((opt, idx) => {
-                const isSel = selected === idx
-                const isCorrectOpt = idx === correctIdx
+                const isSel = isSelected(idx)
+                const isCorrectOpt = isKey(idx)
                 const rationale = isCorrectOpt
                   ? q.explanation[lang]
                   : q.distractor_explanations[lang][idx]
                 return (
                   <div key={idx}>
                     <button
-                      role="radio"
+                      role={q.format === 'mr' ? 'checkbox' : 'radio'}
                       aria-checked={isSel}
                       disabled={revealed}
                       onClick={() => answer(idx)}
@@ -276,22 +435,34 @@ export function ExamRunner() {
                 )
               })}
             </div>
+            )}
+            {/* Matching keys per row, so its walkthrough lives in the overall
+                explanation rather than in per-option rebuttals. */}
+            {revealed && q.format === 'matching' && (
+              <p className="mt-4 text-[13px] leading-relaxed text-foreground" data-testid="matching-rationale">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-success">
+                  {t.whyCorrect}
+                  {' · '}
+                </span>
+                {q.explanation[lang]}
+              </p>
+            )}
             {revealed && (
               <div
                 data-testid="answer-feedback"
                 className={cn(
                   'mt-4 inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-[13px] font-semibold',
-                  selected === correctIdx
+                  answerCorrect
                     ? 'border-success/40 bg-success/10 text-success'
                     : 'border-destructive/40 bg-destructive/10 text-destructive',
                 )}
               >
-                {selected === correctIdx ? (
+                {answerCorrect ? (
                   <Check className="h-4 w-4" />
                 ) : (
                   <X className="h-4 w-4" />
                 )}
-                {selected === correctIdx ? t.tagCorrect : t.tagIncorrect}
+                {answerCorrect ? t.tagCorrect : t.tagIncorrect}
               </div>
             )}
             {revealed && readingPaused && (

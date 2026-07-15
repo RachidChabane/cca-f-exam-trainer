@@ -1,17 +1,18 @@
 import { useMemo, useState } from 'react'
 import { Check, ChevronLeft, Flag, X } from 'lucide-react'
-import { DOMAIN_BY_KEY } from '@/data/blueprint'
+import { domainName } from '@/data/domains'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Markdown } from '@/components/ui/Markdown'
 import { SCENARIO_BY_ID } from '@/scenarios'
+import { isCorrect, type Answer } from '@/lib/scoring'
 import { cn } from '@/lib/cn'
 import { useLang, useT } from '@/lib/useT'
 import { useExamStore } from '@/store/examStore'
 import type { Question } from '@/types'
 
-const LETTERS = ['A', 'B', 'C', 'D']
+const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F']
 type Filter = 'all' | 'incorrect' | 'flagged'
 
 export function ExamReview() {
@@ -25,7 +26,7 @@ export function ExamReview() {
     return session.questions
       .map((q, idx) => ({ q, idx, answer: session.answers[idx], flagged: session.flagged[idx] }))
       .filter((it) => {
-        if (filter === 'incorrect') return it.answer !== it.q.correct_index
+        if (filter === 'incorrect') return !isCorrect(it.q, it.answer)
         if (filter === 'flagged') return it.flagged
         return true
       })
@@ -99,13 +100,13 @@ function ReviewCard({
 }: {
   q: Question
   number: number
-  userAnswer: number | null
+  userAnswer: Answer
   flagged: boolean
 }) {
   const t = useT()
   const lang = useLang()
-  const correctIdx = q.correct_index
-  const isCorrect = userAnswer === correctIdx
+  const picked = userAnswer ?? []
+  const correct = isCorrect(q, userAnswer)
 
   return (
     <Card className="overflow-hidden">
@@ -113,7 +114,7 @@ function ReviewCard({
         <span className="text-[13px] font-semibold tabular-nums text-muted-foreground">
           {String(number).padStart(2, '0')}
         </span>
-        <Badge variant="secondary">{DOMAIN_BY_KEY[q.domain].name[lang]}</Badge>
+        <Badge variant="secondary">{domainName(q.domain)[lang]}</Badge>
         {flagged && (
           <Badge variant="warning" className="gap-1">
             <Flag className="h-3 w-3 fill-warning text-warning" />
@@ -121,39 +122,46 @@ function ReviewCard({
           </Badge>
         )}
         <span className="ml-auto">
-          <Badge variant={isCorrect ? 'success' : 'destructive'} className="gap-1">
-            {isCorrect ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
-            {isCorrect ? t.tagCorrect : t.tagIncorrect}
+          <Badge variant={correct ? 'success' : 'destructive'} className="gap-1">
+            {correct ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
+            {correct ? t.tagCorrect : t.tagIncorrect}
           </Badge>
         </span>
       </div>
 
       <div className="p-5">
-        <div className="mb-2 flex flex-wrap items-center gap-2">
-          {SCENARIO_BY_ID[q.theme] && (
+        {/* Scenario framing exists only for CCA-F; CCA-P items are standalone. */}
+        {q.theme && SCENARIO_BY_ID[q.theme] && (
+          <div className="mb-2 flex flex-wrap items-center gap-2">
             <Badge variant="outline" className="text-[11px]">
               {SCENARIO_BY_ID[q.theme].name[lang]}
             </Badge>
-          )}
-          <span className="text-[12.5px] font-medium text-muted-foreground">{q.scenarioTitle[lang]}</span>
-        </div>
-        <details className="group mb-3">
-          <summary className="cursor-pointer list-none text-[11px] font-semibold uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground">
-            <span className="inline-flex items-center gap-1.5">
-              <span className="transition-transform group-open:rotate-90">›</span>
-              {t.scenarioContextToggle}
-            </span>
-          </summary>
-          <div className="mt-2 rounded-md border border-border bg-surface px-4 py-3 text-[13px] leading-relaxed">
-            <Markdown>{q.scenarioContext[lang]}</Markdown>
+            {q.scenarioTitle && (
+              <span className="text-[12.5px] font-medium text-muted-foreground">
+                {q.scenarioTitle[lang]}
+              </span>
+            )}
           </div>
-        </details>
+        )}
+        {q.scenarioContext && (
+          <details className="group mb-3">
+            <summary className="cursor-pointer list-none text-[11px] font-semibold uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="transition-transform group-open:rotate-90">›</span>
+                {t.scenarioContextToggle}
+              </span>
+            </summary>
+            <div className="mt-2 rounded-md border border-border bg-surface px-4 py-3 text-[13px] leading-relaxed">
+              <Markdown>{q.scenarioContext[lang]}</Markdown>
+            </div>
+          </details>
+        )}
         <h3 className="text-[15.5px] font-semibold leading-snug">{q.stem[lang]}</h3>
 
         <ul className="mt-4 space-y-2">
           {q.options[lang].map((opt, idx) => {
-            const isAns = correctIdx === idx
-            const isUser = userAnswer === idx
+            const isAns = q.correct.includes(idx)
+            const isUser = picked.includes(idx)
             return (
               <li
                 key={idx}
@@ -192,7 +200,7 @@ function ReviewCard({
           })}
         </ul>
 
-        {userAnswer === null && (
+        {userAnswer == null && (
           <p className="mt-3 text-[12.5px] italic text-muted-foreground">{t.notAnswered}</p>
         )}
 
@@ -212,7 +220,10 @@ function ReviewCard({
           </summary>
           <ul className="mt-2 space-y-2">
             {q.options[lang].map((_, idx) =>
-              idx === correctIdx ? null : (
+              // Skip every keyed option (all of them, for multiple-response) and
+              // any option with no written rebuttal — the imported CCA-P set carries
+              // one combined rationale instead of per-option ones.
+              q.correct.includes(idx) || !q.distractor_explanations[lang][idx] ? null : (
                 <li key={idx} className="flex gap-2.5 text-[13px] leading-relaxed text-muted-foreground">
                   <span className="font-semibold text-foreground">{LETTERS[idx]}.</span>
                   <span>{q.distractor_explanations[lang][idx]}</span>

@@ -11,10 +11,11 @@
     "check:data": "node scripts/check-data.mjs",
     "fact-check": "node scripts/fact-check.mjs",
     "fact-check:llm": "node scripts/fact-check-llm.mjs",
-    "verify": "npm run check:data && npm run fact-check && npm run build",
+    "verify": "npm run check:data && npm run check:tells && npm run fact-check && npm run build",
     "pretest:e2e": "npm run build",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "check:tells": "node scripts/check-tells.mjs"
   },
   "dependencies": {
     "@fontsource/fraunces": "^5.2.9",

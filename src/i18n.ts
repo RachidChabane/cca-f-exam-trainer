@@ -207,6 +207,19 @@ const en = {
   bankPool: (q: number, themes: number) => `${q} questions · ${themes} themes`,
   bankGeneratedEmpty: 'Not generated yet',
 
+  // CCA-P (CCAR-P) — multiple-response + scenario-matching items
+  selectExactly: (n: number) => `Select ${n === 2 ? 'TWO' : n === 3 ? 'THREE' : n}`,
+  selectRemaining: (n: number) => `${n} more to pick`,
+  ccarpTitle: 'CCA-P — Architect Professional',
+  ccarpSubtitle: '63 items · 120 min · 7 domains · multiple-response',
+  ccarpOfficial: 'Imported practice set',
+  ccarpGenerated: 'Generated bank',
+  ccarpOfficialNote: 'Imported from a community practice set, then length-rebalanced. Not real exam items.',
+  ccarpGeneratedNote: 'Original questions written to the exam-guide blueprint.',
+  ccarpFormatMc: 'Single answer',
+  ccarpFormatMr: 'Multiple response',
+  ccarpFormatMatching: 'Matching',
+
   // Misc
   domainColon: 'Domain',
 }
@@ -414,6 +427,19 @@ const fr: typeof en = {
   bankCount: (n: number) => `${n} question${n === 1 ? '' : 's'}`,
   bankPool: (q: number, themes: number) => `${q} questions · ${themes} thèmes`,
   bankGeneratedEmpty: 'Pas encore générée',
+
+  // CCA-P (CCAR-P) — réponses multiples + appariement de scénarios
+  selectExactly: (n: number) => `Sélectionnez ${n === 2 ? 'DEUX' : n === 3 ? 'TROIS' : n} réponses`,
+  selectRemaining: (n: number) => `encore ${n} à choisir`,
+  ccarpTitle: 'CCA-P — Architect Professional',
+  ccarpSubtitle: '63 questions · 120 min · 7 domaines · réponses multiples',
+  ccarpOfficial: 'Jeu d’entraînement importé',
+  ccarpGenerated: 'Banque générée',
+  ccarpOfficialNote: 'Importé d’un jeu d’entraînement communautaire, puis rééquilibré en longueur. Ce ne sont pas de vraies questions d’examen.',
+  ccarpGeneratedNote: 'Questions originales rédigées d’après le blueprint du guide d’examen.',
+  ccarpFormatMc: 'Réponse unique',
+  ccarpFormatMr: 'Réponses multiples',
+  ccarpFormatMatching: 'Appariement',
 
   // Divers
   domainColon: 'Domaine',

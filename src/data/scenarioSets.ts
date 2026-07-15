@@ -1,4 +1,5 @@
 import scenariosRaw from '@data/scenarios.json'
+import { flattenScenarioSets } from '@/lib/scoring'
 import type { Question, ScenarioSet } from '@/types'
 
 /**
@@ -14,18 +15,4 @@ export const SCENARIO_SETS = scenariosRaw as ScenarioSet[]
  * navigator, and the answer review can all work question-by-question while the
  * full scenario sitting still groups them by scenario.
  */
-export const QUESTIONS: Question[] = SCENARIO_SETS.flatMap((s) =>
-  s.questions.map((q) => ({
-    id: q.id,
-    domain: q.domain,
-    scenarioId: s.id,
-    theme: s.theme,
-    scenarioTitle: s.title,
-    scenarioContext: s.context,
-    stem: q.stem,
-    options: q.options,
-    correct_index: q.correct_index,
-    explanation: q.explanation,
-    distractor_explanations: q.distractor_explanations,
-  })),
-)
+export const QUESTIONS: Question[] = flattenScenarioSets(SCENARIO_SETS)

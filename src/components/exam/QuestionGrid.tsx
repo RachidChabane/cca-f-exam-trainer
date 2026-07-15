@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { Flag } from 'lucide-react'
-import { computeBlocks } from '@/lib/scoring'
+import { computeBlocks, isAnswerComplete } from '@/lib/scoring'
+import { domainName } from '@/data/domains'
 import { cn } from '@/lib/cn'
 import { useLang, useT } from '@/lib/useT'
 import { useExamStore } from '@/store/examStore'
@@ -10,13 +11,18 @@ export function QuestionGrid({ onNavigate }: { onNavigate?: () => void }) {
   const lang = useLang()
   const session = useExamStore((s) => s.session)
   const goto = useExamStore((s) => s.goto)
-  const blocks = useMemo(() => (session ? computeBlocks(session.questions) : []), [session])
+  const blocks = useMemo(
+    () => (session ? computeBlocks(session.questions, domainName) : []),
+    [session],
+  )
   if (!session) return null
 
   const grouped = session.mode === 'exam' && blocks.length > 1
 
   function cell(i: number) {
-    const answered = session!.answers[i] !== null
+    // Complete, not merely started — a half-picked multiple-response is still
+    // outstanding, and the navigator is how you find what you left unfinished.
+    const answered = isAnswerComplete(session!.questions[i], session!.answers[i])
     const flagged = session!.flagged[i]
     const current = session!.current === i
     return (

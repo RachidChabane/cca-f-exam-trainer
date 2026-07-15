@@ -2,11 +2,16 @@ import { create } from 'zustand'
 import { DOMAIN_BY_KEY } from '@/data/blueprint'
 import { QUESTIONS, SCENARIO_SETS } from '@/data/scenarioSets'
 import { GENERATED_BANK_SETS, OFFICIAL_BANK_SETS, type BankSource } from '@/data/questionBank'
+import { CCARP_GENERATED, CCARP_OFFICIAL, type CcarpSource } from '@/data/ccarpBank'
+import { CCARP_DOMAIN_ORDER, CCARP_EXAM, CCARP_SESSION_COUNTS } from '@/data/ccarpBlueprint'
 import { SCENARIOS_PRESENTED } from '@/scenarios'
 import {
   buildSession,
   flattenScenarioSets,
   gradeSession,
+  isAnswerComplete,
+  isCorrect,
+  sampleCcarpExam,
   sampleDrill,
   sampleScenarioExam,
   type ExamSession,
@@ -35,9 +40,11 @@ interface ExamState {
   start: () => void
   startScenario: () => void
   startBank: (source: BankSource) => void
+  startCcarp: (source: CcarpSource) => void
   startDrill: (domain: DomainKey, count?: number) => void
   retryWrong: () => void
   answer: (optionIndex: number) => void
+  answerRow: (rowIndex: number, optionIndex: number) => void
   togglePause: () => void
   toggleFlag: () => void
   goto: (index: number) => void
@@ -62,7 +69,10 @@ interface ExamState {
 function reconcileTimer(s: ExamSession): ExamSession {
   if (!s.timed || s.status !== 'active') return s
   const frozen = s.pausedRemainingMs != null
-  const shouldFreeze = s.paused || s.answers[s.current] !== null
+  // Freeze once the answer is COMPLETE, not merely started: a half-selected
+  // multiple-response or a partly-filled matching grid has revealed nothing yet,
+  // so that thinking time is still the candidate's own and must stay on the clock.
+  const shouldFreeze = s.paused || isAnswerComplete(s.questions[s.current], s.answers[s.current])
   if (shouldFreeze && !frozen) {
     return { ...s, pausedRemainingMs: Math.max(0, s.endsAt - Date.now()) }
   }
@@ -72,12 +82,21 @@ function reconcileTimer(s: ExamSession): ExamSession {
   return s
 }
 
+/** Write an answer for the current question and reconcile the clock. Completing
+ * an answer reveals the explanations, so the timer freezes for the reading. */
+function commitAnswer(s: ExamSession, next: number[]): ExamSession {
+  const answers = s.answers.slice()
+  answers[s.current] = next
+  return reconcileTimer({ ...s, answers })
+}
+
 /** Record a finished session into the cross-session history. */
 function recordHistory(session: ExamSession): HistoryEntry[] {
   const r = gradeSession(session)
   return appendHistory({
     at: session.submittedAt ?? Date.now(),
     mode: session.mode,
+    exam: session.exam,
     domain: session.domain ?? null,
     timed: session.timed,
     scaled: r.scaled,
@@ -98,7 +117,7 @@ const BANK_QUESTIONS = [
   ...flattenScenarioSets(GENERATED_BANK_SETS),
 ]
 const QBY_ID = new Map<string, Question>(
-  [...QUESTIONS, ...BANK_QUESTIONS].map((q) => [q.id, q]),
+  [...QUESTIONS, ...BANK_QUESTIONS, ...CCARP_OFFICIAL, ...CCARP_GENERATED].map((q) => [q.id, q]),
 )
 const restoredRaw = loadActiveRaw()
 const restoredSession = restoredRaw ? resolveSession(restoredRaw.session, QBY_ID) : null
@@ -139,6 +158,32 @@ export const useExamStore = create<ExamState>((set, get) => ({
     set({ session: buildSession(questions, { mode: 'exam', timed: true }), phase: 'active' })
   },
 
+  /**
+   * A full CCA-P sitting: 63 items at the blueprint's per-domain weights, 120
+   * minutes, single provenance. Unlike CCA-F this is not scenario-framed — the
+   * items are standalone, so they are laid out in exam-guide domain order.
+   */
+  startCcarp: (source) => {
+    const pool = source === 'official' ? CCARP_OFFICIAL : CCARP_GENERATED
+    const { questions, shortfall } = sampleCcarpExam(pool, CCARP_SESSION_COUNTS, CCARP_DOMAIN_ORDER)
+    if (questions.length === 0) return
+    if (Object.keys(shortfall).length) {
+      // Visible rather than silent: a short sitting is still worth taking, but the
+      // candidate should know it isn't the real 63-item weighting.
+      console.warn('[ccarp] sitting is short of blueprint quota:', shortfall)
+    }
+    set({
+      session: buildSession(questions, {
+        mode: 'exam',
+        timed: true,
+        exam: 'ccarp',
+        minutes: CCARP_EXAM.mechanics.time_limit_minutes,
+        label: CCARP_EXAM.name,
+      }),
+      phase: 'active',
+    })
+  },
+
   startDrill: (domain, count = DRILL_COUNT) => {
     const questions = sampleDrill(QUESTIONS, domain, count)
     if (questions.length === 0) return
@@ -156,28 +201,65 @@ export const useExamStore = create<ExamState>((set, get) => ({
   retryWrong: () => {
     const s = get().session
     if (!s) return
-    const wrong = s.questions.filter((q, i) => s.answers[i] !== q.correct_index)
+    const wrong = s.questions.filter((q, i) => !isCorrect(q, s.answers[i]))
     if (wrong.length === 0) return
     set({
-      session: buildSession(wrong, { mode: 'drill', timed: false }),
+      session: buildSession(wrong, { mode: 'drill', timed: false, exam: s.exam }),
       phase: 'active',
     })
   },
 
+  /**
+   * Select an option on the current question.
+   *
+   * Instant-feedback mode: a question locks the moment its answer is COMPLETE,
+   * revealing the explanations. Ignoring further input keeps the score honest —
+   * you can't switch after seeing the key — mirroring Study-mode's reveal lock.
+   *
+   * "Complete" depends on the format, which is what makes multi-select work
+   * without a submit button:
+   *  - mc       — one click completes it (unchanged CCA-F behaviour).
+   *  - mr       — clicks accumulate and toggle freely; it locks only once
+   *               `select_count` options are selected. Below that you can change
+   *               your mind, because nothing has been revealed yet.
+   * Matching items are answered row-by-row via `answerRow`.
+   */
   answer: (optionIndex) => {
     const s = get().session
-    if (!s || s.status !== 'active') return
-    // Instant-feedback mode: selecting an option commits it and reveals the
-    // answer immediately, so a question locks on first pick. Ignoring re-answers
-    // keeps the score honest (you can't switch to the right option after seeing
-    // it) and mirrors the reveal lock in Study-mode quizzes.
-    if (s.answers[s.current] !== null) return
-    if (s.paused) return // can't answer while on a manual break
-    const answers = s.answers.slice()
-    answers[s.current] = optionIndex
-    // Answering reveals the explanations; freeze the clock so reading them is
-    // untimed (reconcileTimer sees the now-answered current question).
-    set({ session: reconcileTimer({ ...s, answers }) })
+    if (!s || s.status !== 'active' || s.paused) return
+    const q = s.questions[s.current]
+    const prev = s.answers[s.current]
+    if (isAnswerComplete(q, prev)) return // locked: already revealed
+    if (q.format === 'matching') return // use answerRow
+
+    let next: number[]
+    if (q.format === 'mr') {
+      const cur = prev ?? []
+      next = cur.includes(optionIndex)
+        ? cur.filter((i) => i !== optionIndex) // toggle off — nothing revealed yet
+        : [...cur, optionIndex]
+      if (next.length > (q.select_count ?? q.correct.length)) return // stem caps it
+    } else {
+      next = [optionIndex]
+    }
+    set({ session: commitAnswer(s, next) })
+  },
+
+  /** Classify one row of a matching item against the shared option set. Rows can
+   * be revised until every row is filled, at which point the item locks. */
+  answerRow: (rowIndex, optionIndex) => {
+    const s = get().session
+    if (!s || s.status !== 'active' || s.paused) return
+    const q = s.questions[s.current]
+    if (q.format !== 'matching') return
+    const rowCount = q.rows?.en.length ?? 0
+    if (rowIndex < 0 || rowIndex >= rowCount) return
+    const prev = s.answers[s.current]
+    if (isAnswerComplete(q, prev)) return // locked
+    // -1 = row not yet classified; isAnswerComplete waits for all of them.
+    const next = prev ? prev.slice() : (Array(rowCount).fill(-1) as number[])
+    next[rowIndex] = optionIndex
+    set({ session: commitAnswer(s, next) })
   },
 
   // Manual break: flip `paused` and let reconcileTimer freeze/resume the clock.

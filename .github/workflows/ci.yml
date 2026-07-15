@@ -25,6 +25,8 @@ jobs:
       - run: npm ci
       - name: Validate data schema
         run: npm run check:data
+      - name: Surface-tell gate (can a knowledge-free reader beat chance?)
+        run: npm run check:tells
       - name: Fact-check exam parameters (deterministic)
         run: npm run fact-check
       - name: Type-check & production build

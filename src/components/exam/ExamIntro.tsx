@@ -3,6 +3,7 @@ import {
   Clock,
   Dumbbell,
   FileCheck2,
+  GraduationCap,
   History,
   Layers,
   ListChecks,
@@ -13,6 +14,7 @@ import {
 import { BLUEPRINT, DOMAINS, DOMAIN_BY_KEY } from '@/data/blueprint'
 import { QUESTIONS } from '@/data/scenarioSets'
 import { BANK_COUNTS } from '@/data/questionBank'
+import { CCARP_COUNTS, CCARP_FORMAT_COUNTS } from '@/data/ccarpBank'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -26,6 +28,7 @@ export function ExamIntro() {
   const start = useExamStore((s) => s.start)
   const startScenario = useExamStore((s) => s.startScenario)
   const startBank = useExamStore((s) => s.startBank)
+  const startCcarp = useExamStore((s) => s.startCcarp)
   const startDrill = useExamStore((s) => s.startDrill)
   const history = useExamStore((s) => s.history)
   const clearPastResults = useExamStore((s) => s.clearPastResults)
@@ -129,6 +132,63 @@ export function ExamIntro() {
             emptyLabel={t.bankGeneratedEmpty}
             onStart={() => startBank('ai_generated')}
             testid="start-bank-generated"
+          />
+        </div>
+      </Card>
+
+      {/* CCA-P (CCAR-P) — the *other* certification. Kept visually distinct from the
+          CCA-F cards above so a sitting is never started against the wrong exam. */}
+      <Card className="mt-8 border-primary/30 p-6">
+        <div className="mb-1 flex flex-wrap items-center gap-2">
+          <GraduationCap className="h-4 w-4 text-primary" />
+          <h2 className="text-[12px] font-semibold uppercase tracking-wide text-muted-foreground">
+            {t.ccarpTitle}
+          </h2>
+          <Badge variant="primary" className="text-[10px]">
+            {t.ccarpSubtitle}
+          </Badge>
+        </div>
+        <div className="mb-4 mt-2 flex flex-wrap gap-1.5">
+          {(
+            [
+              [t.ccarpFormatMc, CCARP_FORMAT_COUNTS.mc],
+              [t.ccarpFormatMr, CCARP_FORMAT_COUNTS.mr],
+              [t.ccarpFormatMatching, CCARP_FORMAT_COUNTS.matching],
+            ] as const
+          ).map(([label, n]) =>
+            n > 0 ? (
+              <Badge key={label} variant="outline" className="text-[10.5px]">
+                {label} · {n}
+              </Badge>
+            ) : null,
+          )}
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <BankOption
+            icon={<FileCheck2 className="h-4 w-4" />}
+            title={t.ccarpOfficial}
+            desc={t.ccarpOfficialNote}
+            badge={t.bankBadgeOfficial}
+            badgeVariant="secondary"
+            count={CCARP_COUNTS.official}
+            countLabel={t.bankCount(CCARP_COUNTS.official)}
+            startLabel={t.bankStart}
+            emptyLabel={t.bankGeneratedEmpty}
+            onStart={() => startCcarp('official')}
+            testid="start-ccarp-official"
+          />
+          <BankOption
+            icon={<Sparkles className="h-4 w-4" />}
+            title={t.ccarpGenerated}
+            desc={t.ccarpGeneratedNote}
+            badge={t.bankBadgeGenerated}
+            badgeVariant="secondary"
+            count={CCARP_COUNTS.ai_generated}
+            countLabel={t.bankCount(CCARP_COUNTS.ai_generated)}
+            startLabel={t.bankStart}
+            emptyLabel={t.bankGeneratedEmpty}
+            onStart={() => startCcarp('ai_generated')}
+            testid="start-ccarp-generated"
           />
         </div>
       </Card>

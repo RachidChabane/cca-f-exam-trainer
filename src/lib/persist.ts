@@ -1,5 +1,5 @@
-import type { ExamSession, SessionMode } from '@/lib/scoring'
-import type { Bi, DomainKey, Lang, Question, Theme } from '@/types'
+import type { Answer, ExamSession, SessionMode } from '@/lib/scoring'
+import type { Bi, DomainKey, ExamKey, Lang, Question, Theme } from '@/types'
 
 /**
  * Local persistence (localStorage only — nothing leaves the browser).
@@ -11,7 +11,11 @@ import type { Bi, DomainKey, Lang, Question, Theme } from '@/types'
  * small and self-heals if the question pool changes underneath it.
  */
 
-const ACTIVE_KEY = 'ccaf:active:v2'
+// v3: `answers` went from `(number | null)[]` to `(number[] | null)[]` when the
+// trainer gained CCA-P's multiple-response and matching items, and sessions gained
+// an `exam` tag. A v2 payload would deserialize into nonsense, so the bump makes
+// any in-flight v2 session fall back to a fresh start instead.
+const ACTIVE_KEY = 'ccaf:active:v3'
 const HISTORY_KEY = 'ccaf:history:v1'
 const UI_KEY = 'ccaf:ui:v1'
 const HISTORY_MAX = 50
@@ -44,7 +48,7 @@ function remove(key: string): void {
 
 interface SerializedSession {
   questionIds: string[]
-  answers: (number | null)[]
+  answers: Answer[]
   flagged: boolean[]
   current: number
   startedAt: number
@@ -54,6 +58,8 @@ interface SerializedSession {
   autoSubmitted: boolean
   submittedAt: number | null
   mode: SessionMode
+  /** Absent on pre-CCA-P payloads; treated as 'ccaf'. */
+  exam?: ExamKey
   timed: boolean
   domain?: DomainKey
   label?: Bi
@@ -88,6 +94,7 @@ export function saveActive(phase: ExamPhase, session: ExamSession | null): void 
       autoSubmitted: session.autoSubmitted,
       submittedAt: session.submittedAt,
       mode: session.mode,
+      exam: session.exam,
       timed: session.timed,
       domain: session.domain,
       label: session.label,
@@ -134,6 +141,7 @@ export function resolveSession(
     autoSubmitted: s.autoSubmitted,
     submittedAt: s.submittedAt,
     mode: s.mode,
+    exam: s.exam ?? 'ccaf',
     timed: s.timed,
     domain: s.domain,
     label: s.label,
@@ -158,6 +166,8 @@ export function clearActive(): void {
 export interface HistoryEntry {
   at: number
   mode: SessionMode
+  /** Absent on entries recorded before the trainer hosted two exams => 'ccaf'. */
+  exam?: ExamKey
   domain: DomainKey | null
   timed: boolean
   scaled: number
