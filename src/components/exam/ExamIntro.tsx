@@ -11,7 +11,8 @@ import {
   Target,
   Trash2,
 } from 'lucide-react'
-import { BLUEPRINT, DOMAINS, DOMAIN_BY_KEY } from '@/data/blueprint'
+import { BLUEPRINT, DOMAINS } from '@/data/blueprint'
+import { domainName } from '@/data/domains'
 import { QUESTIONS } from '@/data/scenarioSets'
 import { BANK_COUNTS } from '@/data/questionBank'
 import { CCARP_COUNTS, CCARP_FORMAT_COUNTS } from '@/data/ccarpBank'
@@ -267,7 +268,7 @@ export function ExamIntro() {
                       {h.mode === 'exam' ? t.attemptFull : t.attemptDrill}
                     </Badge>
                     <span className="truncate text-[13px] text-muted-foreground">
-                      {h.domain ? DOMAIN_BY_KEY[h.domain].name[lang] : when}
+                      {h.domain ? domainName(h.domain)[lang] : when}
                     </span>
                   </div>
                   <div className="shrink-0 text-right">

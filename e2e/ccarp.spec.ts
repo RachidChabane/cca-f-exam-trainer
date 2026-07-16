@@ -122,3 +122,18 @@ test('ccarp: multiple-response is graded all-or-nothing', async ({ page }) => {
   // Correct iff both of our picks were the keyed pair — no partial credit.
   expect(/correct/i.test(verdict) && !/incorrect/i.test(verdict)).toBe(bothPicksKeyed)
 })
+
+test('ccarp: full sitting submits and renders the multi-domain results screen', async ({ page }) => {
+  await startCcarp(page)
+
+  // Answer the first item, then submit early. Grading still tallies every CCA-P
+  // domain, so the results screen renders its per-domain breakdown — the path
+  // that must resolve CCA-P domain keys, not only CCA-F ones.
+  await page.getByTestId('option-0').click()
+  await page.getByTestId('submit-exam').click()
+  await page.getByTestId('confirm-submit').click()
+
+  // No blank screen: the graded results render, including the by-domain breakdown.
+  await expect(page.getByTestId('result-scaled')).toBeVisible()
+  await expect(page.getByText(/accuracy by domain/i)).toBeVisible()
+})

@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { Info, Repeat, RotateCcw, ScrollText } from 'lucide-react'
-import { BLUEPRINT, DOMAIN_BY_KEY } from '@/data/blueprint'
+import { BLUEPRINT } from '@/data/blueprint'
+import { domainName } from '@/data/domains'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -141,7 +142,7 @@ export function ExamResults() {
               <li key={d.key}>
                 <div className="flex items-baseline justify-between gap-3 text-sm">
                   <span className="flex items-center gap-2 font-medium">
-                    {DOMAIN_BY_KEY[d.key].name[lang]}
+                    {domainName(d.key)[lang]}
                     {isWeak && (
                       <Badge variant="warning" className="text-[10px]">
                         {t.weakestDomain}
