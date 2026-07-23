@@ -315,7 +315,7 @@
         },
         {
           "label": "B",
-          "text": "Give the model retrieval access to the live catalogue so its answers stay current"
+          "text": "Give the model tool access to query the live catalogue directly so its answers stay current"
         },
         {
           "label": "C",
@@ -329,7 +329,7 @@
       "correct": [
         "B"
       ],
-      "explanation": "Daily-changing factual data is the canonical case for retrieval augmentation — the model always answers from current data without retraining. Why not the others: A is stale within days; C is costly and won't scale with catalogue size; D simply accepts wrong answers.",
+      "explanation": "Daily-changing prices and promotions are live state — the canonical case for a direct tool call against the source of truth, so the model always answers from current values without retraining. Why not the others: A is stale within days; C is costly and won't scale with catalogue size; D simply accepts wrong answers.",
       "hardened": true
     },
     {
@@ -3090,7 +3090,7 @@
       "source": "ai_generated",
       "domain": "integration",
       "format": "mc",
-      "text": "A payments-integration team places Claude in the synchronous webhook handler that accepts incoming cardholder-dispute notifications from a card network. The network's webhook gateway enforces a fixed 5-second timeout on every acknowledgment — this is a technical contract term set by the network, not something the integrator can configure or negotiate. If the handler doesn't return a 200 within that window, the network marks the delivery failed and retries, producing duplicate dispute records downstream. Separately, the team's merchant agreement with the network requires reason-code categorization accuracy of at least 95%, measured against the network's own arbitration outcomes; falling short triggers an audit and financial penalties. Today the handler calls Claude with no extended thinking: median latency is 850ms, comfortably inside the 5-second window, but measured accuracy is only 82%. In staging, enabling extended thinking with budget_tokens=8000 raises accuracy to 96%, but median latency rises to 6.8 seconds — blowing the ack window on most calls. Separately, the network's chargeback rules give the merchant up to 30 minutes after intake to finalize and route the dispute reason code to its case-management system before any downstream deadline applies. Which change is most likely to satisfy both the ack SLA and the 95% accuracy requirement?",
+      "text": "A payments-integration team places Claude in the synchronous webhook handler that accepts incoming cardholder-dispute notifications from a card network. The network's webhook gateway enforces a fixed 5-second timeout on every acknowledgment — this is a technical contract term set by the network, not something the integrator can configure or negotiate. If the handler doesn't return a 200 within that window, the network marks the delivery failed and retries, producing duplicate dispute records downstream. Separately, the team's merchant agreement with the network requires reason-code categorization accuracy of at least 95%, measured against the network's own arbitration outcomes; falling short triggers an audit and financial penalties. Today the handler calls Claude with no extended thinking: median latency is 850ms, comfortably inside the 5-second window, but measured accuracy is only 82%. In staging, enabling extended thinking at effort=high raises accuracy to 96%, but median latency rises to 6.8 seconds — blowing the ack window on most calls. Separately, the network's chargeback rules give the merchant up to 30 minutes after intake to finalize and route the dispute reason code to its case-management system before any downstream deadline applies. Which change is most likely to satisfy both the ack SLA and the 95% accuracy requirement?",
       "explanation": "A is correct: it decouples the two constraints that cannot both be met by a single synchronous call. The fast, no-extended-thinking call satisfies the immutable 5-second ack timeout, while the extended-thinking call — already validated in staging at 96% accuracy — runs asynchronously and still finishes comfortably inside the 30-minute routing deadline the network itself grants. B fails because the stem explicitly states the network's webhook timeout is a fixed contract term the integrator cannot get extended — proposing to negotiate it around the constraint the scenario just ruled out. C fails because prompt-level few-shot tuning has no demonstrated ceiling in this scenario; only extended thinking was measured to cross the contractual 95% floor, so relying on prompting alone risks continuing to fail the audit threshold. D fails because a nightly batch cadence is slower than the 30-minute routing deadline — the case-management system would already route on the wrong reason code long before the nightly correction ever runs.",
       "difficulty": "hard",
       "topic": "Accuracy-latency trade-offs with extended thinking in latency-bound integrations",
@@ -3099,12 +3099,12 @@
       "options": [
         {
           "label": "A",
-          "text": "Ack fast, classify slow: run a quick no-extended-thinking call inside the synchronous webhook handler to return 200 within the 5-second window, then have an async worker rerun Claude with extended thinking (budget_tokens=8000) to finalize the reason code before the 30-minute deadline, keeping the accuracy-heavy step off the ack path.",
+          "text": "Ack fast, classify slow: run a quick no-extended-thinking call inside the synchronous webhook handler to return 200 within the 5-second window, then have an async worker rerun Claude with extended thinking at effort=high to finalize the reason code before the 30-minute deadline, keeping the accuracy-heavy step off the ack path.",
           "explanation": "Correct: satisfies the immutable 5-second ack requirement with the fast call, and satisfies the 95% accuracy floor with the extended-thinking call, which still finishes well inside the 30-minute routing window the network allows."
         },
         {
           "label": "B",
-          "text": "Increase budget_tokens further to push accuracy above 96%, and ask the card network's integration team to extend the webhook's fixed 5-second timeout to accommodate the added extended-thinking latency, treating a bigger thinking budget as the direct lever for closing the accuracy gap.",
+          "text": "Raise the effort level further to push accuracy above 96%, and ask the card network's integration team to extend the webhook's fixed 5-second timeout to accommodate the added extended-thinking latency, treating a higher effort setting as the direct lever for closing the accuracy gap.",
           "explanation": "Wrong: the stem states the 5-second timeout is a fixed contract term the integrator cannot configure or negotiate, so this proposal depends on changing a constraint the scenario rules out."
         },
         {
@@ -3967,7 +3967,7 @@
       "domain": "governance_safety",
       "format": "mc",
       "text": "Production logs for an autonomous refund-processing agent show it correctly handled 340 of 352 refund requests this week without any issue. However, 3 of the 12 refunds it approved above $2,000 were later found to violate a discount-stacking exception the agent had misapplied, costing the company several thousand dollars in unrecoverable payouts. The team wants a control that closes this specific failure mode without adding an approval step to the 96% of requests the agent already handles correctly. Which approach is most effective for this workflow?",
-      "explanation": "D is correct: it puts a deterministic, enforced checkpoint at the tool boundary itself, scoped to exactly the risk tier where the failures occurred (refunds above $500), while leaving the already-reliable low-value path untouched. A is wrong because routing all 352 requests through one queue erases the throughput benefit of automation for the 96% that were never the problem, and doesn't target the specific high-value policy-exception failure. B is wrong because clearer prompt wording only reduces the odds of the agent misreading the policy again — it's a probabilistic fix layered onto a control gap, and the after-the-fact weekly log doesn't stop the money from leaving before anyone reviews it. C is wrong because it depends on the model reliably emitting a specific text tag and an external script correctly catching it; any drift in phrasing or a skipped tag lets a bad refund straight through, whereas D enforces the check as a structural property of the tool call rather than a convention the model has to remember to follow.",
+      "explanation": "D is correct: it puts a deterministic, enforced checkpoint at the tool boundary itself, scoped to exactly the risk tier where the failures occurred (refunds above $2,000), while leaving the already-reliable low-value path untouched. A is wrong because routing all 352 requests through one queue erases the throughput benefit of automation for the 96% that were never the problem, and doesn't target the specific high-value policy-exception failure. B is wrong because clearer prompt wording only reduces the odds of the agent misreading the policy again — it's a probabilistic fix layered onto a control gap, and the after-the-fact weekly log doesn't stop the money from leaving before anyone reviews it. C is wrong because it depends on the model reliably emitting a specific text tag and an external script correctly catching it; any drift in phrasing or a skipped tag lets a bad refund straight through, whereas D enforces the check as a structural property of the tool call rather than a convention the model has to remember to follow.",
       "difficulty": "medium",
       "topic": "Risk-tiered human-in-the-loop approval gates",
       "objective": "Apply human-in-the-loop validation strategies",
@@ -3985,12 +3985,12 @@
         },
         {
           "label": "C",
-          "text": "Have the agent tag its response text with NEEDS_REVIEW for exception refunds above $500, and have a downstream script grep for that tag before releasing funds.",
+          "text": "Have the agent tag its response text with NEEDS_REVIEW for exception refunds above $2,000, and have a downstream script grep for that tag before releasing funds.",
           "explanation": "Wrong: this is a brittle text-parsing heuristic bolted on after generation — if the model phrases its output differently or omits the tag on an edge case, the refund releases with no check at all, unlike an enforced structural gate."
         },
         {
           "label": "D",
-          "text": "Configure the refund tool so any payout above $500 is blocked from completing until a human signs off, while lower payouts finish automatically.",
+          "text": "Configure the refund tool so any payout above $2,000 is blocked from completing until a human signs off, while lower payouts finish automatically.",
           "explanation": "Correct: this builds the checkpoint into the tool call itself, scoped precisely to the risk tier where the actual failures happened, so high-value exceptions get a mandatory human decision while the reliable low-value majority keeps executing automatically."
         }
       ],
@@ -4651,7 +4651,7 @@
       "domain": "developer_productivity",
       "format": "mc",
       "text": "Telemetry from a 40-engineer rollout of Claude Code shows the same roughly 200-word service-scaffolding prompt has been pasted into the CLI 340 times over the past two weeks, with small wording drift between engineers. A follow-up audit finds the generated service is missing its test directory in about 18% of those runs. Which change is most likely to eliminate the inconsistency?",
-      "explanation": "C wins because the root cause is invocation drift: engineers are freehand-retyping/pasting a long prompt, so the fix is to make invocation deterministic via a project slash command that encodes the exact prompt and checklist (the documented mechanism for exactly this). A is a prompt-strength fix layered on CLAUDE.md that doesn't touch how the prompt gets invoked, so drift and probabilistic compliance both remain. B invents a CLAUDE_SCAFFOLD_TEMPLATE env var that doesn't exist in Claude Code. D solves an adjacent problem with unneeded complexity — subagent isolation addresses context pollution, not inconsistent invocation, and adds a heavier interaction model than the task needs.",
+      "explanation": "C wins because the root cause is invocation drift: engineers are freehand-retyping/pasting a long prompt, so the fix is to make invocation deterministic via a project slash command that encodes the exact prompt and checklist (the documented mechanism for exactly this). A is a prompt-strength fix layered on CLAUDE.md that doesn't touch how the prompt gets invoked, so drift and probabilistic compliance both remain. B reaches for a Skill, but Skills are model-invoked — Claude applies them when it judges them relevant — so invocation stays probabilistic; the slash command is the explicit, user-invoked counterpart that runs the identical template deterministically. D solves an adjacent problem with unneeded complexity — subagent isolation addresses context pollution, not inconsistent invocation, and adds a heavier interaction model than the task needs.",
       "difficulty": "medium",
       "topic": "Standardizing repeated AI-assisted workflows with slash commands",
       "objective": "Improve developer workflows using AI-assisted tooling",
@@ -4664,8 +4664,8 @@
         },
         {
           "label": "B",
-          "text": "Set a CLAUDE_SCAFFOLD_TEMPLATE environment variable pointing engineers' shells at a shared template file for Claude to read before each run.",
-          "explanation": "No such environment variable exists in Claude Code; this invents a plausible-sounding configuration mechanism instead of using the real, documented way to standardize a repeated prompt."
+          "text": "Package the scaffolding procedure as a project Skill so Claude discovers and applies the team standard whenever it judges a scaffolding task is underway.",
+          "explanation": "A Skill is model-invoked: Claude decides when it applies, so invocation stays probabilistic — the failure here is inconsistent invocation, and only an explicit user-invoked command guarantees the identical template runs every time."
         },
         {
           "label": "C",
