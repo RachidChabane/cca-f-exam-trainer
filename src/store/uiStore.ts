@@ -2,7 +2,9 @@ import { create } from 'zustand'
 import { loadUi, saveUi } from '@/lib/persist'
 import type { Lang, Theme } from '@/types'
 
-export type View = 'home' | 'exam' | 'study' | 'rote' | 'about'
+export type View = 'home' | 'exam' | 'study' | 'about'
+
+const VIEWS: readonly View[] = ['home', 'exam', 'study', 'about']
 
 /**
  * UI session state — language, theme, and the active top-level view.
@@ -29,7 +31,8 @@ function applyTheme(theme: Theme) {
 const saved = loadUi()
 const initialTheme: Theme = saved.theme ?? 'dark'
 const initialLang: Lang = saved.lang ?? 'en'
-const initialView: View = saved.view ?? 'home'
+// Guard against a persisted view name this build no longer renders.
+const initialView: View = VIEWS.includes(saved.view as View) ? (saved.view as View) : 'home'
 
 // Apply the persisted (or default) theme as soon as the module loads.
 applyTheme(initialTheme)

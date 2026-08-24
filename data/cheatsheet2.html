@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: A4 portrait; margin: 4mm 4mm; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 8px; line-height: 1.16; color: #111;
+    column-count: 1;
+    width: 132mm;
+  }
+  h1 { font-size: 12px; margin: 0 0 1mm 0; color: #0a3d62; }
+  h1 small { font-weight: normal; font-size: 8px; color: #555; }
+  table { width: 100%; border-collapse: collapse; margin: 0 0 1mm 0; break-inside: avoid; }
+  caption {
+    caption-side: top; text-align: left; font-weight: 700; font-size: 9px;
+    color: #fff; background: #0a3d62; padding: 0.5mm 1.4mm; border-radius: 1px;
+  }
+  td { border-bottom: 0.4px solid #d7dde3; padding: 0.45mm 1.3mm; vertical-align: top; }
+  tr:nth-child(even) td { background: #f3f6f9; }
+  td.l { width: 49%; }
+  td.r { width: 51%; }
+  .x { color: #b00020; font-weight: 700; }
+  .v { color: #0b7a3b; font-weight: 700; }
+  .s { font-weight: 700; color: #0a3d62; }
+  .why { color: #555; font-style: italic; }
+  code { font-family: "SF Mono", Menlo, monospace; font-size: 8px; background: #eef1f4; padding: 0 1px; border-radius: 1px; }
+</style>
+</head>
+<body>
+
+<h1>CCA-F Trap Cheat Sheet <small>— the option that's OK but NOT the best. <span class="x">✗</span>=tempting trap · <span class="v">✓</span>=best · <span class="why">why</span></small></h1>
+
+<table>
+  <caption>🧩 Agentic architecture</caption>
+  <tr><td class="l"><span class="s">Wrong tool, thin desc.</span> <span class="x">✗ few-shot / classifier / merge</span></td><td class="r"><span class="v">✓ rewrite descriptions</span> <span class="why">boundary vs sibling, sample query</span></td></tr>
+  <tr><td><span class="s">Wrong tool, desc already clear.</span> <span class="x">✗ add neg. examples</span></td><td><span class="v">✓ keyword conditional in the system prompt</span> <span class="why">clue: desc isn't the cause</span></td></tr>
+  <tr><td><span class="s">Few-shot for tool pick.</span> <span class="x">✗ 10-15 clear / grouped</span></td><td><span class="v">✓ 4-6 ambiguous cases + reasoning</span> <span class="why">model already nails clear ones</span></td></tr>
+  <tr><td><span class="s">Migration w/ unknowns.</span> <span class="x">✗ codemod / tests / module-by-module</span></td><td><span class="v">✓ Plan mode, approve approach first</span> <span class="why">others miss the design-level bug</span></td></tr>
+  <tr><td><span class="s">Subagent output too big.</span> <span class="x">✗ summarizer / bigger ctx / vector db</span></td><td><span class="v">✓ upstream returns structured data</span> <span class="why">fix at source, no extra hop</span></td></tr>
+  <tr><td><span class="s">Agents overlap.</span> <span class="x">✗ shared scratchpad / dedupe after</span></td><td><span class="v">✓ coordinator partitions subtopics up front</span></td></tr>
+  <tr><td><span class="s">Coverage gaps.</span> <span class="x">✗ blame synth/search agent</span></td><td><span class="v">✓ coordinator decomposition too narrow</span></td></tr>
+  <tr><td><span class="s">Worker dies silent.</span> <span class="x">✗ "all collected = ok" / abort</span></td><td><span class="v">✓ require returned success per dispatched item</span> <span class="why">no result = fail</span></td></tr>
+  <tr><td><span class="s">Subagent error types.</span> <span class="x">✗ timeout & "0 results" both fail</span></td><td><span class="v">✓ timeout=retry, 0-results=valid; recover transient locally</span></td></tr>
+  <tr><td><span class="s">Conflicting data.</span> <span class="x">✗ keep higher-conf + footnote</span></td><td><span class="v">✓ return both, mark unresolved, owner decides</span></td></tr>
+  <tr><td><span class="s">Partial coverage.</span> <span class="x">✗ global preamble / soften all</span></td><td><span class="v">✓ per-section confidence note</span></td></tr>
+  <tr><td><span class="s">Escalate?</span> <span class="x">✗ angry / threat / multi-concern / contradiction</span></td><td><span class="v">✓ only policy-interp gap OR dead-end (no route to act)</span></td></tr>
+  <tr><td><span class="s">Destructive write.</span> <span class="x">✗ prompt "wait" / snapshot / revert</span></td><td><span class="v">✓ approval checkpoint blocks the apply</span></td></tr>
+  <tr><td><span class="s">Must-never (refund/credit/delete).</span> <span class="x">✗ session log / token / PostToolUse / guard clause</span></td><td><span class="v">✓ PreToolUse deny OR read authoritative record</span> <span class="why">independent of model, before money moves</span></td></tr>
+  <tr><td><span class="s">Deterministic transform.</span> <span class="x">✗ temp-0 agent / regex / LSP</span></td><td><span class="v">✓ codemod over the AST, run once</span> <span class="why">regex hits same-named local var</span></td></tr>
+  <tr><td><span class="s">Sequential indep. lookups.</span> <span class="x">✗ composite tool / speculative / max_tokens</span></td><td><span class="v">✓ parallel tool_use blocks in one turn</span></td></tr>
+</table>
+
+<table>
+  <caption>🧠 Context &amp; batch</caption>
+  <tr><td class="l"><span class="s">Batch fit?</span> <span class="x">✗ batch both / timeout-fallback / smaller batches</span></td><td class="r"><span class="v">✓ sync if blocks merge·push·release OR human deadline; batch only unattended</span></td></tr>
+  <tr><td><span class="s">Batch + tool loop.</span> <span class="x">✗ batch the whole exchange</span></td><td><span class="v">✓ keep gathering sync, batch only the final self-contained call</span></td></tr>
+  <tr><td><span class="s">Verbose discovery.</span> <span class="x">✗ /compact / multi-session / scratch-reload</span></td><td><span class="v">✓ Explore subagent returns a summary</span></td></tr>
+  <tr><td><span class="s">Lost in the middle.</span> <span class="x">✗ summarize-all / bigger model / rotate</span></td><td><span class="v">✓ digest at start+end + headers; or verbatim quote per field</span></td></tr>
+  <tr><td><span class="s">Critical fact compacted.</span> <span class="x">✗ keep numbers in summary / raise threshold / pin turn</span></td><td><span class="v">✓ write to external/case record, prepend every turn</span></td></tr>
+  <tr><td><span class="s">Cache read=0.</span> <span class="x">✗ 5-min TTL / workspace scope</span></td><td><span class="v">✓ volatile id before breakpoint → move it after</span></td></tr>
+</table>
+
+<table>
+  <caption>🗂 Claude Code config</caption>
+  <tr><td class="l"><span class="s">Team / clone-ready.</span> <span class="x">✗ ~/.claude / root commands/ / doc section</span></td><td class="r"><span class="v">✓ commit .claude/commands/ or .claude/CLAUDE.md</span></td></tr>
+  <tr><td><span class="s">Personal override of team skill.</span> <span class="x">✗ same name / override:true</span></td><td><span class="v">✓ a NEW command name /my-x</span> <span class="why">same name won't shadow</span></td></tr>
+  <tr><td><span class="s">Skill won't auto-fire.</span> <span class="x">✗ phrasings in body / CLAUDE.md / few-shot</span></td><td><span class="v">✓ user phrasings in the description frontmatter</span></td></tr>
+  <tr><td><span class="s">Modular, always-on.</span> <span class="x">✗ rules/ + paths glob</span></td><td><span class="v">✓ @import lines in CLAUDE.md</span> <span class="why">rules+paths loads only for matching files</span></td></tr>
+  <tr><td><span class="s">Path/file-type rules.</span> <span class="x">✗ CLAUDE.md sections</span></td><td><span class="v">✓ .claude/rules/ + paths: glob</span></td></tr>
+  <tr><td><span class="s">MCP creds, shared file.</span> <span class="x">✗ .env / :-default / op:// / user scope</span></td><td><span class="v">✓ ${ENV_VAR} in committed .mcp.json + document it</span></td></tr>
+</table>
+
+<table>
+  <caption>📝 Prompt &amp; output</caption>
+  <tr><td class="l"><span class="s">Structured output.</span> <span class="x">✗ "respond only JSON"+strip+retry / few-shot / temp 0</span></td><td class="r"><span class="v">✓ forced tool_choice + input_schema, read tool_use</span> <span class="why">prefill <code>{</code> = smallest fix for preamble</span></td></tr>
+  <tr><td><span class="s">Force the tool.</span> <span class="x">✗ mark all fields required</span></td><td><span class="v">✓ tool_choice forces the CALL</span></td></tr>
+  <tr><td><span class="s">Missing field.</span> <span class="x">✗ drop from required / "none" token</span></td><td><span class="v">✓ keep required, type <code>["string","null"]</code></span></td></tr>
+  <tr><td><span class="s">Schema-validate fail.</span> <span class="x">✗ separate reformat call / pre-normalize</span></td><td><span class="v">✓ tool_result is_error:true, Claude reissues</span> <span class="why">only it has the source</span></td></tr>
+  <tr><td><span class="s">Self-review blind spot.</span> <span class="x">✗ self-critique prompt / extended thinking</span></td><td><span class="v">✓ 2nd independent instance, no generator reasoning</span></td></tr>
+  <tr><td><span class="s">Inconsistent severity.</span> <span class="x">✗ mapping table / relative-to-PR / reasoning-then-adjust</span></td><td><span class="v">✓ explicit criteria + borderline anchor / fixed budget</span></td></tr>
+  <tr><td><span class="s">False-positive noise.</span> <span class="x">✗ uniform cut / confidence display / slow few-shot</span></td><td><span class="v">✓ disable noisy category, fix offline, restore</span></td></tr>
+  <tr><td><span class="s">Prose reinterpreted each iter.</span> <span class="x">✗ more precise spec / parser first</span></td><td><span class="v">✓ 2-3 input→output examples</span></td></tr>
+  <tr><td><span class="s">Ambiguous multi-match.</span> <span class="x">✗ re-query filters / confirm the one picked</span></td><td><span class="v">✓ list the matches, user picks, before acting</span></td></tr>
+  <tr><td><span class="s">Hallucinated API names.</span> <span class="x">✗ typecheck+regen / dump SDK to CLAUDE.md</span></td><td><span class="v">✓ fetch real signatures from MCP doc, just-in-time</span></td></tr>
+  <tr><td><span class="s">CI accuracy gate.</span> <span class="x">✗ average / one field / vs last run</span></td><td><span class="v">✓ gate on the MIN per-field rate</span></td></tr>
+  <tr><td><span class="s">Scanned/low-quality docs.</span> <span class="x">✗ augment prompt / OCR→shared / pass label</span></td><td><span class="v">✓ own path per stream; scans read the image</span></td></tr>
+</table>
+
+</body>
+</html>

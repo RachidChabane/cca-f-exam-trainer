@@ -220,14 +220,12 @@ const en = {
   ccarpFormatMr: 'Multiple response',
   ccarpFormatMatching: 'Matching',
 
-  // Rote (CCA-P memorization page)
-  navRote: 'Memorize',
-  roteKicker: 'CCA-P · Rote knowledge',
-  roteTitle: 'The facts you can’t derive',
-  roteSubtitle:
-    'Every exact term, value, behavior, and definition in the five CCA-P courses that has to be memorized outright — plus the traps where the course’s answer contradicts engineering instinct. Deducible principles are left out by design.',
-  roteFactsStat: 'Must-know facts',
-  roteTrapsStat: 'Counter-intuitive traps',
+  // Rote (CCA-P memorization panel, under Study)
+  studyTabCcap: 'CCA-P',
+  roteIntro:
+    'The non-inferable knowledge in the five CCA-P courses: exact terms, values, behaviors, and definitions to memorize outright, plus the traps where the course’s answer contradicts engineering instinct. Deducible principles are left out by design.',
+  rotePickModule: 'Course module',
+  roteAllModules: 'All modules',
   roteSearchPlaceholder: 'Search facts…',
   roteTrapsOnly: 'Traps only',
   roteRecallMode: 'Recall mode',
@@ -460,14 +458,12 @@ const fr: typeof en = {
   ccarpFormatMr: 'Réponses multiples',
   ccarpFormatMatching: 'Appariement',
 
-  // Par cœur (page de mémorisation CCA-P)
-  navRote: 'Par cœur',
-  roteKicker: 'CCA-P · Par cœur',
-  roteTitle: 'Les faits qu’on ne peut pas déduire',
-  roteSubtitle:
-    'Tous les termes, valeurs, comportements et définitions exacts des cinq cours CCA-P à mémoriser tels quels — plus les pièges où la réponse du cours contredit l’intuition d’ingénieur. Les principes déductibles sont volontairement exclus.',
-  roteFactsStat: 'Faits à connaître',
-  roteTrapsStat: 'Pièges contre-intuitifs',
+  // Par cœur (panneau de mémorisation CCA-P, sous Réviser)
+  studyTabCcap: 'CCA-P',
+  roteIntro:
+    'Le savoir non déductible des cinq cours CCA-P : termes, valeurs, comportements et définitions exacts à mémoriser tels quels, plus les pièges où la réponse du cours contredit l’intuition d’ingénieur. Les principes déductibles sont volontairement exclus.',
+  rotePickModule: 'Module de cours',
+  roteAllModules: 'Tous les modules',
   roteSearchPlaceholder: 'Rechercher…',
   roteTrapsOnly: 'Pièges seuls',
   roteRecallMode: 'Mode rappel',

@@ -1,17 +1,18 @@
 import { useState } from 'react'
-import { AlertTriangle, BookOpen, ListChecks } from 'lucide-react'
+import { AlertTriangle, BookOpen, Brain, ListChecks } from 'lucide-react'
 import { DOMAINS } from '@/data/blueprint'
 import { COURSES } from '@/data/courses'
 import { EXAM_TRAPS, QUIZZES } from '@/data/study'
 import { SCENARIOS } from '@/scenarios'
 import { Card } from '@/components/ui/Card'
 import { CourseReader } from '@/components/study/CourseReader'
+import { RotePanel } from '@/components/study/RotePanel'
 import { QuizList } from '@/components/study/QuizItem'
 import { TrapList } from '@/components/study/TrapList'
 import { cn } from '@/lib/cn'
 import { useLang, useT } from '@/lib/useT'
 
-type Tab = 'courses' | 'quiz' | 'traps'
+type Tab = 'courses' | 'quiz' | 'traps' | 'ccap'
 
 /** A wrapping row of pill buttons used to pick a theme or a domain. */
 function PillNav({
@@ -223,6 +224,7 @@ export function StudyView() {
     { id: 'courses', label: t.studyTabCourses, icon: <BookOpen className="h-3.5 w-3.5" /> },
     { id: 'quiz', label: t.studyTabQuiz, icon: <ListChecks className="h-3.5 w-3.5" /> },
     { id: 'traps', label: t.studyTabTraps, icon: <AlertTriangle className="h-3.5 w-3.5" /> },
+    { id: 'ccap', label: t.studyTabCcap, icon: <Brain className="h-3.5 w-3.5" /> },
   ]
 
   return (
@@ -261,6 +263,7 @@ export function StudyView() {
       {tab === 'courses' && <CoursesPanel />}
       {tab === 'quiz' && <QuizPanel />}
       {tab === 'traps' && <TrapsPanel />}
+      {tab === 'ccap' && <RotePanel />}
     </div>
   )
 }
