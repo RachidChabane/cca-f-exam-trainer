@@ -15,6 +15,9 @@ const ExamView = lazy(() =>
 const StudyView = lazy(() =>
   import('@/components/study/StudyView').then((m) => ({ default: m.StudyView })),
 )
+const RoteView = lazy(() =>
+  import('@/components/rote/RoteView').then((m) => ({ default: m.RoteView })),
+)
 const AboutView = lazy(() =>
   import('@/components/AboutView').then((m) => ({ default: m.AboutView })),
 )
@@ -43,6 +46,7 @@ export function App() {
           {view === 'home' && <HomeView />}
           {view === 'exam' && <ExamView />}
           {view === 'study' && <StudyView />}
+          {view === 'rote' && <RoteView />}
           {view === 'about' && <AboutView />}
         </Suspense>
       </main>

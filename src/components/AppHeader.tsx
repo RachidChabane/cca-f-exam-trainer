@@ -106,6 +106,7 @@ export function AppHeader() {
           <NavTab view="home" label={t.navHome} />
           <NavTab view="exam" label={t.navExam} />
           <NavTab view="study" label={t.navStudy} />
+          <NavTab view="rote" label={t.navRote} />
           <NavTab view="about" label={t.navAbout} />
         </nav>
 

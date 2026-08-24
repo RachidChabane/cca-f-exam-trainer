@@ -220,6 +220,25 @@ const en = {
   ccarpFormatMr: 'Multiple response',
   ccarpFormatMatching: 'Matching',
 
+  // Rote (CCA-P memorization page)
+  navRote: 'Memorize',
+  roteKicker: 'CCA-P · Rote knowledge',
+  roteTitle: 'The facts you can’t derive',
+  roteSubtitle:
+    'Every exact term, value, behavior, and definition in the five CCA-P courses that has to be memorized outright — plus the traps where the course’s answer contradicts engineering instinct. Deducible principles are left out by design.',
+  roteFactsStat: 'Must-know facts',
+  roteTrapsStat: 'Counter-intuitive traps',
+  roteSearchPlaceholder: 'Search facts…',
+  roteTrapsOnly: 'Traps only',
+  roteRecallMode: 'Recall mode',
+  roteRecallHint: 'Facts are hidden — click a card to reveal it.',
+  roteShown: (n: number, total: number) =>
+    n === total ? `${total} items` : `${n} of ${total} shown`,
+  roteTrapBadge: 'Trap',
+  roteLogicSays: 'Logic says',
+  roteCourseSays: 'Course says',
+  roteEmpty: 'Nothing matches your filters.',
+
   // Misc
   domainColon: 'Domain',
 }
@@ -440,6 +459,25 @@ const fr: typeof en = {
   ccarpFormatMc: 'Réponse unique',
   ccarpFormatMr: 'Réponses multiples',
   ccarpFormatMatching: 'Appariement',
+
+  // Par cœur (page de mémorisation CCA-P)
+  navRote: 'Par cœur',
+  roteKicker: 'CCA-P · Par cœur',
+  roteTitle: 'Les faits qu’on ne peut pas déduire',
+  roteSubtitle:
+    'Tous les termes, valeurs, comportements et définitions exacts des cinq cours CCA-P à mémoriser tels quels — plus les pièges où la réponse du cours contredit l’intuition d’ingénieur. Les principes déductibles sont volontairement exclus.',
+  roteFactsStat: 'Faits à connaître',
+  roteTrapsStat: 'Pièges contre-intuitifs',
+  roteSearchPlaceholder: 'Rechercher…',
+  roteTrapsOnly: 'Pièges seuls',
+  roteRecallMode: 'Mode rappel',
+  roteRecallHint: 'Les faits sont masqués — cliquez sur une carte pour la révéler.',
+  roteShown: (n: number, total: number) =>
+    n === total ? `${total} éléments` : `${n} sur ${total} affichés`,
+  roteTrapBadge: 'Piège',
+  roteLogicSays: 'La logique dit',
+  roteCourseSays: 'Le cours dit',
+  roteEmpty: 'Aucun élément ne correspond aux filtres.',
 
   // Divers
   domainColon: 'Domaine',

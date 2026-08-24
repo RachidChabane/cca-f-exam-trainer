@@ -203,7 +203,7 @@ export function clearHistory(): void {
 export interface PersistedUi {
   lang?: Lang
   theme?: Theme
-  view?: 'home' | 'exam' | 'study' | 'about'
+  view?: 'home' | 'exam' | 'study' | 'rote' | 'about'
 }
 
 export function loadUi(): PersistedUi {

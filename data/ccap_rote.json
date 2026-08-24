@@ -1,0 +1,1567 @@
+{
+  "meta": {
+    "name": "CCA-P rote-memorization bank",
+    "description": "Non-inferable knowledge extracted from the five official CCA-P prep course modules: exact terms, values, behaviors, and definitions that must be memorized outright, plus counter-intuitive rules where the course answer contradicts common engineering intuition. Selection criterion: a strong architect who never read the courses could not derive the item by reasoning. Deducible principles are excluded by design.",
+    "source": "claude-CA-P/courses/markdown (5 modules, extracted from Skilljar)",
+    "modules": {
+      "01": "Claude Platform & Solution Design",
+      "02": "Enterprise Integration & Production",
+      "03": "Responsible AI, Safety & Risk",
+      "04": "Stakeholder Engagement, Lifecycle & GTM",
+      "05": "Team Enablement & Operational Productivity"
+    },
+    "counts": {
+      "must-know": 145,
+      "counterintuitive": 43
+    }
+  },
+  "items": [
+    {
+      "id": "rote-001",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Oversized request errors",
+      "fact": "A prompt too large to send is rejected before generation: exceeding the model's token limit returns 400 invalid_request_error (prompt too long); exceeding the API's byte limit on the raw request body returns 413 request_too_large.",
+      "sourceSection": "The four properties architects design around"
+    },
+    {
+      "id": "rote-002",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Mid-generation context truncation",
+      "fact": "When the prompt fits but generation hits the context ceiling, the response returns stop reason model_context_window_exceeded with truncated output — a distinct failure mode from an oversized (rejected) request.",
+      "sourceSection": "The four properties architects design around"
+    },
+    {
+      "id": "rote-003",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Four properties → mitigations",
+      "fact": "Course mitigations per property: pattern completion → citations, uncertainty signaling, generator-verifier loops, routing factual lookups through tools; knowledge boundaries → web search, retrieval (RAG), tool use, MCP servers as source of truth; context window → progressive context loading, chunking, front-loading critical information, projects, summarizing across turns; steerability → system prompts, structured outputs, code execution.",
+      "sourceSection": "The four properties architects design around"
+    },
+    {
+      "id": "rote-004",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Four design consequences",
+      "fact": "The four properties map 1:1 to four design consequences: non-determinism (same input, different outputs across runs), context as a finite resource (hard edge, fixed token budget), confidence is not validity (wrong answers in the same fluent tone as right ones), and knowledge and capability boundaries (reliable on common/recent/consistent topics, unreliable on rare/private/fast-changing ones).",
+      "sourceSection": "The four properties architects design around"
+    },
+    {
+      "id": "rote-005",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Three architecture layers",
+      "fact": "Three layers that are never alternatives — every deployment has all three: Entry Points (what a person/system interacts with: Claude.ai, Claude Code, a custom app), Build-time interfaces (what an engineer programs against: the API, SDKs, MCP, the Agent SDK), and Delivery routes (where API traffic terminates: Anthropic, AWS Bedrock, GCP Vertex AI, Microsoft Foundry).",
+      "sourceSection": "Entry points, build-time interfaces, delivery routes"
+    },
+    {
+      "id": "rote-006",
+      "module": "01",
+      "kind": "counterintuitive",
+      "topic": "Claude Code's audience",
+      "fact": "Claude Code is an entry point built for developers running a terminal, not for non-engineering end users — even though the same model powers every entry point.",
+      "sourceSection": "Entry points, build-time interfaces, delivery routes",
+      "intuitionTrap": "\"It's all Claude underneath, so the wrapper doesn't matter for who uses it\" is wrong: the entry point, not the model, decides audience fit."
+    },
+    {
+      "id": "rote-007",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Seven platform primitives",
+      "fact": "The seven primitives: Tools (a function the model can call to act or fetch), MCP (protocol exposing tools so multiple Claude clients reach the same entry points), Subagents (scoped sub-task in a separate context, isolated or parallel), Hooks (deterministic code firing on defined events to enforce a rule the model cannot skip), Skills (versioned reusable unit — instructions plus optional scripts), Agent Teams (coordinated peer agents each owning part of a goal), Dynamic Workflows (steps assembled at runtime rather than fixed in advance).",
+      "sourceSection": "The parts an architect assembles solutions from"
+    },
+    {
+      "id": "rote-008",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Reserved definitions: workflow / agent / multi-agent",
+      "fact": "Reserved wording: a workflow is steps wired in your code, often using tools; an agent is the model choosing its own sequence of tool calls; a multi-agent system is an orchestrator delegating to subagents.",
+      "sourceSection": "The parts an architect assembles solutions from"
+    },
+    {
+      "id": "rote-009",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Delegation map and its three tests",
+      "fact": "Decomposition produces a delegation map assigning each part of a request to AI-appropriate work, human-retained work, or collaborative work (Claude drafts, a person decides). Each assignment is justified by exactly three tests: Reversibility, Stakes, and Accountability.",
+      "sourceSection": "Where Claude fits (Claude / systems / humans)"
+    },
+    {
+      "id": "rote-010",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Agent production constraints",
+      "fact": "In production, agents are bound by four non-optional things: constrained tool entry points, per-turn budgets, explicit permissions, and stopping criteria.",
+      "sourceSection": "Three patterns for structuring Claude's involvement"
+    },
+    {
+      "id": "rote-011",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Sequence before fine-tuning",
+      "fact": "Anthropic's recommended reliability sequence: (1) optimize the prompt, (2) add tool use or retrieval, (3) move to a stronger pattern such as evaluator-optimizer, (4) only then consider fine-tuning.",
+      "sourceSection": "Try prompting before you consider fine-tuning"
+    },
+    {
+      "id": "rote-012",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Fine-tuning availability",
+      "fact": "Fine-tuning Claude is not broadly available: access is limited, varies by model and delivery route, and changes as the program expands — confirm current options with the Anthropic account team before recommending it.",
+      "sourceSection": "Try prompting before you consider fine-tuning"
+    },
+    {
+      "id": "rote-013",
+      "module": "01",
+      "kind": "counterintuitive",
+      "topic": "Agent vs workflow cost",
+      "fact": "Agents don't automatically cost more than workflows: cost is driven by accumulated context and number of model calls, so a poorly designed workflow can cost more than a well-designed agent.",
+      "sourceSection": "Skills-based architecture as a packaging option",
+      "intuitionTrap": "The pattern label doesn't determine cost — design does."
+    },
+    {
+      "id": "rote-014",
+      "module": "01",
+      "kind": "counterintuitive",
+      "topic": "Open-ended feel vs genuine unpredictability",
+      "fact": "Feeling uncertain how to structure a task differs from a task whose steps genuinely can't be determined in advance; trace mining usually shows the real paths fell into a handful of enumerable shapes, meaning a router plus a few chains was correct all along.",
+      "sourceSection": "When the team wanted flexibility and got non-determinism",
+      "intuitionTrap": "Uncertainty about structure feels like proof the task needs an agent's flexibility; the course treats it as a design-deferral smell."
+    },
+    {
+      "id": "rote-015",
+      "module": "01",
+      "kind": "counterintuitive",
+      "topic": "Agent-specific compliance risk",
+      "fact": "A workflow can point an auditor to a discrete code step; an agent can only point to a model turn — that missing auditable step is the compliance risk the agent pattern itself introduces, distinct from an unpinned model version rolling forward, which is a governance gap under any pattern.",
+      "sourceSection": "What broke and why",
+      "intuitionTrap": "The two failures get lumped together as one agent problem; only the missing discrete approval step is agent-pattern-specific."
+    },
+    {
+      "id": "rote-016",
+      "module": "01",
+      "kind": "counterintuitive",
+      "topic": "Model-decision logging gap",
+      "fact": "Logging that catches a broken deterministic check (e.g. a SQL rule) does not record the choices a model makes inside a single request, so a business rule folded into a probabilistic system drifts silently and surfaces only via manual audit.",
+      "sourceSection": "What broke: a deterministic rule handed to a probabilistic system",
+      "intuitionTrap": "Existing production monitoring is assumed to flag a broken business rule the way it flags a broken query."
+    },
+    {
+      "id": "rote-017",
+      "module": "01",
+      "kind": "counterintuitive",
+      "topic": "Recoverability asymmetry",
+      "fact": "A subagent failure is usually recoverable (retry, reroute, or drop and flag the gap); an orchestrator failure usually is not — the whole run fails and partial subagent work is stranded.",
+      "sourceSection": "Error recovery: where a failure can be caught, and where it cannot",
+      "intuitionTrap": "Recoverability is assumed symmetric, or the orchestrator assumed more robust because it is 'in charge'; it is the single point of failure."
+    },
+    {
+      "id": "rote-018",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Human-in-the-loop checkpoints",
+      "fact": "A human-in-the-loop checkpoint is a gate that pauses execution for review, positioned by the risk and reversibility of the action. Gate every irreversible or high-stakes action; sample lower-stakes actions rather than gating each one.",
+      "sourceSection": "Human-in-the-loop checkpoint patterns for agent workflows"
+    },
+    {
+      "id": "rote-019",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Silent dropped-unit failure",
+      "fact": "The most dangerous multi-agent failure is silent: a subagent drops a unit and the orchestrator synthesizes a confident, complete-looking answer. The fix is a coverage check at synthesis — results returned must equal units dispatched, or the run flags the difference.",
+      "sourceSection": "When fan-out hid a dropped unit"
+    },
+    {
+      "id": "rote-020",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Structured extraction pipeline",
+      "fact": "Good extraction pipeline: OCR, extract fields against a schema, validate, route exceptions; an evaluator-optimizer is common because first-pass extraction on edge cases isn't trustworthy unchecked. It goes wrong with no exception path — low-confidence extractions flowing through the same pipeline as clean documents with no human gate.",
+      "sourceSection": "Reference architectures: what good looks like and where projects go wrong"
+    },
+    {
+      "id": "rote-021",
+      "module": "01",
+      "kind": "counterintuitive",
+      "topic": "Evals for composed architectures",
+      "fact": "Composing two reference architectures requires separate eval sets per architecture, not one for the composed system.",
+      "sourceSection": "How to decide if a problem needs one or several patterns",
+      "intuitionTrap": "A single end-to-end score can hide a broken component behind a healthy aggregate."
+    },
+    {
+      "id": "rote-022",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "The retrieval principle",
+      "fact": "Retrieval is for stable knowledge (true yesterday and tomorrow); tool use is for live state (current value owned by a system, changing independently of your index). Conflating them — named the most common reference-architecture mistake — produces fluent, confident, wrong answers with no error signal.",
+      "sourceSection": "The retrieval principle"
+    },
+    {
+      "id": "rote-023",
+      "module": "01",
+      "kind": "counterintuitive",
+      "topic": "Chunking follows source structure",
+      "fact": "The chunking approach is chosen by the structure of the source material, never by a default or fixed chunk size.",
+      "sourceSection": "Chunking: how you break the corpus, by what the corpus is",
+      "intuitionTrap": "Teams default to a universal fixed chunk size (e.g. 500 tokens) instead of deriving it from the document."
+    },
+    {
+      "id": "rote-024",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "RAG trade-off triad",
+      "fact": "Every retrieval design trades retrieval quality, latency, and maintenance. Smaller chunks and hybrid indexing raise quality and latency together; larger chunks and dense-only indexing lower latency and maintenance but miss exact-match queries.",
+      "sourceSection": "Articulating the trade-off"
+    },
+    {
+      "id": "rote-025",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Chunking by content type",
+      "fact": "Structured, section-numbered sources: hierarchical chunking preserving section/subsection structure so a clause or procedure stays intact. Long-form prose with no section anchors: semantic chunking on meaning boundaries so each passage is self-contained; fixed-size chunks cut mid-idea and across section boundaries.",
+      "sourceSection": "Design the RAG pipeline"
+    },
+    {
+      "id": "rote-026",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Memory is application-managed",
+      "fact": "The model has no native memory between calls; summaries and memory layers are application-managed continuity across turns or sessions — anything persisting does so because the application stored it and passed it back in. This is an architectural choice, not a model capability.",
+      "sourceSection": "Distinct terms that are easy to conflate"
+    },
+    {
+      "id": "rote-027",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Model family and default tier",
+      "fact": "The family is Opus, Sonnet, and Haiku; Opus is the most capable for demanding reasoning, advanced coding, and research synthesis. Sonnet is the default starting point — move up to Opus only when an eval set shows Sonnet misses the quality bar, and down to Haiku only when an eval set confirms the tradeoff is acceptable for that task.",
+      "sourceSection": "Model selection: start with Sonnet, move deliberately"
+    },
+    {
+      "id": "rote-028",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Token counts are measured, not estimated",
+      "fact": "Every API response reports actual token counts in its usage field, and those measured counts — not any characters-per-token estimate, which varies by model generation, tokenizer, and language — are what the context limit and billing apply to. Use the token-counting API to check before sending.",
+      "sourceSection": "Context-window sizing: the working-memory cliff"
+    },
+    {
+      "id": "rote-029",
+      "module": "01",
+      "kind": "counterintuitive",
+      "topic": "Context window is a ceiling",
+      "fact": "Don't budget the full context window: budget largest realistic conversation + retrieved context + system prompt + working scratch + growth margin. The window is a ceiling, not a target.",
+      "sourceSection": "Context-window sizing: the working-memory cliff",
+      "intuitionTrap": "Using as much of the advertised window as possible looks efficient; designing toward the ceiling guarantees overflow in production."
+    },
+    {
+      "id": "rote-030",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Monolithic context strategy",
+      "fact": "Monolithic places everything in the prompt at once; it earns its place for bounded tasks with predictable input size, stable prefixes benefiting from prompt caching, single-shot Q&A, and reasoning needing simultaneous access to all material. It breaks down as context accumulates turn over turn — cost and latency scale linearly with input length, and attention quality can degrade on very long contexts before the hard limit.",
+      "sourceSection": "Context strategy: spectrum between progressive and monolithic"
+    },
+    {
+      "id": "rote-031",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Progressive context strategy",
+      "fact": "Progressive stages context just-in-time (retrieve, summarize across turns, load only what the next step needs) and is \"the right default for most production workloads.\" It breaks down for long-range coherence, decisions depending on detail dropped earlier, and prompt caching — and the exact input the model saw at step N is no longer reconstructable, complicating debugging.",
+      "sourceSection": "Context strategy: spectrum between progressive and monolithic"
+    },
+    {
+      "id": "rote-032",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Compaction",
+      "fact": "Compaction earns its place for long-running agents, phase transitions that can checkpoint to a clean summary, and sessions that would otherwise hit context limits mid-task. It breaks down when summaries drop load-bearing detail (exact identifiers, numeric values, prior decisions, one-off edge cases); the summarizer is itself a model call, compaction is largely one-way, and measuring summary fidelity is an unsolved evaluation problem.",
+      "sourceSection": "Context strategy: spectrum between progressive and monolithic"
+    },
+    {
+      "id": "rote-033",
+      "module": "01",
+      "kind": "counterintuitive",
+      "topic": "Strategy and sizing are separate",
+      "fact": "Context strategy (progressive vs monolithic, etc.) and context sizing are separate decisions that interact but don't determine each other; treating them as one is where most context designs go wrong.",
+      "sourceSection": "In practice, strategies may be combined",
+      "intuitionTrap": "Picking a strategy is assumed to settle how much context to budget."
+    },
+    {
+      "id": "rote-034",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Adaptive thinking and the effort parameter",
+      "fact": "On Claude Opus 4.6 and later, Claude Sonnet 4.6 and later, and Claude Sonnet 5, adaptive thinking with the effort parameter is the recommended control for extended thinking — you set reasoning effort rather than a token budget.",
+      "sourceSection": "What extended thinking controls"
+    },
+    {
+      "id": "rote-035",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Fable 5 thinking mode",
+      "fact": "Adaptive thinking is the only thinking mode on Claude Fable 5.",
+      "sourceSection": "What extended thinking controls"
+    },
+    {
+      "id": "rote-036",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "budget_tokens removal",
+      "fact": "budget_tokens is deprecated on the 4.6 model generation and removed on Claude Sonnet 5, where passing it returns a 400 error.",
+      "sourceSection": "What extended thinking controls"
+    },
+    {
+      "id": "rote-037",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Thinking token billing",
+      "fact": "Thinking tokens are billed as output tokens at the model's standard output rate and add latency; when extended thinking is not engaged, none are generated or billed.",
+      "sourceSection": "What extended thinking controls"
+    },
+    {
+      "id": "rote-038",
+      "module": "01",
+      "kind": "counterintuitive",
+      "topic": "What the thinking toggle controls",
+      "fact": "The model reasons internally either way; the extended-thinking toggle controls only whether you spend tokens and latency on an additional billed, expanded reasoning pass.",
+      "sourceSection": "What extended thinking controls",
+      "intuitionTrap": "Disabling extended thinking is assumed to make the model skip reasoning entirely."
+    },
+    {
+      "id": "rote-039",
+      "module": "01",
+      "kind": "counterintuitive",
+      "topic": "Thinking summaries vs billing",
+      "fact": "The API may return a summarized representation of the thinking process, but you are billed for the thinking tokens actually consumed during reasoning, not the length of the visible summary.",
+      "sourceSection": "What extended thinking controls",
+      "intuitionTrap": "A short visible summary suggests small billing, while actual internal consumption can be far larger."
+    },
+    {
+      "id": "rote-040",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Gating a model swap",
+      "fact": "Treat any model change like a code deployment. Minimum: a curated test set of prompts with known-good outputs covering the real production distribution, a grading function (model-graded against a rubric or programmatic), and a delta/rollback threshold set in advance below which you do not ship.",
+      "sourceSection": "Gate every model change with an eval before you ship it"
+    },
+    {
+      "id": "rote-041",
+      "module": "01",
+      "kind": "counterintuitive",
+      "topic": "Threshold before results",
+      "fact": "The rollback threshold must be set before running the eval, not after.",
+      "sourceSection": "Gate every model change with an eval before you ship it",
+      "intuitionTrap": "Deciding an acceptable gap after seeing results rationalizes the threshold to match the outcome — acceptance criteria written after the build."
+    },
+    {
+      "id": "rote-042",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "No tier decision = most expensive tier",
+      "fact": "Not choosing a model tier is choosing the most expensive one; a system with no per-step model-tier decision defaults to the most expensive option.",
+      "sourceSection": "How a model-tier decision becomes a budget conversation"
+    },
+    {
+      "id": "rote-043",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Load-bearing control",
+      "fact": "The load-bearing control is the single setting that, if relaxed, breaches a budget first: when latency binds, model tier and extended thinking are load-bearing; when cost binds, model tier and context strategy are.",
+      "sourceSection": "Decision: identify the load-bearing control"
+    },
+    {
+      "id": "rote-044",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Description competency",
+      "fact": "Description, one of the four AI Fluency competencies, is telling the model precisely what you want; a well-described prompt names three things — the scope (what is in and out of bounds), the format (the exact output contract), and the constraints (rules that must never be violated).",
+      "sourceSection": "Description: the 4D competency applied to prompt design"
+    },
+    {
+      "id": "rote-045",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Skill API surface",
+      "fact": "A Skill is attached to a request through the container.skills parameter and published/versioned through the /v1/skills endpoint. Skills require the Code Execution Tool, so the pattern always carries a sandboxed execution environment dependency.",
+      "sourceSection": "Skills as an integration mechanism"
+    },
+    {
+      "id": "rote-046",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "SDK languages",
+      "fact": "The SDK is an opinionated wrapper over the same API entry point, available for Python, TypeScript, Java, Go, Ruby, C#, and PHP. The only reason to drop to raw HTTP is a freshly shipped API feature not yet in the SDK.",
+      "sourceSection": "A way to keep these terms separate"
+    },
+    {
+      "id": "rote-047",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "MCP vs API tool use",
+      "fact": "MCP and API tool use are different layers, not alternatives: MCP is the protocol for exposing and discovering a tool entry point across clients, while API tool use is how Claude calls a tool inside a single request (an MCP server's tools are invoked via API tool use). Pick MCP when one tool entry point must be reachable from multiple Claude clients; pick raw API tool use when the tools live inside one product.",
+      "sourceSection": "A way to keep these terms separate"
+    },
+    {
+      "id": "rote-048",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Agent SDK vs Anthropic SDK",
+      "fact": "The Anthropic SDK wraps API boilerplate but does not run an agent loop. The Claude Agent SDK is the managed runtime that runs the agent loop powering Claude Code, distributed as the @anthropic-ai/claude-agent-sdk package for TypeScript and Python.",
+      "sourceSection": "Claude Agent SDK: when a partner needs an agent loop they can embed in their own product"
+    },
+    {
+      "id": "rote-049",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Claude Code's two layer groups",
+      "fact": "Claude Code's configuration layers split into what the agent knows and does — CLAUDE.md, skills, subagents, MCP — and what the agent is allowed to touch — Hooks, permission boundaries, approval flows, sandboxing, restricted execution.",
+      "sourceSection": "Claude Code: customization and governance layers"
+    },
+    {
+      "id": "rote-050",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Four delivery routes",
+      "fact": "The same model is available through four delivery routes: the direct Anthropic API (api.anthropic.com), AWS Bedrock, GCP Vertex AI, and Microsoft Foundry (Azure). Behavior is identical; what differs is which cloud account the spend lands in, which identity system authenticates, which region traffic terminates in, and which procurement contract covers it.",
+      "sourceSection": "CSP delivery routes: where API traffic terminates"
+    },
+    {
+      "id": "rote-051",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "CSP feature lag",
+      "fact": "CSP-mediated routes (Bedrock, Vertex, Foundry) tend to lag the first-party API on new features by weeks, sometimes longer for major capabilities.",
+      "sourceSection": "CSP delivery routes: where API traffic terminates"
+    },
+    {
+      "id": "rote-052",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Per-route wrapper differences",
+      "fact": "Across routes the wrapper changes, not the model: model identifiers and version strings differ, regional availability differs, and each CSP adds its own inference-wrapping feature — inference profiles on Bedrock, model deployments in Foundry, Model Garden access controls in Vertex.",
+      "sourceSection": "CSP delivery routes: where API traffic terminates"
+    },
+    {
+      "id": "rote-053",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Regulated-industry entry points",
+      "fact": "Attorney-client privilege, HIPAA, GDPR, FedRAMP, or data-residency policy rule entry points in or out before cost or build effort is considered. Claude.ai is eliminated most often (consumer-grade, not designed for every enterprise data-handling requirement); the API and SDK routed through a partner-approved gateway with logging, retention, and identity controls in the partner's own infrastructure survive most regulated reviews.",
+      "sourceSection": "Security, governance, and regulated-industry constraints"
+    },
+    {
+      "id": "rote-054",
+      "module": "01",
+      "kind": "counterintuitive",
+      "topic": "Compliance must not run on subagents",
+      "fact": "The highest-consequence path must run in deterministic server-side code, not on subagents — subagents provide weaker deterministic guarantees.",
+      "sourceSection": "The annotation across the diagram",
+      "intuitionTrap": "Giving a compliance subagent its own restricted tool entry point looks safe and modular, but narrowing tools doesn't make subagent execution deterministic."
+    },
+    {
+      "id": "rote-055",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Claude Code distribution",
+      "fact": "Claude Code is distributed as a CLI, IDE plugins (VS Code, JetBrains, and others), a desktop application, and a web product at claude.ai/code.",
+      "sourceSection": "Glossary"
+    },
+    {
+      "id": "rote-056",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Five factors that pick the pattern",
+      "fact": "Choosing among augmented LLM, workflow, and agent is decided by five factors: predictability, error cost, observability, latency, and cost. The tightest/binding constraint decides the pattern.",
+      "sourceSection": "Key takeaways"
+    },
+    {
+      "id": "rote-057",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "The five reference architectures",
+      "fact": "The five tested reference architectures are exactly: Agent, RAG, Document processing pipeline (Evaluator-optimizer), Routing, and Coding agent.",
+      "sourceSection": "Key takeaways"
+    },
+    {
+      "id": "rote-058",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Names of the four properties",
+      "fact": "The course's four properties of generative AI are named: next-token prediction, knowledge, working memory, and steerability — distinct from the four design consequences they map to. Working memory is \"the property with the hardest edge\": inside the window attention is available, outside it there is no access at all.",
+      "sourceSection": "The four properties architects design around / Sources"
+    },
+    {
+      "id": "rote-059",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Two different three-way splits",
+      "fact": "Decomposition uses two distinct triples: the owner buckets are what Claude does, what existing systems do, and what humans do; the delegation map categories are AI-appropriate work, human-retained work, and collaborative work (Claude drafts, a person decides).",
+      "sourceSection": "Where Claude fits (Claude / systems / humans)"
+    },
+    {
+      "id": "rote-060",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Context engineering (reserved term)",
+      "fact": "\"Context engineering\" is reserved for deciding which mechanism is responsible for getting each kind of data in front of the model; retrieval over a vector index is only one such mechanism.",
+      "sourceSection": "When retrieval got reached for instead of a tool call"
+    },
+    {
+      "id": "rote-061",
+      "module": "01",
+      "kind": "counterintuitive",
+      "topic": "Retrieval misapplied to live state",
+      "fact": "Three symptoms: stale chunks, results shifting with each index refresh, and answers contradicting the database. A better embedding model or shorter refresh interval will not fix it — call the system that owns the live state. Detection cost is high because the system looks healthy: normal latency, no errors.",
+      "sourceSection": "The most common mistake: retrieval applied to live state",
+      "intuitionTrap": "Stale or contradictory results look like a retrieval-quality problem, but no refresh interval makes an index a source of live state."
+    },
+    {
+      "id": "rote-062",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "When to compose two architectures",
+      "fact": "Reach for a second reference architecture only when the two parts of the problem break in different ways worth managing separately; reaching for one because you haven't decided what problem you're solving is \"a design decision you're deferring, not a pattern you're applying.\" Composing roughly doubles the surface area to maintain — when in doubt, pick one.",
+      "sourceSection": "How to decide if a problem needs one or several patterns"
+    },
+    {
+      "id": "rote-063",
+      "module": "01",
+      "kind": "counterintuitive",
+      "topic": "Guardrails belong in the output contract",
+      "fact": "Enforce a guardrail structurally by building it into the output contract as a constraint the format requires, not as a sentence in the role text: \"A rule stated in the role can be drifted past. A constraint built into the output contract shapes the response format and cannot be quietly ignored.\"",
+      "sourceSection": "Author the reusable prompt asset",
+      "intuitionTrap": "A forcefully worded prohibition in the role section reads like a real guardrail, but an instruction the model can route around is not a constraint."
+    },
+    {
+      "id": "rote-064",
+      "module": "01",
+      "kind": "counterintuitive",
+      "topic": "Underspecified guardrails",
+      "fact": "An underspecified guardrail is worse than a missing one, \"because it creates the appearance of a control without the substance.\" Underspecification — a gap the model fills with its own assumption, differently each time — is the named key failure in prompt design.",
+      "sourceSection": "Designing system prompts, templates, and guardrails",
+      "intuitionTrap": "Partial protection seems strictly better than none, but the appearance of a control stops anyone from adding the real one."
+    },
+    {
+      "id": "rote-065",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "Prompt-construction bias",
+      "fact": "Prompt bias enters through three sources — leading phrasing, unbalanced examples, and assumptions baked into the instruction — answered by three disciplines: phrase neutrally, balance examples across the cases the system will see, and check whether the prompt presumes the answer it should elicit. Bias is invisible in any single output and shows only in aggregate, making this a design requirement, not a polish step.",
+      "sourceSection": "Avoiding bias in prompt construction"
+    },
+    {
+      "id": "rote-066",
+      "module": "01",
+      "kind": "counterintuitive",
+      "topic": "When to enable extended thinking",
+      "fact": "Run evals without extended thinking first; consider enabling it only if accuracy still misses requirements after working on the prompt. The case for turning it on must come from a measured accuracy gap.",
+      "sourceSection": "What extended thinking controls",
+      "intuitionTrap": "It looks like a free quality upgrade, but without measured evidence you pay thinking tokens and latency on every call with no proof it moves accuracy."
+    },
+    {
+      "id": "rote-067",
+      "module": "01",
+      "kind": "must-know",
+      "topic": "MCP exposes tools, prompts, and resources",
+      "fact": "An MCP server exposes tools, prompts, AND resources that any MCP-compatible client can use, so one integration written once is reused across applications — shifting tool-definition maintenance out of application code and into reusable servers.",
+      "sourceSection": "Glossary"
+    },
+    {
+      "id": "rote-068",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Grading ladder order",
+      "fact": "The grading ladder, in order: (1) code-based grading wherever the behavior allows (schema validation, exact match, length, presence checks), (2) LLM-as-judge when the behavior needs interpretation, (3) human grading as last resort, reserved for high-stakes or novel behaviors where neither code nor a calibrated judge is trustworthy.",
+      "sourceSection": "The grading ladder: choosing how to grade"
+    },
+    {
+      "id": "rote-069",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "LLM-as-judge rigor",
+      "fact": "Rigorous LLM-as-judge grading requires four elements: detailed rubrics, constrained verdicts (a small fixed label set, not free-form scores), calibration against human-labeled examples, and grading with a different model than the one being evaluated (to avoid self-preference). An uncalibrated judge is worse than no automated grade because it appears trustworthy.",
+      "sourceSection": "The grading ladder: choosing how to grade"
+    },
+    {
+      "id": "rote-070",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Requirement to eval criterion",
+      "fact": "Four steps turn a business requirement into a measurable eval criterion: (1) identify the behavior specifically, (2) set the threshold, (3) identify the failure modes, (4) include adversarial inputs. Thresholds must come from the business requirement, not from what the first prototype happens to achieve.",
+      "sourceSection": "Defining success criteria: turning a business requirement into a measurable threshold"
+    },
+    {
+      "id": "rote-071",
+      "module": "02",
+      "kind": "counterintuitive",
+      "topic": "Highest regression risk",
+      "fact": "The highest-risk moment for a regression is when evals are present but out of date, not when evals are absent entirely.",
+      "sourceSection": "Evals as the gating mechanism for change",
+      "intuitionTrap": "Any eval suite seems strictly safer than none, but a stale one silently passes changes by measuring behavior the system no longer has."
+    },
+    {
+      "id": "rote-072",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "POC-to-production gap",
+      "fact": "The POC-to-production gap has exactly four dimensions: cost, latency, reliability, and failure modes — all four are invisible in a demo.",
+      "sourceSection": "From POC to production: cost, latency, and reliability"
+    },
+    {
+      "id": "rote-073",
+      "module": "02",
+      "kind": "counterintuitive",
+      "topic": "Average-based cost models",
+      "fact": "A cost model built on average token usage can underestimate the cost impact of long-tail requests by a factor of two or three, because token distributions are skewed (most requests short, a tail consuming a disproportionate share of spend).",
+      "sourceSection": "Cost and latency modeling: Know the numbers before you build",
+      "intuitionTrap": "Sizing off observed average token count feels sound, but the average hides a tail that can double or triple real cost."
+    },
+    {
+      "id": "rote-074",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Cache read rate",
+      "fact": "Cache reads are billed at roughly 10% of the standard input token rate (verify the current rate at platform.claude.com/docs/en/about-claude/pricing).",
+      "sourceSection": "Cost and latency modeling: Know the numbers before you build"
+    },
+    {
+      "id": "rote-075",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Reliability control layering",
+      "fact": "Each reliability control sits at the layer it protects: retries with exponential backoff close to the API call, circuit breakers at the service boundary, fallback chains (to a different model tier or a cached response) in the orchestration layer. A control in the wrong layer leaves the right part exposed; fallback behavior must be tested as part of the eval suite.",
+      "sourceSection": "Reliability controls: what to build into every model call"
+    },
+    {
+      "id": "rote-076",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Model version pinning scope",
+      "fact": "Model version pinning applies to every architecture type equally — it is an operational discipline, not an architecture-specific choice: pin versions in configuration, monitor the Anthropic model deprecation page, and maintain a version-update runbook.",
+      "sourceSection": "Failure modes by architecture type"
+    },
+    {
+      "id": "rote-077",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "cache_control and default TTL",
+      "fact": "Prompt caching requires explicit cache_control markers in the request, and cache writes cost more per token than standard input. The default cache TTL is 5 minutes, so workloads whose request frequency is lower than the TTL will not realize consistent caching savings.",
+      "sourceSection": "How to size a use case"
+    },
+    {
+      "id": "rote-078",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Batch API discount and limit",
+      "fact": "The Batch API gives a 50% price reduction versus standard API pricing and supports up to 100,000 requests per batch, for workloads whose SLA permits asynchronous processing; for regulated workloads, verify BAA/compliance coverage before routing PHI through batch.",
+      "sourceSection": "How to size a use case"
+    },
+    {
+      "id": "rote-079",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Four-step scoping sequence",
+      "fact": "Scoping runs in four steps: business requirement to capability list, capability list to architecture sketch, architecture sketch to boundary conditions, boundary conditions to scope in the SOW (statement of work).",
+      "sourceSection": "How to scope a use case"
+    },
+    {
+      "id": "rote-080",
+      "module": "02",
+      "kind": "counterintuitive",
+      "topic": "Undocumented constraints",
+      "fact": "A 'feasible with constraints' verdict whose constraints are not documented becomes an infeasible system the moment those constraints are violated in production; documented constraints carry the same design weight as the architecture itself.",
+      "sourceSection": "Business value and ROI mapping: turning a feasible design into a justified investment",
+      "intuitionTrap": "Once the demo works, 'feasible with constraints' feels equivalent to plain 'feasible' and writing the constraints down feels like paperwork."
+    },
+    {
+      "id": "rote-081",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Five ROI pillars",
+      "fact": "The ROI business case rests on five pillars: efficiency (same work faster or cheaper), transformation (work not feasible before becoming possible), productivity (more output from the same people), solution cost (the run cost of the system), and performance SLAs (the service levels the deployment must hold).",
+      "sourceSection": "Business value and ROI mapping: turning a feasible design into a justified investment"
+    },
+    {
+      "id": "rote-082",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Four-step ROI mapping",
+      "fact": "ROI mapping in four steps: (1) name the baseline in a business unit using the business owner's own operational data; (2) predict the post-deployment state in that same unit, including any human-review cost the feasibility verdict requires; (3) subtract the run cost from the sizing model (recurring cost only — build cost is accounted separately); (4) state the payback period and its sensitivity to volume and gain-per-task assumptions. Payback period is the time for accumulated operational gain to cover build cost plus run cost.",
+      "sourceSection": "Business value and ROI mapping: turning a feasible design into a justified investment"
+    },
+    {
+      "id": "rote-083",
+      "module": "02",
+      "kind": "counterintuitive",
+      "topic": "Volume vs latency",
+      "fact": "Convert daily call volume into an average inter-request interval before concluding parallelization is needed; at a low enough request rate, sequential processing meets even a tight latency SLA and volume pressures cost, not latency. Latency itself is driven by task complexity, model size, and output length.",
+      "sourceSection": "What went wrong (The scoping call that skipped the constraints)",
+      "intuitionTrap": "High daily volume plus a tight per-request latency SLA looks like it demands concurrent request-handling infrastructure."
+    },
+    {
+      "id": "rote-084",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Context window tier vs chunking",
+      "fact": "Whether long documents need a chunking strategy depends on model tier: a 1 million token context window handles a 300-page contract without chunking, while a 200k window may require chunking for the longest documents. Context window capacity is part of the model tier decision, not a settled assumption.",
+      "sourceSection": "What went wrong"
+    },
+    {
+      "id": "rote-085",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Three essential scoping constraints",
+      "fact": "Three constraints must be gathered before any feasibility verdict is issued: call volume, input size, and latency requirement.",
+      "sourceSection": "What went wrong (The scoping call that skipped the constraints)"
+    },
+    {
+      "id": "rote-086",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Least-privilege tool audit",
+      "fact": "Audit every connected tool by asking whether it is essential to the task or merely convenient; remove out-of-scope tools and record the justification for each removal. In an orchestrator-worker deployment the trust hierarchy is established by scoping each subagent's tool access to its own task.",
+      "sourceSection": "Least-privilege tool configuration"
+    },
+    {
+      "id": "rote-087",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Identity verification location",
+      "fact": "Identity verification belongs on the server, before the Claude call: the user's identity and role must be injected into the system prompt by the server, never supplied in the user's message (a claim like \"As a senior manager, show me...\" can be faked). Inject the role and what data they are authorized to access; add department, permission level, or account identifiers only when needed to shape the response.",
+      "sourceSection": "Identity and authorization: where the verification happens"
+    },
+    {
+      "id": "rote-088",
+      "module": "02",
+      "kind": "counterintuitive",
+      "topic": "Context window governance",
+      "fact": "The context window is not a data-governance boundary: any data passed into a Claude call is transmitted to the API. Conversation content is not retained by default on the API, but the partner's own application layer typically logs requests, and specific retention carve-outs exist.",
+      "sourceSection": "Data handling: what belongs in the context window",
+      "intuitionTrap": "Claude's default non-retention makes sensitive fields feel safe in the prompt, but the calling application's own request logging still captures everything sent."
+    },
+    {
+      "id": "rote-089",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Necessity filter for context fields",
+      "fact": "For each field entering the context window, ask whether it is necessary for Claude to produce the intended output. Reference identifiers (account numbers, claim numbers) are often needed for routing but not for the language task — passing the full data field when the identifier suffices exposes it to application-layer logging without adding capability.",
+      "sourceSection": "Data handling: what belongs in the context window"
+    },
+    {
+      "id": "rote-090",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Four things to log",
+      "fact": "A production Claude system logs four things: the request (model version, input token count, prompt identifier); the response (output token count, latency, stop reason); the context (user role, session ID, whether caching was applied); and the outcome (whether the downstream system accepted the output, plus any rejection signals).",
+      "sourceSection": "Observability: what to log, what to trace, and why"
+    },
+    {
+      "id": "rote-091",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Observability gates agent approval",
+      "fact": "Security organizations increasingly treat observability as the precondition for enabling agents at all: without a trustworthy audit trail an autonomous system is not approved to act, and an agentic action taken but not logged is treated by a security reviewer as an action that cannot be allowed.",
+      "sourceSection": "Observability: what to log, what to trace, and why"
+    },
+    {
+      "id": "rote-092",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Per-tenant API keys",
+      "fact": "Separate API keys per tenant are required for attribution and isolation in any production multi-tenant deployment; on a shared key an org-level rate-limit breach is visible but cannot be attributed to the tenant that caused it, and every tenant absorbs the impact.",
+      "sourceSection": "Observability: what to log, what to trace, and why"
+    },
+    {
+      "id": "rote-093",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Most expensive data-handling fix",
+      "fact": "Retroactive PII redaction across a log history never designed to support it is the most expensive data-handling fix in a production Claude system; an integration without PII redaction prior to the API call exposes sensitive fields to application-layer request logging on every request.",
+      "sourceSection": "Observability: what to log, what to trace, and why"
+    },
+    {
+      "id": "rote-094",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "LLM interaction effects",
+      "fact": "LLM experiments have a failure mode classical A/B tests don't: interaction effects between the treatment and specific input types — a prompt change that improves typical inputs can degrade rare edge cases that appear frequently in a later seasonal spike. Test-period and input-distribution alignment matter more here than in most other software contexts.",
+      "sourceSection": "Reading results without overclaiming"
+    },
+    {
+      "id": "rote-095",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Live A/B vs shadow testing",
+      "fact": "Use a live A/B test when the deployment can absorb a small bounded exposure to a worse version and traffic is high enough for a meaningful sample in a reasonable window; use shadow testing when a single bad output carries too much risk or traffic is too low to split. Shadow testing costs downstream signal (scoring relies on an offline rubric or golden answers rather than real user behavior) and is often the only acceptable validation method in regulated-industry deployments.",
+      "sourceSection": "Shadow testing: validating a change before any user sees it"
+    },
+    {
+      "id": "rote-096",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Four observability questions",
+      "fact": "Production observability must answer four questions, each needing a different instrumentation layer: what is the system doing (request-level tracing), how well is it performing (metric aggregation), when did it change (anomaly detection), and why did it change (change attribution).",
+      "sourceSection": "Observability at scale: instrumentation design, dashboards, anomaly detection"
+    },
+    {
+      "id": "rote-097",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Anomaly alert thresholds",
+      "fact": "A cost spike exceeding 150% of the 7-day average deserves an alert, as does latency p95 crossing the SLA threshold. Model drift (gradual change in the distribution of outputs over time) is hard to catch with threshold alerts and needs periodic distribution comparison instead.",
+      "sourceSection": "Observability at scale: instrumentation design, dashboards, anomaly detection"
+    },
+    {
+      "id": "rote-098",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Three change-attribution causes",
+      "fact": "When a metric moves, instrumentation must distinguish three causes with different mitigations: model drift (behavior on stable inputs changed), data drift (the input distribution changed), and model update effects (the version changed and behaves differently on existing inputs). Mixing them up produces the wrong fix.",
+      "sourceSection": "Observability at scale: instrumentation design, dashboards, anomaly detection"
+    },
+    {
+      "id": "rote-099",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Four-class failure taxonomy",
+      "fact": "Four failure classes, each with a distinct fix: prompt failure (ambiguous/underspecified instruction the model filled in — fix the prompt); hallucination (confident content not grounded in input or a reliable source — fix by grounding via retrieval, tool use, or verification; stronger instruction will not resolve it); model mismatch (wrong tier for the task, or swapped without re-evaluation — fix by model selection gated on an eval); orchestrator-workers failure (a recoverable subagent failure looks different from an unrecoverable orchestrator failure — attribution needs a trace spanning both).",
+      "sourceSection": "A failure taxonomy: classifying what you are looking at"
+    },
+    {
+      "id": "rote-100",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Discernment competency",
+      "fact": "Discernment, one of the four AI Fluency competencies, is judging the quality of what the model produced rather than accepting it at face value. In production it is the habit of classifying each output as acceptable, needs revision, or needs override, and feeding that judgment back into evals and monitoring.",
+      "sourceSection": "Discernment: judging the output"
+    },
+    {
+      "id": "rote-101",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Business metric translation layer",
+      "fact": "The observability stack needs a translation layer connecting technical metrics to the business metrics stakeholders track, built at design time rather than after the first business review — e.g. task success rate maps to first-contact resolution rate, and latency maps to average handle time.",
+      "sourceSection": "Connecting observability data to business value"
+    },
+    {
+      "id": "rote-102",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "A/B result flaws",
+      "fact": "Three independently sufficient flaws invalidate a prompt comparison: sample size too small (a few points of difference on a high-variance metric needs a sample in the hundreds per group to reach significance), input distribution not controlled between groups, and the primary metric not pre-specified — choosing the metric after seeing which one moved turns a test into confirmation, not evidence.",
+      "sourceSection": "The 50-session winner that wasn't"
+    },
+    {
+      "id": "rote-103",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Three feasibility verdict forms",
+      "fact": "A feasibility verdict must be stated in one of exactly three forms: feasible as scoped, feasible with constraints, or not feasible — and for every constrained verdict the load-bearing boundary condition must be documented.",
+      "sourceSection": "Five takeaways"
+    },
+    {
+      "id": "rote-104",
+      "module": "02",
+      "kind": "counterintuitive",
+      "topic": "High stakes doesn't force an LLM judge",
+      "fact": "The grading ladder is driven purely by whether a check is deterministic (known value, binary outcome, numeric threshold) or requires interpretation — not by stakes. A cross-claimant data-leakage scan and a safety-critical auto-deny check stay code-based; only interpretive checks such as summary faithfulness require an LLM judge.",
+      "sourceSection": "Exercise: define the evaluation framework",
+      "intuitionTrap": "Higher stakes seems to justify a more 'sophisticated' LLM-judge evaluation."
+    },
+    {
+      "id": "rote-105",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "5xx error class",
+      "fact": "5xx (500–599) are server-side failures on an otherwise valid request — named examples: 500 Internal Server Error, 503 Service Unavailable, 529 Overloaded Error. They are usually transient and resolvable with retry and backoff, distinct from 4xx codes which indicate a client-side problem.",
+      "sourceSection": "Glossary"
+    },
+    {
+      "id": "rote-106",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "BAA coverage is configuration-specific",
+      "fact": "A Business Associate Agreement (BAA) is required under HIPAA between a covered entity or business associate and a vendor handling PHI on its behalf. For Claude deployments BAA coverage is configuration-specific: the same surface may be BAA-covered on one delivery route and not on another — check coverage by configuration, not by product.",
+      "sourceSection": "Glossary"
+    },
+    {
+      "id": "rote-107",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "GDPR specifics",
+      "fact": "GDPR governs processing of personal data of individuals in the EU/EEA, establishing lawful-basis requirements, data subject rights, and controller and processor obligations, with fines up to 4% of global annual turnover.",
+      "sourceSection": "Glossary"
+    },
+    {
+      "id": "rote-108",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "DPA definition",
+      "fact": "A DPA (Data Processing Agreement) is a contract between a data controller and a data processor defining how personal data may be handled on the controller's behalf, covering processing scope, security obligations, sub-processor terms, and breach notification.",
+      "sourceSection": "Glossary"
+    },
+    {
+      "id": "rote-109",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Multi-turn eval criteria",
+      "fact": "A multi-turn eval checks three things: whether the system keeps prior context straight across turns, whether it answers a follow-up without inventing details never said earlier, and whether output quality holds as the conversation runs longer. The unit scored is a whole conversation, so it needs its own golden dataset of full transcripts — a single-turn eval set cannot substitute.",
+      "sourceSection": "Evals as the gating mechanism for change"
+    },
+    {
+      "id": "rote-110",
+      "module": "02",
+      "kind": "counterintuitive",
+      "topic": "Eval set size vs cost",
+      "fact": "Favor volume over perfection in eval datasets: many automatically gradable cases beat a handful of hand-graded ones, because broad cheap coverage catches more regressions and can run on every change. Every model-based eval is an API call, but cost is a secondary constraint — size the dataset against what gives confidence, since the bigger risk is under-evaluating.",
+      "sourceSection": "The grading ladder: choosing how to grade / Evals as the gating mechanism for change",
+      "intuitionTrap": "Cost discipline suggests trimming to a few high-value hand-curated cases, but one production-breaking change slipping through an undersized suite costs far more than the extra API calls."
+    },
+    {
+      "id": "rote-111",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Eval suite misconfiguration",
+      "fact": "An eval suite that exists can still fail in exactly two ways: the dataset is not representative (built from the handful of development samples rather than the production input distribution), and it is not kept current (the golden dataset still holds the old prompt's expected outputs, so it keeps passing). Manual spot-checks are not a substitute — they confirm one input produces one output but say nothing about unknown inputs.",
+      "sourceSection": "The eval suite that measured the wrong thing"
+    },
+    {
+      "id": "rote-112",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Input vs output token pricing",
+      "fact": "Input and output tokens are priced at different rates on all model tiers, so monthly cost = (call volume × input tokens × input rate) + (call volume × output tokens × output rate). Where prompt caching applies, cached input tokens are priced at the cache read rate rather than the standard input rate.",
+      "sourceSection": "How to size a use case — Step 3: Project the monthly cost"
+    },
+    {
+      "id": "rote-113",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Most overlooked AI property",
+      "fact": "Of the four AI properties, working memory (context window) is the most overlooked in feasibility assessments, because it rarely shows up during development on small clean inputs but surfaces in production. Skipping any of the four risks missing a constraint that changes the design.",
+      "sourceSection": "Business value and ROI mapping — Complexity note"
+    },
+    {
+      "id": "rote-114",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Five integration layers",
+      "fact": "Enterprise integration is five layers, each carrying an architectural decision that belongs to the Architect rather than the implementation team: compliance/entry point selection comes first and eliminates routes, and the remaining four — least-privilege tool configuration, identity and authorization, data handling, and observability — operate only within whatever options survive that filter.",
+      "sourceSection": "Enterprise integration patterns: identity, auth, data, and observability"
+    },
+    {
+      "id": "rote-115",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "inference_geo",
+      "fact": "`inference_geo` is the configuration used for geographic pinning of model execution. Geo-pinning is implemented at the delivery route level on CSP-mediated integrations, and the pin must be set at the integration layer and verified at request time — it cannot be assumed from the entry point choice.",
+      "sourceSection": "Security and compliance constraints at the integration layer / Glossary"
+    },
+    {
+      "id": "rote-116",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Ordered pre-integration constraint workflow",
+      "fact": "Before any integration design begins, work the constraints in this order: (1) identify the governing regulation or policy, (2) determine which entry point and route are still available, (3) choose the integration pattern that fits, (4) document the identity, data handling, and observability requirements that follow. Skipping a step risks building something that works technically but fails legal or security review.",
+      "sourceSection": "Security and compliance constraints at the integration layer"
+    },
+    {
+      "id": "rote-117",
+      "module": "02",
+      "kind": "counterintuitive",
+      "topic": "Privilege preservation",
+      "fact": "Privilege preservation (e.g. attorney-client privilege) depends on contractual terms, retention settings, and internal policies; the integration chart only helps mitigate privilege-waiver concerns, it does not establish privilege, and the course's compliance material is not legal guidance.",
+      "sourceSection": "Security and compliance constraints at the integration layer",
+      "intuitionTrap": "A compliance/entry-point table reads as declaring a surface 'privileged' or 'compliant', when coverage is set by contract, retention settings, and configuration — so the same surface can qualify on one route and not another."
+    },
+    {
+      "id": "rote-118",
+      "module": "02",
+      "kind": "must-know",
+      "topic": "Experiment-design plane axes",
+      "fact": "The experiment-design plane has exactly two axes: expected effect size (how large a difference you expect) and confidence requirement (how certain you must be before acting). Placement determines the right experimental posture, which in turn determines the minimum sample size.",
+      "sourceSection": "Place on the experiment-design plane"
+    },
+    {
+      "id": "rote-119",
+      "module": "03",
+      "kind": "must-know",
+      "topic": "The constitution",
+      "fact": "Anthropic trains Claude against 'the constitution', a written document of the values and behavior the model should exhibit (latest referenced version: January 2026), used during training to generate learning examples and to rank candidate responses. Its conflict priority order is: be broadly safe, be ethical, comply with Anthropic's guidelines, be genuinely helpful to operators and users.",
+      "sourceSection": "What the model's training enforces versus what you own"
+    },
+    {
+      "id": "rote-120",
+      "module": "03",
+      "kind": "must-know",
+      "topic": "Constitution ordering is holistic",
+      "fact": "The constitution's priority order (broadly safe > ethical > guideline-compliant > genuinely helpful) is holistic, not strict: higher-priority goals generally take precedence in a conflict, but the model weighs them together rather than applying them in rigid sequence.",
+      "sourceSection": "What the model's training enforces versus what you own"
+    },
+    {
+      "id": "rote-121",
+      "module": "03",
+      "kind": "must-know",
+      "topic": "Four-layer safety stack",
+      "fact": "Four layers from Claude outward, each with an owner and a blind spot: (1) Trained behavior (Anthropic) — broad classes of harmful output on every request; blind to your domain policy, data rules, authorization model; (2) System instructions (Architect) — role, tone, stated constraints; blind to anything adversarial or unusual input talks Claude out of, since instructions are not enforcement; (3) Input/output screening (Architect) — disallowed-content detection; blind to actions with side effects and to novel attacks a classifier misses; (4) Tool-call/action authorization (Architect) — whether this caller may perform this action in this context; blind to content quality and fairness.",
+      "sourceSection": "A layered view: each layer has a job and a blind spot"
+    },
+    {
+      "id": "rote-122",
+      "module": "03",
+      "kind": "must-know",
+      "topic": "Five LLM-system risk categories",
+      "fact": "(1) Direct prompt injection — user input overrides system instructions; (2) Indirect prompt injection — malicious instructions arrive through retrieved content or tool outputs the model treats as trusted, which input screening on the user vector never sees; (3) Token-budget exhaustion — oversized or padded input consumes context or output budget, truncating work or inflating cost; (4) Tool and action abuse — the model is induced to call a side-effecting tool outside policy; (5) Data exposure — sensitive fields enter the context window or logs where they should not.",
+      "sourceSection": "Risks, limitations, and failure modes of LLM systems"
+    },
+    {
+      "id": "rote-123",
+      "module": "03",
+      "kind": "must-know",
+      "topic": "stop_reason \"refusal\" and stop_details",
+      "fact": "When a streaming classifier intervenes, the Messages API returns stop_reason: \"refusal\" with a stop_details object (available since Claude Opus 4.7) carrying a policy category plus a readable explanation; both fields are null when the refusal maps to no named category. Documented categories are cyber, bio, frontier_llm, and reasoning_extraction; handlers must tolerate an absent stop_details on models that don't return it and fall back to generic handling.",
+      "sourceSection": "A second injection vector: instructions arriving through retrieved content and tool outputs"
+    },
+    {
+      "id": "rote-124",
+      "module": "03",
+      "kind": "must-know",
+      "topic": "Reset context after a refusal",
+      "fact": "After a stop_reason: \"refusal\", reset the conversation context before continuing — remove or rephrase the triggering turn, or clear the history. Sending the next request on the same refused context returns further refusals.",
+      "sourceSection": "A second injection vector: instructions arriving through retrieved content and tool outputs"
+    },
+    {
+      "id": "rote-125",
+      "module": "03",
+      "kind": "must-know",
+      "topic": "Built-in controls never fail open",
+      "fact": "Fail-open vs fail-closed is the Architect's choice only for operator-built guardrails (components your team builds, hosts, and configures). Anthropic's built-in model safety controls are not operator-configurable and do not fail open.",
+      "sourceSection": "Fail open versus fail closed: how your guardrail layer behaves under failure"
+    },
+    {
+      "id": "rote-126",
+      "module": "03",
+      "kind": "must-know",
+      "topic": "Skill supply-chain audit",
+      "fact": "Audit a skill bundle before trusting it for (1) anomalous calls — network requests, shell execution, file-system access, credential reads — and (2) out-of-scope operations that don't match its stated job; every audit ends in one recorded verdict: approve, reject, or remediate (strip the call, sandbox the operation, pin a safer version, then re-audit). Because an audit misses code fetched at runtime, also run skills sandboxed with least privilege and source only from a vetted internal registry, verified publishers, and signed releases — never assume the platform vets skills for you.",
+      "sourceSection": "Skill supply-chain security"
+    },
+    {
+      "id": "rote-127",
+      "module": "03",
+      "kind": "must-know",
+      "topic": "Four fairness injection points",
+      "fact": "Unequal outcomes enter a Claude system at four points: the retrieval corpus, the framing of the prompt, the examples used in few-shot prompting, and downstream routing of the output.",
+      "sourceSection": "Where unequal outcomes enter, and what the system must explain"
+    },
+    {
+      "id": "rote-128",
+      "module": "03",
+      "kind": "must-know",
+      "topic": "Decision logging contents",
+      "fact": "To replay and explain a single decision, decision logging must capture the inputs that drove it, the retrieved context, the model output, and the routing it went through.",
+      "sourceSection": "Where unequal outcomes enter, and what the system must explain"
+    },
+    {
+      "id": "rote-129",
+      "module": "03",
+      "kind": "must-know",
+      "topic": "Discernment",
+      "fact": "Discernment, one of the four AI Fluency competencies, is evaluating AI outputs and behaviors — judging whether an output is acceptable, needs revision, or needs override rather than accepting it. Applied to fairness, it is what lets a reviewer recognize a skewed or unjustified outcome instead of only confirming a value was produced.",
+      "sourceSection": "Discernment: judging outputs for unequal treatment"
+    },
+    {
+      "id": "rote-130",
+      "module": "03",
+      "kind": "must-know",
+      "topic": "Diligence",
+      "fact": "Diligence, one of the four AI Fluency competencies, is ensuring responsible AI collaboration. Applied to deployment it means maintaining explicit human accountability checkpoints, recognizing when automation pressure erodes oversight, and auditing workflows for gaps where AI acts without review as automation scales.",
+      "sourceSection": "Diligence: the competency behind human review"
+    },
+    {
+      "id": "rote-131",
+      "module": "03",
+      "kind": "must-know",
+      "topic": "Human-review routing rule",
+      "fact": "Route a decision to a person when it is low-confidence AND either irreversible or high-cost; let confident, reversible, low-cost decisions through automatically. Reversibility and cost of a wrong decision set the stakes, while confidence only determines how much volume gets routed — when they conflict, weight cost and reversibility over confidence.",
+      "sourceSection": "Routing decisions to people by stakes, not by volume"
+    },
+    {
+      "id": "rote-132",
+      "module": "03",
+      "kind": "must-know",
+      "topic": "What a reviewer must see",
+      "fact": "Accurate human review requires giving the reviewer three things: the inputs that drove the decision, the model's output, and the reason the item was flagged. Without the flag reason they cannot separate an edge case from routine traffic; without the inputs they cannot tell whether the output is correct.",
+      "sourceSection": "What the reviewer sees decides whether review is accurate"
+    },
+    {
+      "id": "rote-133",
+      "module": "03",
+      "kind": "must-know",
+      "topic": "Three reviewer placements",
+      "fact": "Once a decision is routed to a person, three placement options exist: pre-action approval, post-action audit, or sampled review. Involving the human earlier (pre-action) is safer and slower.",
+      "sourceSection": "Where the human sits is a tradeoff between safety and speed"
+    },
+    {
+      "id": "rote-134",
+      "module": "03",
+      "kind": "must-know",
+      "topic": "Consent fatigue",
+      "fact": "Consent fatigue is when a system asks for approval dozens of times in a row and reviewers start clicking through, approving items without reading or giving the quality of review needed.",
+      "sourceSection": "What the reviewer sees decides whether review is accurate"
+    },
+    {
+      "id": "rote-135",
+      "module": "03",
+      "kind": "must-know",
+      "topic": "Training exclusion vs. retention",
+      "fact": "Never collapse training-use and retention into one claim: data may be excluded from model training by default while still being retained or monitored for logging, abuse prevention, legal compliance, or configured audit purposes.",
+      "sourceSection": "Turning each compliance obligation into a control with evidence"
+    },
+    {
+      "id": "rote-136",
+      "module": "03",
+      "kind": "must-know",
+      "topic": "BAA",
+      "fact": "A Business Associate Agreement is a contract under HIPAA permitting a vendor to process protected health data on a covered entity's behalf, defining each party's safeguards and liabilities. Without it, handling that data through the vendor is non-compliant regardless of the technical controls in place.",
+      "sourceSection": "Glossary"
+    },
+    {
+      "id": "rote-137",
+      "module": "03",
+      "kind": "must-know",
+      "topic": "FedRAMP impact levels",
+      "fact": "FedRAMP classifies workloads as low, moderate, or high impact, setting the security controls a cloud service must meet for US government workloads of that sensitivity. The workload sets the required level, and the delivery route must be authorized at or above it.",
+      "sourceSection": "Glossary"
+    },
+    {
+      "id": "rote-138",
+      "module": "03",
+      "kind": "must-know",
+      "topic": "Data residency",
+      "fact": "Data residency is the requirement that data is processed and stored within a specified geographic region, including copies in logs and caches. It is the control behind many data-sovereignty obligations.",
+      "sourceSection": "Glossary"
+    },
+    {
+      "id": "rote-139",
+      "module": "03",
+      "kind": "counterintuitive",
+      "topic": "Trained refusals never cover domain policy",
+      "fact": "Trained refusals cover broad, general-purpose harm only; a deployment-specific rule (e.g. no cross-business-unit record access) that was never encoded in a classifier, system prompt, or application control is simply unenforced. A normal-looking, in-domain request for a forbidden record then gets answered.",
+      "sourceSection": "When trained refusals are mistaken for a domain policy",
+      "intuitionTrap": "Reliable refusal of harmful prompts in testing suggests safety training generalizes to your domain access rules, but it never saw them."
+    },
+    {
+      "id": "rote-140",
+      "module": "03",
+      "kind": "counterintuitive",
+      "topic": "One output filter is not a guarded path",
+      "fact": "An output filter inspects only generated text and runs after a tool call has already executed, so a model that calls a refund tool completes the irreversible financial action before screening happens. Side-effecting tool calls need their own authorization gate before execution.",
+      "sourceSection": "When a single output filter looks like a finished design",
+      "intuitionTrap": "Output filtering looks like the decisive control because it sits closest to the user and is easiest to point to on a diagram."
+    },
+    {
+      "id": "rote-141",
+      "module": "03",
+      "kind": "counterintuitive",
+      "topic": "Guardrails must fail closed",
+      "fact": "Absent an explicit choice, a guardrail that errors under load or becomes unreachable lets requests through unscreened — fail open. An operator-built guardrail that silently passes traffic is worse than no guardrail, giving the illusion of protection; safety controls must fail closed.",
+      "sourceSection": "Fail open versus fail closed: how your guardrail layer behaves under failure",
+      "intuitionTrap": "Reliability instinct says degrade gracefully and keep serving rather than block legitimate users."
+    },
+    {
+      "id": "rote-142",
+      "module": "03",
+      "kind": "counterintuitive",
+      "topic": "Reviewing everything destroys review",
+      "fact": "Sending every output to a person with only the output and an approve button collapses into rubber-stamping once volume exceeds reading capacity, so high-stakes decisions get the same approval as trivial ones. Two failures stack: volume beyond capacity, and missing context to judge against.",
+      "sourceSection": "When routing everything to review makes review meaningless",
+      "intuitionTrap": "Routing everything to a human feels like the maximally conservative default that needs no judgment about stakes."
+    },
+    {
+      "id": "rote-143",
+      "module": "03",
+      "kind": "counterintuitive",
+      "topic": "Confidence does not set stakes",
+      "fact": "Confidence is not one of the two deciding controls for routing (reversibility and cost of a wrong answer are); a confident case still routes to a human if irreversible or high-cost, because confidence estimates only how likely the output is wrong, not what happens if it is.",
+      "sourceSection": "Build the review-routing rule",
+      "intuitionTrap": "The natural design is 'low confidence to a human, high confidence through', treating confidence as the primary routing signal."
+    },
+    {
+      "id": "rote-144",
+      "module": "03",
+      "kind": "counterintuitive",
+      "topic": "Per-action sign-off is not safest",
+      "fact": "Anthropic's agent-autonomy research found requiring sign-off on every action adds friction without meaningful safety gain; the better pattern is monitoring with intervention, concentrating review at higher-value checkpoints such as plan review or exception handling. This is the reasoning behind plan-level review in Claude Code, where a person approves the plan rather than each step.",
+      "sourceSection": "What the reviewer sees decides whether review is accurate",
+      "intuitionTrap": "Approving every single agent action seems maximally cautious, but it induces consent fatigue and lowers real oversight."
+    },
+    {
+      "id": "rote-145",
+      "module": "03",
+      "kind": "counterintuitive",
+      "topic": "Vendor bias evals don't cover your fairness",
+      "fact": "Skew enters at injection points only the deploying architect controls — the retrieval corpus, prompt framing, few-shot examples, downstream routing — which a model provider's published fairness evaluations never touched. Without your own logging you cannot prove where the skew came from when a regulator asks.",
+      "sourceSection": "When fairness is treated as the model provider's problem",
+      "intuitionTrap": "Fairness feels handled upstream because the provider trained the model and published bias-evaluation results."
+    },
+    {
+      "id": "rote-146",
+      "module": "03",
+      "kind": "counterintuitive",
+      "topic": "Compliant route ≠ compliance",
+      "fact": "A compliant delivery route (e.g. residency pinned to an approved region) is only a prerequisite: with no named owner and no living evidence artifact, a configuration change can silently break it — such as logging that starts writing request metadata to a second region — and the gap surfaces only at audit, when a design document is not a data-flow record.",
+      "sourceSection": "When passing entry point selection feels like finishing compliance",
+      "intuitionTrap": "Passing the constraint pre-filter produces a visible 'design can move forward' result that feels like compliance is finished."
+    },
+    {
+      "id": "rote-147",
+      "module": "03",
+      "kind": "must-know",
+      "topic": "Training-time alignment vs inference-time control",
+      "fact": "'Training-time alignment' is safe behavior baked in before deployment — general by design, and it never saw your domain policy, data-handling rules, or authorization model. 'Inference-time control' is the runtime guardrails you configure per request (system instructions, input and output checks, tool permissions, human review gates) and is the only layer that enforces deployment-specific rules; system instructions shape behavior but enforce policy only when paired with screening, authorization, and review.",
+      "sourceSection": "What the model's training enforces versus what you own"
+    },
+    {
+      "id": "rote-148",
+      "module": "03",
+      "kind": "must-know",
+      "topic": "Vulnerability assessment entry points",
+      "fact": "Walk the request and data paths together and ask at each of five entry points what an adversary could do and which control stands in the way: user input, retrieved content, tool outputs, the model's own output, and the logs. Look for anywhere a plausible attack meets no control.",
+      "sourceSection": "Risks, limitations, and failure modes of LLM systems"
+    },
+    {
+      "id": "rote-149",
+      "module": "03",
+      "kind": "must-know",
+      "topic": "Model-based vs deterministic checks",
+      "fact": "The two check types fail in opposite ways and are chained in series, never used alone: a model-based classifier (judge model) can be evaded by phrasing, while a deterministic rule is brittle — it blocks exactly what it was programmed to detect, missing the unanticipated and over-blocking anything resembling a restricted pattern. No control catches everything, so identify what each misses and cover that gap with a different control.",
+      "sourceSection": "Placing screening and authorization so the system degrades safely"
+    },
+    {
+      "id": "rote-150",
+      "module": "03",
+      "kind": "must-know",
+      "topic": "Three explanation audiences",
+      "fact": "Transparency serves three audiences needing different slices of the same record: users (the affected person, who needs the reason in terms they can act on), regulators (who ask whether similar cases were treated comparably), and your debugging team (who need the full trace for any flagged decision). Who asks determines what the system explains.",
+      "sourceSection": "Where unequal outcomes enter, and what the system must explain"
+    },
+    {
+      "id": "rote-151",
+      "module": "03",
+      "kind": "must-know",
+      "topic": "Compliance control register",
+      "fact": "The compliance control register is a table mapping each obligation to its technical control, an accountable owner, and an evidence artifact, so a regulated deployment is audited as a register rather than asserted as a narrative. Because configurations drift and artifacts go stale, it is revalidated on a regular cadence and spans security, legal, and platform owners who must agree on who holds what.",
+      "sourceSection": "Glossary"
+    },
+    {
+      "id": "rote-152",
+      "module": "03",
+      "kind": "must-know",
+      "topic": "HIPAA delivery route",
+      "fact": "HIPAA drives a specific delivery requirement: deliver through a HIPAA-ready plan or first-party API under a signed BAA.",
+      "sourceSection": "Glossary"
+    },
+    {
+      "id": "rote-153",
+      "module": "03",
+      "kind": "counterintuitive",
+      "topic": "Screening cannot cover skills",
+      "fact": "Input filters and prompt screening watch the conversation, but a skill's malicious logic was baked into the bundle upstream and never appears there; output monitoring may catch a downstream effect only after the code has run. The defense must move earlier: pre-use audit of the bundle plus runtime confinement.",
+      "sourceSection": "Placing screening and authorization so the system degrades safely",
+      "intuitionTrap": "A guarded path that screens inputs and outputs seems to cover anything a skill does, but the skill's code never enters the screened conversation."
+    },
+    {
+      "id": "rote-154",
+      "module": "03",
+      "kind": "counterintuitive",
+      "topic": "Transparency logging vs data minimization",
+      "fact": "Logging for transparency and minimizing data are not in conflict: they need the same log, governed differently. The decision log is itself in scope for the compliance register — under HIPAA or GDPR its logged inputs and retrieved context hold sensitive personal data, so apply minimization, retention limits, and access controls to it and map it as a named control.",
+      "sourceSection": "Where unequal outcomes enter, and what the system must explain",
+      "intuitionTrap": "Capturing inputs, retrieved context, output, and routing on every decision looks like a direct violation of data minimization, forcing a choice between the two."
+    },
+    {
+      "id": "rote-155",
+      "module": "04",
+      "kind": "must-know",
+      "topic": "Discovery three-step filter",
+      "fact": "A discovery conversation is a structured elicitation run as a three-step filter: (1) listen to the business goal in plain language, (2) translate it into requirements, assumptions, and unresolved constraints, (3) write those down before the conversation moves on.",
+      "sourceSection": "A discovery call is a structured elicitation, not a conversation"
+    },
+    {
+      "id": "rote-156",
+      "module": "04",
+      "kind": "must-know",
+      "topic": "Four discovery investigation categories",
+      "fact": "Discovery forces a vague stakeholder statement into four buckets: what the system must do, must not do, must cost, and must prove. Stakeholders rarely volunteer the \"must not do\" boundaries, so the Architect asks for them explicitly.",
+      "sourceSection": "A discovery call is a structured elicitation, not a conversation"
+    },
+    {
+      "id": "rote-157",
+      "module": "04",
+      "kind": "must-know",
+      "topic": "Translation table row",
+      "fact": "Each discovery item becomes one row in a translation table: the stakeholder statement as said, the constraint it implies, the architectural decision that constraint forces, and the assumption documented when the constraint is not yet confirmed.",
+      "sourceSection": "A discovery call is a structured elicitation, not a conversation"
+    },
+    {
+      "id": "rote-158",
+      "module": "04",
+      "kind": "must-know",
+      "topic": "Tradeoff decision frame (four questions)",
+      "fact": "Present a tradeoff through four questions: what do we gain, what do we give up, what is the reversal cost (what it costs to undo the decision after the system has been built around it), and in regulated environments what this does to our compliance posture. Reversal cost is the element most presentations skip and the one that most often changes the meeting.",
+      "sourceSection": "Present a tradeoff so the stakeholder can act on it"
+    },
+    {
+      "id": "rote-159",
+      "module": "04",
+      "kind": "must-know",
+      "topic": "Feedback loop five-step model",
+      "fact": "The feedback loop sits above observability and runs Signals → Triage → Decide → Act → Review: what is the system showing us; what needs attention now vs. what can wait; does this need a team fix, stakeholder review, or no action; what correction, guardrail update, or escalation is required; did the response work and does the rule need to change.",
+      "sourceSection": "The feedback loop decides which signals reach a stakeholder"
+    },
+    {
+      "id": "rote-160",
+      "module": "04",
+      "kind": "must-know",
+      "topic": "Feedback loop vs. dashboard",
+      "fact": "A dashboard collects and displays signals; a feedback loop maps each signal to a trigger, an owner, and a required action. Observability records what happened; the feedback loop determines what to do about it.",
+      "sourceSection": "The observability stack that replaced the feedback loop"
+    },
+    {
+      "id": "rote-161",
+      "module": "04",
+      "kind": "must-know",
+      "topic": "SLA three required elements",
+      "fact": "An SLA is a commitment that makes three things clear: what are we measuring, what counts as a breach, and what happens when a breach occurs.",
+      "sourceSection": "The feedback loop decides which signals reach a stakeholder"
+    },
+    {
+      "id": "rote-162",
+      "module": "04",
+      "kind": "must-know",
+      "topic": "Governance table",
+      "fact": "The governance table maps each production signal to its review trigger, the Architect's response, and any regulatory checkpoint. It must exist before launch and is the mechanism that turns policy into an operating routine.",
+      "sourceSection": "Glossary"
+    },
+    {
+      "id": "rote-163",
+      "module": "04",
+      "kind": "must-know",
+      "topic": "Documentation's three readers",
+      "fact": "Architecture documentation must serve three readers: the inheriting engineer (no part in the build), the auditor (needs evidence a specific control is live), and the returning Architect months later. A document built for one and not the others is incomplete even when detailed.",
+      "sourceSection": "Documentation that survives your absence"
+    },
+    {
+      "id": "rote-164",
+      "module": "04",
+      "kind": "must-know",
+      "topic": "Control register and evidence artifact",
+      "fact": "For a compliance reviewer, documentation carries each regulatory obligation, the technical control that satisfies it, that control's owner, and the evidence artifact demonstrating the control is operating. An evidence artifact is concrete proof (a signed agreement, a configuration screen, an authorization record, a returned log query); a control asserted with no artifact is a claim, not proof.",
+      "sourceSection": "Documentation that survives your absence"
+    },
+    {
+      "id": "rote-165",
+      "module": "04",
+      "kind": "must-know",
+      "topic": "Entry-point-responsibility map",
+      "fact": "An entry-point-responsibility map records which Claude entry point (direct API, Claude Code, Bedrock, Vertex, Microsoft Foundry) owns which task and why, written before integration begins. It prevents an entry point chosen for one task from quietly taking on another because routing was never documented.",
+      "sourceSection": "Glossary"
+    },
+    {
+      "id": "rote-166",
+      "module": "04",
+      "kind": "must-know",
+      "topic": "Multi-entry-point deployment risks",
+      "fact": "Across routes, model identifier strings differ and feature availability on a CSP-mediated route can lag the direct API. Each entry-point boundary is an integration point with its own authentication, logging, and failure-mode profile.",
+      "sourceSection": "Entry point selection returns with the full production picture"
+    },
+    {
+      "id": "rote-167",
+      "module": "04",
+      "kind": "must-know",
+      "topic": "Outcome document six fields",
+      "fact": "A customer outcome document covers six fields: the use case and its scope boundary, the metric before deployment, the metric after deployment, the control that makes the result auditable, the owner responsible for ongoing measurement, and the potential to reuse the pattern for other engagements. The before-and-after business outcome plus the reuse notes are what make it reusable IP rather than a technical record.",
+      "sourceSection": "Entry point selection returns with the full production picture"
+    },
+    {
+      "id": "rote-168",
+      "module": "04",
+      "kind": "must-know",
+      "topic": "Deployment lifecycle phases",
+      "fact": "The deployment lifecycle runs discovery → design → handoff → monitoring → iteration: documentation is the handoff phase, the feedback loop is monitoring and iteration, and entry-point selection with the outcome document closes the loop.",
+      "sourceSection": "Orientation: what you will be able to do by the end"
+    },
+    {
+      "id": "rote-169",
+      "module": "04",
+      "kind": "counterintuitive",
+      "topic": "No sketching during discovery",
+      "fact": "A discovery call must finish the four-category question set (must do / must not do / must cost / must prove) before any architecture is proposed; sketching a plausible solution partway through the call is the named failure mode, however productive it feels.",
+      "sourceSection": "The discovery call that turned into a design session",
+      "intuitionTrap": "A stakeholder confirming a mid-call sketch reads as alignment, but it stops the questioning, so hidden constraints (a human-authorization gate, PHI handling, multi-jurisdiction residency) surface only weeks later in compliance review."
+    },
+    {
+      "id": "rote-170",
+      "module": "04",
+      "kind": "counterintuitive",
+      "topic": "Observability stack is not a feedback loop",
+      "fact": "A fully live observability stack (dashboards, alerts, data flowing) does not mean stakeholder feedback is covered: a slow quality drift can sit visible in the collected data for weeks and never trigger a review because no governance rule mapped that signal to a trigger and owner.",
+      "sourceSection": "The observability stack that replaced the feedback loop",
+      "intuitionTrap": "Alerts fire only on thresholds someone defined, so a dashboard collecting a signal nobody owns is exactly as blind as not collecting it."
+    },
+    {
+      "id": "rote-171",
+      "module": "04",
+      "kind": "counterintuitive",
+      "topic": "Limit placement in demos",
+      "fact": "\"Limit placement\" is deciding in advance which one or two limitations a demo will name and framing them as intentional scope boundaries; naming them is what builds buyer confidence, especially in regulated industries (healthcare, financial services, public sector).",
+      "sourceSection": "Present a tradeoff so the stakeholder can act on it",
+      "intuitionTrap": "Naming a weakness feels risky, but a vague or deflected answer drops confidence while a clearly scoped boundary reads as rigor."
+    },
+    {
+      "id": "rote-172",
+      "module": "04",
+      "kind": "counterintuitive",
+      "topic": "Global endpoint breaks data residency",
+      "fact": "Regional availability on Bedrock and Vertex requires explicit configuration; defaulting to a global endpoint is the common pattern that breaks a data-residency requirement.",
+      "sourceSection": "Entry point selection returns with the full production picture",
+      "intuitionTrap": "The provider's default/global endpoint looks like the safe standard choice with residency handled at the account or region level, but on Bedrock/Vertex residency is never automatic."
+    },
+    {
+      "id": "rote-173",
+      "module": "04",
+      "kind": "must-know",
+      "topic": "Experience words and four probes",
+      "fact": "Five experience words signal that more discovery is needed rather than functioning as requirements: seamless, easy, fast, simple, intuitive. When one appears, probe: what would break that experience, what the user must never notice, what has to happen behind the scenes, and what must still be true when something goes wrong.",
+      "sourceSection": "A discovery call is a structured elicitation, not a conversation"
+    },
+    {
+      "id": "rote-174",
+      "module": "04",
+      "kind": "must-know",
+      "topic": "\"Translation\" (reserved term)",
+      "fact": "\"Translation\" is the course's reserved name for the core discovery move — converting a stakeholder preference (\"seamless\", \"fast\", \"simple\") into a testable, bounded constraint — and is named the most important skill in discovery. A preference only tells you where to investigate; the follow-up questions produce the constraint itself.",
+      "sourceSection": "Glossary / A discovery call is a structured elicitation"
+    },
+    {
+      "id": "rote-175",
+      "module": "04",
+      "kind": "must-know",
+      "topic": "\"Design rationale record\" (reserved term)",
+      "fact": "A \"design rationale record\" captures, for each architectural choice, not just the decision but the alternatives rejected and the tradeoff each resolved. A diagram records what the system is and never why, so without the record a successor reverses a load-bearing choice for an understandable wrong reason.",
+      "sourceSection": "Glossary"
+    },
+    {
+      "id": "rote-176",
+      "module": "04",
+      "kind": "counterintuitive",
+      "topic": "Schedule-triggered regulated reviews",
+      "fact": "In regulated deployments some governance rows are schedule-triggered rather than threshold-triggered (periodic output audits for a documentation obligation, scheduled confirmation that an environment still meets residency rules); these are design-time obligations whose rows must be in place before launch.",
+      "sourceSection": "The feedback loop decides which signals reach a stakeholder",
+      "intuitionTrap": "Monitoring intuition says a review fires when a metric crosses a threshold, so a system with nothing going wrong appears to need no review at all."
+    },
+    {
+      "id": "rote-177",
+      "module": "05",
+      "kind": "must-know",
+      "topic": "Four Skills distribution mechanisms",
+      "fact": "Skills reach a team by exactly four mechanisms, differing in access, versioning, and rollback: (1) owner/org-provisioned Skills uploaded at Organization settings > Skills, available org-wide at once; (2) Skills bundled into a plugin assigned to a group or the whole org — plugins carry install preferences (required, installed-by-default, available, not available), version-controlled updates from a connected repository, and rollback; (3) Claude Code project Skills at .claude/skills/, versioned with the repository and scoped to the projects that carry them; (4) API Skills, called programmatically by the partner's own products with explicit version pinning.",
+      "sourceSection": "Configuring Claude tooling and environments for teams"
+    },
+    {
+      "id": "rote-178",
+      "module": "05",
+      "kind": "counterintuitive",
+      "topic": "Server-managed settings vs Skills distribution",
+      "fact": "Centrally managed Claude Code configuration (server-managed settings) is a separate settings-delivery channel, not a fifth Skills distribution mechanism: it is delivered from Anthropic's servers when users authenticate and refreshes on an hourly polling cycle.",
+      "sourceSection": "Configuring Claude tooling and environments for teams",
+      "intuitionTrap": "Because it is centrally administered and applies org-wide like the four Skills mechanisms, it looks like another way to distribute Skills."
+    },
+    {
+      "id": "rote-179",
+      "module": "05",
+      "kind": "must-know",
+      "topic": "Four team-setup decisions",
+      "fact": "The Architect owns four team-setup decisions: environment, rollout, Skills distribution, and spend.",
+      "sourceSection": "Configuring Claude tooling and environments for teams"
+    },
+    {
+      "id": "rote-180",
+      "module": "05",
+      "kind": "must-know",
+      "topic": "Cost guardrail components",
+      "fact": "Team cost guardrails have four components: model defaults (which model a session starts on), model allowlists and restrictions (which models the team may switch to), effort guidance (how hard the model works on a task), and spend, rate, and per-user caps.",
+      "sourceSection": "Configuring Claude tooling and environments for teams"
+    },
+    {
+      "id": "rote-181",
+      "module": "05",
+      "kind": "must-know",
+      "topic": "Champion-and-batch rollout",
+      "fact": "Roll out by giving one champion per department/team access first, proving the workflow in practice, then seeding adoption batch by batch — never a single all-hands switch-on. Course example: a 200-person org with four departments enables one champion each, gives each two weeks to convert a real workflow (e.g. code-review assist, test-generation step), then has each run a 45-minute session for a first batch of five peers.",
+      "sourceSection": "Configuring Claude tooling and environments for teams"
+    },
+    {
+      "id": "rote-182",
+      "module": "05",
+      "kind": "must-know",
+      "topic": "Two adoption failure modes",
+      "fact": "Two named adoption failure modes: lumpy adoption — a few developers use the tooling heavily while the rest barely touch it, so the team never realizes the gain and the practice never standardizes (mitigation: champion-and-batch rollout); and stalling at basic chat — the team uses Claude only as a question-answering box, never advancing to tool use, repository-aware assistance, or packaged Skills. Access alone is not adoption.",
+      "sourceSection": "Improving developer workflows with AI tooling"
+    },
+    {
+      "id": "rote-183",
+      "module": "05",
+      "kind": "must-know",
+      "topic": "Deployment diligence",
+      "fact": "Deployment diligence: taking responsibility for verifying and vouching for the outputs we use or share.",
+      "sourceSection": "Improving developer workflows with AI tooling"
+    },
+    {
+      "id": "rote-184",
+      "module": "05",
+      "kind": "must-know",
+      "topic": "Verification checklist: four dimensions",
+      "fact": "AI-generated output must pass a verification checklist covering exactly four dimensions before reaching production: correctness, security, maintainability, and human understanding.",
+      "sourceSection": "Improving developer workflows with AI tooling"
+    },
+    {
+      "id": "rote-185",
+      "module": "05",
+      "kind": "must-know",
+      "topic": "Runbook and escalation path",
+      "fact": "Runbook: a captured set of known symptom-to-cause-to-action paths letting a team resolve recurring operational issues without the Architect. Escalation path: a named definition of who handles what and when an operational issue leaves the team.",
+      "sourceSection": "Glossary"
+    },
+    {
+      "id": "rote-186",
+      "module": "05",
+      "kind": "must-know",
+      "topic": "Team environment",
+      "fact": "Team environment: a single team baseline — for example a project CLAUDE.md, agreed tools, and permission posture — that every member starts from, instead of individual setups that drift apart.",
+      "sourceSection": "Glossary"
+    },
+    {
+      "id": "rote-187",
+      "module": "05",
+      "kind": "counterintuitive",
+      "topic": "Human understanding as fourth dimension",
+      "fact": "Human understanding means the author must be able to explain what shipped; the failure to watch for is engineers accepting AI output they no longer fully understand because it looks right and passes a check. Correctness, security, and maintainability alone do not satisfy the verification checklist.",
+      "sourceSection": "Improving developer workflows with AI tooling",
+      "intuitionTrap": "Output that is correct, secure, maintainable, and passes the regression and eval suites looks fully verified — but passing checks is exactly the condition under which the subtle failure hides."
+    },
+    {
+      "id": "rote-188",
+      "module": "05",
+      "kind": "must-know",
+      "topic": "Organization plugin management mechanics",
+      "fact": "Organization plugin management covers: plugin marketplaces, group assignment, install preferences (required / default install), hide and deprecate behavior, manual upload, GitHub sync, update, and removal.",
+      "sourceSection": "Sources"
+    }
+  ]
+}
