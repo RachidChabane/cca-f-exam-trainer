@@ -126,9 +126,13 @@ test('ccarp: multiple-response is graded all-or-nothing', async ({ page }) => {
 test('ccarp: full sitting submits and renders the multi-domain results screen', async ({ page }) => {
   await startCcarp(page)
 
-  // Answer the first item, then submit early. Grading still tallies every CCA-P
+  // Answer one item, then submit early. Grading still tallies every CCA-P
   // domain, so the results screen renders its per-domain breakdown — the path
-  // that must resolve CCA-P domain keys, not only CCA-F ones.
+  // that must resolve CCA-P domain keys, not only CCA-F ones. The sitting is
+  // shuffled, so walk to an item that renders options (a matching item first
+  // in the order has rows instead).
+  const found = await advanceUntil(page, async () => (await page.getByTestId('option-0').count()) > 0)
+  expect(found, 'expected at least one option-based item in the sitting').toBe(true)
   await page.getByTestId('option-0').click()
   await page.getByTestId('submit-exam').click()
   await page.getByTestId('confirm-submit').click()
