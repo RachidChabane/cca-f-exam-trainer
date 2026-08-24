@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Search } from 'lucide-react'
-import { ROTE_ITEMS, ROTE_MODULES, type RoteItem, type RoteModuleKey } from '@/data/ccapRote'
+import { ChevronRight, Search } from 'lucide-react'
+import { ROTE_ITEMS, ROTE_MODULES, type RoteItem, type RoteModuleKey, type RoteQuiz } from '@/data/ccapRote'
 import { cn } from '@/lib/cn'
 import { useT } from '@/lib/useT'
 
@@ -35,6 +35,65 @@ function PointRow({ point }: { point: RoteItem['points'][number] }) {
         </span>
       </span>
     </li>
+  )
+}
+
+function QuizBlock({ quiz }: { quiz: RoteQuiz }) {
+  const t = useT()
+  const [open, setOpen] = useState(false)
+  const [picked, setPicked] = useState<number | null>(null)
+  return (
+    // Sits outside recall-mode blur and must not toggle the entry's reveal.
+    <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        data-testid="rote-quiz-toggle"
+        className="inline-flex items-center gap-1 text-[12px] font-medium text-primary hover:underline"
+      >
+        <ChevronRight
+          className={cn('h-3.5 w-3.5 transition-transform duration-100 motion-reduce:transition-none', open && 'rotate-90')}
+        />
+        {t.roteQuizLabel}
+      </button>
+      {open && (
+        <div className="mt-2 rounded-md border border-border bg-surface p-3">
+          <p className="text-[13px] leading-snug">{quiz.q}</p>
+          <div className="mt-2 space-y-1.5">
+            {quiz.options.map((opt, i) => {
+              const answered = picked !== null
+              const isCorrect = i === quiz.answer
+              const isPicked = i === picked
+              return (
+                <button
+                  key={i}
+                  onClick={() => picked === null && setPicked(i)}
+                  disabled={answered}
+                  data-testid={`rote-quiz-option-${i}`}
+                  className={cn(
+                    'block w-full rounded border px-2.5 py-1.5 text-left text-[12.5px] leading-snug transition-colors duration-100',
+                    !answered && 'border-border bg-card hover:border-border-strong',
+                    answered && isCorrect && 'border-success/70 bg-success/10',
+                    answered && isPicked && !isCorrect && 'border-destructive/70 bg-destructive/10',
+                    answered && !isPicked && !isCorrect && 'border-border text-muted-foreground',
+                  )}
+                >
+                  {opt}
+                </button>
+              )
+            })}
+          </div>
+          {picked !== null && (
+            <p className="mt-2 text-[12.5px] leading-snug text-muted-foreground" data-testid="rote-quiz-why">
+              <span className={cn('font-semibold', picked === quiz.answer ? 'text-success' : 'text-destructive')}>
+                {picked === quiz.answer ? t.roteQuizCorrect : t.roteQuizIncorrect}
+              </span>{' '}
+              {quiz.why}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -92,6 +151,7 @@ function RoteEntry({
           ))}
         </ul>
       </div>
+      {item.quiz && <QuizBlock quiz={item.quiz} />}
       <p className="mt-1 text-[10.5px] uppercase tracking-wide text-muted-foreground/70">
         {item.sourceSection}
       </p>

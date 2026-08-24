@@ -20,6 +20,16 @@ export interface RotePoint {
   v: string
 }
 
+/** A drill question that exercises the notion without naming it in the stem. */
+export interface RoteQuiz {
+  q: string
+  options: string[]
+  /** Index of the correct option. */
+  answer: number
+  /** Names the notion and why the trap option fails. */
+  why: string
+}
+
 export interface RoteItem {
   id: string
   module: RoteModuleKey
@@ -31,6 +41,7 @@ export interface RoteItem {
   points: RotePoint[]
   /** Counter-intuitive items only: the wrong-but-plausible intuition. */
   logic?: string
+  quiz?: RoteQuiz
 }
 
 interface RoteBank {

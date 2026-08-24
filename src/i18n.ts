@@ -236,6 +236,9 @@ const en = {
   roteLogicSays: 'Logic says',
   roteCourseSays: 'Course says',
   roteEmpty: 'Nothing matches your filters.',
+  roteQuizLabel: 'Trap question',
+  roteQuizCorrect: 'Correct.',
+  roteQuizIncorrect: 'Not quite.',
 
   // Misc
   domainColon: 'Domain',
@@ -474,6 +477,9 @@ const fr: typeof en = {
   roteLogicSays: 'La logique dit',
   roteCourseSays: 'Le cours dit',
   roteEmpty: 'Aucun élément ne correspond aux filtres.',
+  roteQuizLabel: 'Question piège',
+  roteQuizCorrect: 'Exact.',
+  roteQuizIncorrect: 'Raté.',
 
   // Divers
   domainColon: 'Domaine',
